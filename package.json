@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@backstage/cli": "^0.26.5",
+    "backstage-cli": "^1.0.0-alpha.2",
+    "node-gyp": "^10.1.0"
+  }
+}

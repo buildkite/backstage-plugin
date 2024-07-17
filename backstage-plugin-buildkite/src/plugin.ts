@@ -1,12 +1,12 @@
 import {
   createPlugin,
   createRoutableExtension,
-} from '@backstage/core-plugin-api';
+} from "@backstage/core-plugin-api";
 
-import { rootRouteRef } from './routes';
+import { rootRouteRef } from "./routes";
 
 export const buildkitePlugin = createPlugin({
-  id: 'buildkite',
+  id: "buildkite",
   routes: {
     root: rootRouteRef,
   },
@@ -14,9 +14,9 @@ export const buildkitePlugin = createPlugin({
 
 export const BuildkitePage = buildkitePlugin.provide(
   createRoutableExtension({
-    name: 'BuildkitePage',
+    name: "BuildkitePage",
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import("./components/PipelineComponent").then((m) => m.PipelineComponent),
     mountPoint: rootRouteRef,
-  }),
+  })
 );

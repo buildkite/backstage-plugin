@@ -15,6 +15,8 @@ import { Progress, ResponseErrorPanel } from "@backstage/core-components";
 import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore";
 import useAsync from "react-use/lib/useAsync";
 import { BranchIcon, GithubIcon } from "../Icons";
+import { BuildStep } from "../BuildStepsFetchComponent";
+import { Pipeline } from "../PipelineComponent/Pipelines";
 
 const useStyles = makeStyles({
   buildBox: {
@@ -36,8 +38,8 @@ const useStyles = makeStyles({
   },
 });
 
-type Build = {
-  statusIcon: React.ReactNode;
+export type Build = {
+  statusIcon: React.ReactElement;
   buildMessage: string;
   buildNumber: string;
   author: {
@@ -48,13 +50,7 @@ type Build = {
   commitId: string;
   createdAt: string;
   timeElapsed: string;
-};
-
-type Pipeline = {
-  name: string;
-  navatarColor: string;
-  navatarImage: string;
-  builds: Build[];
+  steps: BuildStep[];
 };
 
 type BuildBoxProps = {
@@ -234,13 +230,17 @@ export const BuildBox = ({ pipeline }: BuildBoxProps) => {
           </Box>
           <Collapse in={expanded[index]} timeout="auto" unmountOnExit>
             <Box
+              display="flex"
+              gridGap="4px"
+              alignItems="center"
+              flexWrap="wrap"
               bgcolor="#f8f8f8"
               padding="12px"
               boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
             >
-              <Typography paragraph>
-                Pipelines and annotations go here
-              </Typography>
+              {build.steps.map((step) => (
+                <BuildStep key={step.id} step={step} />
+              ))}
             </Box>
           </Collapse>
         </Box>

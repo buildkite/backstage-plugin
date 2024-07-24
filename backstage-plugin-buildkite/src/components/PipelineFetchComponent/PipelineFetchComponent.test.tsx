@@ -1,11 +1,13 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom/extend-expect";
 import { PipelineFetchComponent } from "./PipelineFetchComponent";
 import { BuildFailed, BuildRunning, BuildPassed } from "../Icons";
+import { Pipeline } from "../PipelineComponent/Pipelines";
 
 describe("PipelineFetchComponent", () => {
   it("renders the build pipeline", async () => {
-    const pipeline = {
+    const pipeline: Pipeline = {
       name: "ads-promo-client",
       navatarColor: "#B5FFCE",
       navatarImage:
@@ -23,6 +25,29 @@ describe("PipelineFetchComponent", () => {
           commitId: "a1b2c3d4",
           createdAt: "2024-07-24T09:23:00Z",
           timeElapsed: "36s",
+          steps: [
+            {
+              id: "step1",
+              title: "Upload Pipeline",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
+              status: "passed",
+              url: "#",
+            },
+            {
+              id: "step2",
+              title: "Build Docker Image",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
+              status: "passed",
+              url: "#",
+            },
+            {
+              id: "step3",
+              title: "Linting",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
+              status: "running",
+              url: "#",
+            },
+          ],
         },
         {
           statusIcon: <BuildRunning />,
@@ -36,6 +61,29 @@ describe("PipelineFetchComponent", () => {
           commitId: "e5f6g7h8",
           createdAt: "2024-07-24T10:45:00Z",
           timeElapsed: "2m",
+          steps: [
+            {
+              id: "step1",
+              title: "Upload Pipeline",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
+              status: "passed",
+              url: "#",
+            },
+            {
+              id: "step2",
+              title: "Build Docker Image",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
+              status: "passed",
+              url: "#",
+            },
+            {
+              id: "step3",
+              title: "Linting",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
+              status: "running",
+              url: "#",
+            },
+          ],
         },
         {
           statusIcon: <BuildPassed />,
@@ -49,6 +97,29 @@ describe("PipelineFetchComponent", () => {
           commitId: "sdf8d10",
           createdAt: "2024-07-24T10:45:00Z",
           timeElapsed: "17m",
+          steps: [
+            {
+              id: "step1",
+              title: "Upload Pipeline",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
+              status: "passed",
+              url: "#",
+            },
+            {
+              id: "step2",
+              title: "Build Docker Image",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
+              status: "passed",
+              url: "#",
+            },
+            {
+              id: "step3",
+              title: "Linting",
+              icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
+              status: "running",
+              url: "#",
+            },
+          ],
         },
       ],
     };

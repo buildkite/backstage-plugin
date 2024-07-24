@@ -3,17 +3,23 @@ import { render, screen } from "@testing-library/react";
 import { PipelineFetchComponent } from "./PipelineFetchComponent";
 
 describe("PipelineFetchComponent", () => {
-  it("renders the user table", async () => {
+  it("renders the build pipeline", async () => {
     render(<PipelineFetchComponent />);
 
-    // Wait for the table to render
-    const table = await screen.findByRole("table");
-    const nationality = screen.getAllByText("GB");
-    // Assert that the table contains the expected user data
-    expect(table).toBeInTheDocument();
-    expect(screen.getByAltText("Carolyn")).toBeInTheDocument();
-    expect(screen.getByText("Carolyn Moore")).toBeInTheDocument();
-    expect(screen.getByText("carolyn.moore@example.com")).toBeInTheDocument();
-    expect(nationality[0]).toBeInTheDocument();
+    // Wait for the builds to render
+    const buildMessage = await screen.findByText("Fix issue with user login");
+    const buildNumber = screen.getByText("#123");
+    const author = screen.getByText("Jane Doe");
+    const branch = screen.getByText("main");
+    const commitId = screen.getByText("a1b2c3d4");
+    const timeElapsed = screen.getByText("36s");
+
+    // Assert that the build pipeline contains the expected build data
+    expect(buildMessage).toBeInTheDocument();
+    expect(buildNumber).toBeInTheDocument();
+    expect(author).toBeInTheDocument();
+    expect(branch).toBeInTheDocument();
+    expect(commitId).toBeInTheDocument();
+    expect(timeElapsed).toBeInTheDocument();
   });
 });

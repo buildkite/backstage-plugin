@@ -33,23 +33,23 @@ export function BranchIcon(props: any) {
         d="M7.42885 7.71708C8.84901 7.71708 10.0003 6.56581 10.0003 5.14565C10.0003 3.72549 8.84901 2.57422 7.42885 2.57422C6.00869 2.57422 4.85742 3.72549 4.85742 5.14565C4.85742 6.56581 6.00869 7.71708 7.42885 7.71708Z"
         stroke="currentColor"
         fill="transparent"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M17.715 7.71708C19.1351 7.71708 20.2864 6.56581 20.2864 5.14565C20.2864 3.72549 19.1351 2.57422 17.715 2.57422C16.2948 2.57422 15.1436 3.72549 15.1436 5.14565C15.1436 6.56581 16.2948 7.71708 17.715 7.71708Z"
         stroke="currentColor"
         fill="transparent"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M7.42885 21.43C8.84901 21.43 10.0003 20.2787 10.0003 18.8585C10.0003 17.4384 8.84901 16.2871 7.42885 16.2871C6.00869 16.2871 4.85742 17.4384 4.85742 18.8585C4.85742 20.2787 6.00869 21.43 7.42885 21.43Z"
         stroke="currentColor"
         fill="transparent"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M6.57129 6.85938H8.28557V12.4546C9.19545 11.6403 10.397 11.1451 11.7141 11.1451H15.1427C16.0895 11.1451 16.857 10.3776 16.857 9.4308V6.85938H18.5713V9.4308C18.5713 11.3244 17.0363 12.8594 15.1427 12.8594H13.4284H11.7141C9.8206 12.8594 8.28557 14.3944 8.28557 16.2879V17.1451H6.57129V16.2879V6.85938Z"
         fill="currentColor"
       />
@@ -131,7 +131,7 @@ export function BuildRunning(props: any) {
           cy="12"
           r="11.25"
           stroke="#FFBA11"
-          stroke-width="3"
+          strokeWidth="3"
         ></circle>
         <clipPath id="BuildState_1901ddb4-d78b-4f5e-8759-b3ec01b81174_strokeClipPath">
           <use href="#BuildState_1901ddb4-d78b-4f5e-8759-b3ec01b81174_circle"></use>
@@ -139,24 +139,24 @@ export function BuildRunning(props: any) {
       </defs>
       <use
         href="#BuildState_1901ddb4-d78b-4f5e-8759-b3ec01b81174_circle"
-        clip-path="url(#BuildState_1901ddb4-d78b-4f5e-8759-b3ec01b81174_strokeClipPath)"
+        clipPath="url(#BuildState_1901ddb4-d78b-4f5e-8759-b3ec01b81174_strokeClipPath)"
       ></use>
       <g
         fill="none"
         stroke="#FFBA11"
-        stroke-width="1.5"
+        strokeWidth="1.5"
         className={classes.animationSpinSlow}
         style={{ transformOrigin: "center center" }}
       >
         <path
           d="M12 16.5C13.1935 16.5 14.3381 16.0259 15.182 15.182C16.0259 14.3381 16.5 13.1935 16.5 12"
-          stroke-miterlimit="10"
-          stroke-linecap="round"
+          strokeMiterlimit="10"
+          strokeLinecap="round"
         ></path>
         <path
           d="M11.5 7C10.3065 7 9.16193 7.47411 8.31802 8.31802C7.47411 9.16193 7 10.3065 7 11.5"
-          stroke-miterlimit="10"
-          stroke-linecap="round"
+          strokeMiterlimit="10"
+          strokeLinecap="round"
         ></path>
       </g>
     </SvgIcon>

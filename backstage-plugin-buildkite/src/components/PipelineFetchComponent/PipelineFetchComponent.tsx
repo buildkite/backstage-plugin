@@ -279,13 +279,13 @@ export const PipelineFetchComponent = () => {
       {
         statusIcon: <BuildPassed />,
         buildMessage: "Add new feature for payments",
-        buildNumber: "124",
+        buildNumber: "125",
         author: {
           avatar: "https://api.dicebear.com/6.x/open-peeps/svg?seed=Author2",
           name: "John Smith",
         },
         branch: "feature/payments",
-        commitId: "e5f6g7h8",
+        commitId: "sdf8d10",
         createdAt: "2024-07-24T10:45:00Z",
         timeElapsed: "17m",
       },

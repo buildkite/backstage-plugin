@@ -14,13 +14,7 @@ import {
 import { Progress, ResponseErrorPanel } from "@backstage/core-components";
 import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore";
 import useAsync from "react-use/lib/useAsync";
-import {
-  BranchIcon,
-  BuildFailed,
-  BuildPassed,
-  BuildRunning,
-  GithubIcon,
-} from "../Icons";
+import { BranchIcon, GithubIcon } from "../Icons";
 
 const useStyles = makeStyles({
   buildBox: {
@@ -32,7 +26,7 @@ const useStyles = makeStyles({
     width: "24px",
     height: "24px",
     boxShadow: "0px 0px 0px 1px #00000011",
-    backgroundColor: "#B5FFCE",
+    backgroundColor: (props: any) => props.navatarColor,
   },
   chip: {
     color: "#737373",
@@ -56,15 +50,22 @@ type Build = {
   timeElapsed: string;
 };
 
-type BuildBoxProps = {
+type Pipeline = {
+  name: string;
+  navatarColor: string;
+  navatarImage: string;
   builds: Build[];
 };
 
-export const BuildBox = ({ builds }: BuildBoxProps) => {
-  const classes = useStyles();
+type BuildBoxProps = {
+  pipeline: Pipeline;
+};
+
+export const BuildBox = ({ pipeline }: BuildBoxProps) => {
+  const classes = useStyles({ navatarColor: pipeline.navatarColor });
   const [isUTC, setIsUTC] = useState(false);
   const [expanded, setExpanded] = useState<boolean[]>(
-    new Array(builds.length).fill(false)
+    new Array(pipeline.builds.length).fill(false)
   );
 
   const formatDate = (dateString: string, toUTC: boolean) => {
@@ -121,17 +122,18 @@ export const BuildBox = ({ builds }: BuildBoxProps) => {
           <img
             height="16"
             width="16"
-            src="https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png"
+            src={pipeline.navatarImage}
+            alt="avatar"
           />
         </Avatar>
         <Typography
           variant="h5"
           style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
         >
-          ads-promo-client
+          {pipeline.name}
         </Typography>
       </Box>
-      {builds.map((build, index) => (
+      {pipeline.builds.map((build, index) => (
         <Box className={classes.buildBox} key={build.buildNumber}>
           <Box
             display="flex"
@@ -247,49 +249,13 @@ export const BuildBox = ({ builds }: BuildBoxProps) => {
   );
 };
 
-export const PipelineFetchComponent = () => {
+export const PipelineFetchComponent = ({
+  pipeline,
+}: {
+  pipeline: Pipeline;
+}) => {
   const { value, loading, error } = useAsync(async (): Promise<Build[]> => {
-    return [
-      {
-        statusIcon: <BuildFailed />,
-        buildMessage: "Fix issue with user login",
-        buildNumber: "123",
-        author: {
-          avatar: "https://api.dicebear.com/6.x/open-peeps/svg?seed=Author1",
-          name: "Jane Doe",
-        },
-        branch: "main",
-        commitId: "a1b2c3d4",
-        createdAt: "2024-07-24T09:23:00Z",
-        timeElapsed: "36s",
-      },
-      {
-        statusIcon: <BuildRunning />,
-        buildMessage: "Add transaction context to all queries",
-        buildNumber: "124",
-        author: {
-          avatar: "https://api.dicebear.com/6.x/open-peeps/svg?seed=Author2",
-          name: "John Smith",
-        },
-        branch: "feature/payments",
-        commitId: "e5f6g7h8",
-        createdAt: "2024-07-24T10:45:00Z",
-        timeElapsed: "2m",
-      },
-      {
-        statusIcon: <BuildPassed />,
-        buildMessage: "Add new feature for payments",
-        buildNumber: "125",
-        author: {
-          avatar: "https://api.dicebear.com/6.x/open-peeps/svg?seed=Author2",
-          name: "John Smith",
-        },
-        branch: "feature/payments",
-        commitId: "sdf8d10",
-        createdAt: "2024-07-24T10:45:00Z",
-        timeElapsed: "17m",
-      },
-    ];
+    return pipeline.builds;
   }, []);
 
   if (loading) {
@@ -298,5 +264,5 @@ export const PipelineFetchComponent = () => {
     return <ResponseErrorPanel error={error} />;
   }
 
-  return <BuildBox builds={value || []} />;
+  return <BuildBox pipeline={{ ...pipeline, builds: value || [] }} />;
 };

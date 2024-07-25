@@ -8,10 +8,10 @@ import {
   HeaderLabel,
 } from "@backstage/core-components";
 
-import { PipelineFetchComponent } from "../PipelineFetchComponent";
 import { pipelinesDummyData } from "./data";
+import { PipelineComponent } from "../PipelineComponent/PipelineComponent";
 
-export const PipelineComponent = () => (
+export const PipelinePage = () => (
   <Page themeId="tool">
     <Header title="Welcome to buildkite!" subtitle="Optional subtitle">
       <HeaderLabel label="Owner" value="Team X" />
@@ -22,7 +22,7 @@ export const PipelineComponent = () => (
       <Grid container spacing={3} direction="column">
         {pipelinesDummyData.map((pipeline, index) => (
           <Grid item key={index}>
-            <PipelineFetchComponent pipeline={pipeline} />
+            <PipelineComponent pipeline={pipeline} />
           </Grid>
         ))}
       </Grid>

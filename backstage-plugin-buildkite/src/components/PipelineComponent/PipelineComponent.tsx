@@ -16,8 +16,10 @@ import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore";
 import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import useAsync from "react-use/lib/useAsync";
 import { BranchIcon, GithubIcon } from "../Icons";
-import { BuildStep } from "../BuildStepsFetchComponent";
-import { Pipeline } from "../PipelineComponent/data";
+import { BuildStep } from "../BuildStepComponent";
+import { Pipeline } from "../PipelinePage/data";
+import { useRouteRef } from "@backstage/core-plugin-api";
+import { buildkiteBuildRouteRef } from "../../routes";
 
 const useStyles = makeStyles({
   buildBox: {
@@ -59,6 +61,7 @@ type BuildBoxProps = {
 };
 
 export const BuildBox = ({ pipeline }: BuildBoxProps) => {
+  const getBuildPath = useRouteRef(buildkiteBuildRouteRef);
   const classes = useStyles({ navatarColor: pipeline.navatarColor });
   const [isUTC, setIsUTC] = useState(false);
   const [expanded, setExpanded] = useState<boolean[]>(
@@ -159,7 +162,13 @@ export const BuildBox = ({ pipeline }: BuildBoxProps) => {
                 gridGap="6px"
                 alignItems="center"
               >
-                <Link color="textPrimary" href="#">
+                <Link
+                  color="textPrimary"
+                  href={getBuildPath({
+                    pipelineSlug: pipeline.name,
+                    buildNumber: build.buildNumber,
+                  })}
+                >
                   <Typography variant="subtitle2">
                     <strong>{build.buildMessage}</strong>
                   </Typography>
@@ -254,11 +263,7 @@ export const BuildBox = ({ pipeline }: BuildBoxProps) => {
   );
 };
 
-export const PipelineFetchComponent = ({
-  pipeline,
-}: {
-  pipeline: Pipeline;
-}) => {
+export const PipelineComponent = ({ pipeline }: { pipeline: Pipeline }) => {
   const { value, loading, error } = useAsync(async (): Promise<Build[]> => {
     return pipeline.builds;
   }, []);

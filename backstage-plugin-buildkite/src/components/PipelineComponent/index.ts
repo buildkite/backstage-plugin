@@ -1,1 +1,1 @@
-export { PipelineComponent } from "./Pipelines";
+export { PipelineComponent } from "./PipelineComponent";

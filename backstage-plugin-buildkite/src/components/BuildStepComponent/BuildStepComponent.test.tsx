@@ -1,9 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
-import BuildStep, {
-  BuildStep as BuildStepType,
-} from "./BuildStepsFetchComponent";
+import BuildStep, { BuildStep as BuildStepType } from "./BuildStepComponent";
 
 describe("BuildStep Component", () => {
   const stepPassed: BuildStepType = {

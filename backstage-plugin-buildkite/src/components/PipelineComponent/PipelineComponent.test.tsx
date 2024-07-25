@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
-import { PipelineFetchComponent } from "./PipelineFetchComponent";
+import { PipelineComponent } from "./PipelineComponent";
 import { BuildFailed, BuildRunning, BuildPassed } from "../Icons";
-import { Pipeline } from "../PipelineComponent/data";
+import { Pipeline } from "../PipelinePage/data";
 
-describe("PipelineFetchComponent", () => {
+describe("PipelineComponent", () => {
   it("renders the build pipeline", async () => {
     const pipeline: Pipeline = {
       name: "ads-promo-client",
@@ -124,7 +124,7 @@ describe("PipelineFetchComponent", () => {
       ],
     };
 
-    render(<PipelineFetchComponent pipeline={pipeline} />);
+    render(<PipelineComponent pipeline={pipeline} />);
 
     const buildMessage = await screen.findByText("Fix issue with user login");
     const buildNumber = screen.getByText("#123");

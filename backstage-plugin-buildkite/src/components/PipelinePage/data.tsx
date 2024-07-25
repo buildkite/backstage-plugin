@@ -1,6 +1,6 @@
 import React from "react";
 import { BuildFailed, BuildPassed, BuildRunning } from "../Icons";
-import { Build } from "../PipelineFetchComponent/PipelineFetchComponent";
+import { Build } from "../PipelineComponent/PipelineComponent";
 
 export type Pipeline = {
   name: string;

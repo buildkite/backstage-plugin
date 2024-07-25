@@ -1,5 +1,11 @@
-import { createRouteRef } from '@backstage/core-plugin-api';
+import { createRouteRef, createSubRouteRef } from "@backstage/core-plugin-api";
 
-export const rootRouteRef = createRouteRef({
-  id: 'buildkite',
+export const buildkiteRouteRef = createRouteRef({
+  id: "buildkite",
+});
+
+export const buildkiteBuildRouteRef = createSubRouteRef({
+  id: "buildkite/build",
+  parent: buildkiteRouteRef,
+  path: "/:pipelineSlug/:buildNumber",
 });

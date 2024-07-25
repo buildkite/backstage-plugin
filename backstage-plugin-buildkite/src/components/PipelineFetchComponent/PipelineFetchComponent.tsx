@@ -13,10 +13,11 @@ import {
 } from "@material-ui/core";
 import { Progress, ResponseErrorPanel } from "@backstage/core-components";
 import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore";
+import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import useAsync from "react-use/lib/useAsync";
 import { BranchIcon, GithubIcon } from "../Icons";
 import { BuildStep } from "../BuildStepsFetchComponent";
-import { Pipeline } from "../PipelineComponent/Pipelines";
+import { Pipeline } from "../PipelineComponent/data";
 
 const useStyles = makeStyles({
   buildBox: {
@@ -225,7 +226,11 @@ export const BuildBox = ({ pipeline }: BuildBoxProps) => {
               aria-label="show more"
               style={{ marginLeft: "auto", borderRadius: "4px" }}
             >
-              <UnfoldMoreIcon fontSize="inherit" />
+              {expanded[index] ? (
+                <UnfoldLessIcon fontSize="inherit" />
+              ) : (
+                <UnfoldMoreIcon fontSize="inherit" />
+              )}
             </IconButton>
           </Box>
           <Collapse in={expanded[index]} timeout="auto" unmountOnExit>

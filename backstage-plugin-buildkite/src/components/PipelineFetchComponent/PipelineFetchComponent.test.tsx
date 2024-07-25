@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { PipelineFetchComponent } from "./PipelineFetchComponent";
 import { BuildFailed, BuildRunning, BuildPassed } from "../Icons";
-import { Pipeline } from "../PipelineComponent/Pipelines";
+import { Pipeline } from "../PipelineComponent/data";
 
 describe("PipelineFetchComponent", () => {
   it("renders the build pipeline", async () => {

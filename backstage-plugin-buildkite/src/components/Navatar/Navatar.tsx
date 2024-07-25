@@ -1,16 +1,25 @@
 import React from "react";
 import { Avatar, makeStyles } from "@material-ui/core";
 
+interface StyleProps {
+  navatarColor: string;
+}
+
 const useStyles = makeStyles({
   navatar: {
     width: "24px",
     height: "24px",
     boxShadow: "0px 0px 0px 1px #00000011",
-    backgroundColor: (props: any) => props.navatarColor,
+    backgroundColor: (props: StyleProps) => props.navatarColor,
   },
 });
 
-export const Navatar = ({ color, image }) => {
+interface NavatarProps {
+  color: string;
+  image: string;
+}
+
+export const Navatar: React.FC<NavatarProps> = ({ color, image }) => {
   const classes = useStyles({ navatarColor: color });
 
   return (

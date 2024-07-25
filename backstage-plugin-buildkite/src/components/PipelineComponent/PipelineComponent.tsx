@@ -17,9 +17,11 @@ import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import useAsync from "react-use/lib/useAsync";
 import { BranchIcon, GithubIcon } from "../Icons";
 import { BuildStep } from "../BuildStepComponent";
-import { Pipeline } from "../../mockData";
+import { Navatar } from "../Navatar";
+
 import { useRouteRef } from "@backstage/core-plugin-api";
 import { buildkiteBuildRouteRef } from "../../routes";
+import { BuildParams, PipelineParams } from "../../state/useBuild";
 
 const useStyles = makeStyles({
   buildBox: {
@@ -41,23 +43,8 @@ const useStyles = makeStyles({
   },
 });
 
-export type Build = {
-  statusIcon: React.ReactElement;
-  buildMessage: string;
-  buildNumber: string;
-  author: {
-    avatar: string;
-    name: string;
-  };
-  branch: string;
-  commitId: string;
-  createdAt: string;
-  timeElapsed: string;
-  steps: BuildStep[];
-};
-
 type BuildBoxProps = {
-  pipeline: Pipeline;
+  pipeline: PipelineParams;
 };
 
 export const BuildBox = ({ pipeline }: BuildBoxProps) => {
@@ -118,14 +105,7 @@ export const BuildBox = ({ pipeline }: BuildBoxProps) => {
         borderBottom="1px solid #E5E5E5"
         padding="8px"
       >
-        <Avatar variant="rounded" className={classes.navatar}>
-          <img
-            height="16"
-            width="16"
-            src={pipeline.navatarImage}
-            alt="avatar"
-          />
-        </Avatar>
+        <Navatar color={pipeline.navatarColor} image={pipeline.navatarImage} />
         <Typography
           variant="h5"
           style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
@@ -263,8 +243,14 @@ export const BuildBox = ({ pipeline }: BuildBoxProps) => {
   );
 };
 
-export const PipelineComponent = ({ pipeline }: { pipeline: Pipeline }) => {
-  const { value, loading, error } = useAsync(async (): Promise<Build[]> => {
+export const PipelineComponent = ({
+  pipeline,
+}: {
+  pipeline: PipelineParams;
+}) => {
+  const { value, loading, error } = useAsync(async (): Promise<
+    BuildParams[]
+  > => {
     return pipeline.builds;
   }, []);
 

@@ -17,7 +17,7 @@ import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import useAsync from "react-use/lib/useAsync";
 import { BranchIcon, GithubIcon } from "../Icons";
 import { BuildStep } from "../BuildStepComponent";
-import { Pipeline } from "../PipelinePage/data";
+import { Pipeline } from "../../mockData";
 import { useRouteRef } from "@backstage/core-plugin-api";
 import { buildkiteBuildRouteRef } from "../../routes";
 

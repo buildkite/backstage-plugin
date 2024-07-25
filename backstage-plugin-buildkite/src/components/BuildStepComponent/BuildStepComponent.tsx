@@ -4,17 +4,10 @@ import { Box, Chip } from "@material-ui/core";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 import CloseIcon from "@material-ui/icons/Close";
 import DoneIcon from "@material-ui/icons/Done";
-
-export type BuildStep = {
-  id: string;
-  title: string;
-  icon: string;
-  status: "passed" | "failed" | "running";
-  url: string;
-};
+import { BuildStepParams } from "../../state/useBuild";
 
 type BuildStepProps = {
-  step: BuildStep;
+  step: BuildStepParams;
 };
 
 const useStyles = makeStyles({
@@ -72,7 +65,7 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
     console.info("You clicked the Chip.");
   };
 
-  const getStatusIcon = (status: BuildStep["status"]) => {
+  const getStatusIcon = (status: BuildStepParams["status"]) => {
     switch (status) {
       case "passed":
         return (
@@ -95,7 +88,7 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
     }
   };
 
-  const getStatusClass = (status: BuildStep["status"]) => {
+  const getStatusClass = (status: BuildStepParams["status"]) => {
     switch (status) {
       case "passed":
         return classes.passed;

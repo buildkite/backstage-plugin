@@ -1,15 +1,8 @@
 import React from "react";
-import { BuildFailed, BuildPassed, BuildRunning } from "../Icons";
-import { Build } from "../PipelineComponent/PipelineComponent";
+import { BuildFailed, BuildPassed, BuildRunning } from "./components/Icons";
+import { PipelineParams } from "./state/useBuild";
 
-export type Pipeline = {
-  name: string;
-  navatarColor: string;
-  navatarImage: string;
-  builds: Build[];
-};
-
-export const pipelinesDummyData: Pipeline[] = [
+export const mockPipelines: PipelineParams[] = [
   {
     name: "ads-promo-client",
     navatarColor: "#D1FAFF",

@@ -1,2 +1,11 @@
 node_modules/*
 */node_modules
+# Yarn 3 files
+.pnp.*
+/backstage-plugin-buildkite/.yarn/*
+/backstage-plugin-buildkite/!.yarn/patches
+/backstage-plugin-buildkite/!.yarn/plugins
+/backstage-plugin-buildkite/!.yarn/releases
+/backstage-plugin-buildkite/!.yarn/sdks
+/backstage-plugin-buildkite/!.yarn/versions
+/backstage-plugin-buildkite/.yarn

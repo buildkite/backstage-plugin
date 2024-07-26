@@ -5,6 +5,7 @@ import { PipelineParams } from "./state/useBuild";
 export const mockPipelines: PipelineParams[] = [
   {
     name: "ads-promo-client",
+    id: "asd145fg6153df",
     navatarColor: "#D1FAFF",
     navatarImage:
       "https://buildkiteassets.com/emojis/img-buildkite-64/react.png",
@@ -121,6 +122,7 @@ export const mockPipelines: PipelineParams[] = [
   },
   {
     name: "ads-promo-deploy",
+    id: "45j48ktyu85mf",
     navatarColor: "#326DE6",
     navatarImage:
       "https://buildkiteassets.com/emojis/img-buildkite-64/kubernetes.png",

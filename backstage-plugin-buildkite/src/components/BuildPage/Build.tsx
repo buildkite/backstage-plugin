@@ -8,8 +8,10 @@ import {
   Typography,
 } from "@material-ui/core";
 import { useParams } from "react-router-dom";
-import { useBuilds } from "../../state/useBuilds"; // Ensure this path is correct
+import { useRouteRef } from "@backstage/core-plugin-api";
+import { useBuilds } from "../../state/useBuilds";
 import { Navatar } from "../Navatar";
+import { buildkitePipelineRouteRef } from "../../routes";
 
 export const BuildPage = () => {
   const { pipelineSlug, buildNumber } = useParams<{
@@ -27,6 +29,8 @@ export const BuildPage = () => {
     buildNumber
   );
 
+  const getPipelinePath = useRouteRef(buildkitePipelineRouteRef);
+
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -42,6 +46,14 @@ export const BuildPage = () => {
   return (
     <Box display="flex" flexDirection="column" gridGap="20px">
       <Breadcrumbs aria-label="breadcrumb">
+        <Link color="inherit" href="/">
+          <Typography
+            variant="h5"
+            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+          >
+            Home
+          </Typography>
+        </Link>
         <Box
           display="flex"
           flexDirection="row"
@@ -52,12 +64,14 @@ export const BuildPage = () => {
             color={pipeline.navatarColor}
             image={pipeline.navatarImage}
           />
-          <Typography
-            variant="h5"
-            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
-          >
-            {pipeline.name}
-          </Typography>
+          <Link color="inherit" href={getPipelinePath({ pipelineSlug })}>
+            <Typography
+              variant="h5"
+              style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+            >
+              {pipeline.name}
+            </Typography>
+          </Link>
         </Box>
         <Typography
           style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}

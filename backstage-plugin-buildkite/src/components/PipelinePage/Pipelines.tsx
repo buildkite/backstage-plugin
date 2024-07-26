@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Box, Grid, Paper, Typography } from "@material-ui/core";
+import {
+  Box,
+  Breadcrumbs,
+  Grid,
+  Paper,
+  Typography,
+  Link,
+} from "@material-ui/core";
 import { Navatar } from "../Navatar";
 import { BuildParams, PipelineParams } from "../Types";
 import { BuildRow } from "../BuildComponent/BuildComponent";
@@ -54,22 +61,40 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
 
   return (
     <>
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link color="inherit" href="/">
+          <Typography
+            variant="h5"
+            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+          >
+            Home
+          </Typography>
+        </Link>
+        <Box
+          display="flex"
+          flexDirection="row"
+          gridGap="8px"
+          alignItems="center"
+        >
+          <Navatar
+            color={pipeline.navatarColor}
+            image={pipeline.navatarImage}
+          />
+
+          <Typography
+            variant="h5"
+            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+          >
+            {pipeline.name}
+          </Typography>
+        </Box>
+      </Breadcrumbs>
       <Box
         display="flex"
-        flexDirection="row"
-        gridGap="8px"
-        alignItems="center"
-        marginBottom="24px"
+        flexDirection="column"
+        gridGap="30px"
+        marginTop="20px"
       >
-        <Navatar color={pipeline.navatarColor} image={pipeline.navatarImage} />
-        <Typography
-          variant="h5"
-          style={{ fontWeight: 500, marginBottom: "4px" }}
-        >
-          {pipeline.name}
-        </Typography>
-      </Box>
-      <Box display="flex" flexDirection="column" gridGap="30px">
         {Object.entries(buildsByBranch).map(([branch, builds]) => (
           <Paper key={branch} variant="outlined" style={{ overflow: "hidden" }}>
             <Box

@@ -83,6 +83,7 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
 
           <Typography
             variant="h5"
+            color="textPrimary"
             style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
           >
             {pipeline.name}

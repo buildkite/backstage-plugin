@@ -1,6 +1,6 @@
 import React from "react";
 import { BuildFailed, BuildPassed, BuildRunning } from "./components/Icons";
-import { PipelineParams } from "./state/useBuild";
+import { PipelineParams } from "./components/Types";
 
 export const mockPipelines: PipelineParams[] = [
   {

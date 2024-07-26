@@ -4,7 +4,7 @@ import { Box, Chip } from "@material-ui/core";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 import CloseIcon from "@material-ui/icons/Close";
 import DoneIcon from "@material-ui/icons/Done";
-import { BuildStepParams } from "../../state/useBuild";
+import { BuildStepParams } from "../Types";
 
 type BuildStepProps = {
   step: BuildStepParams;

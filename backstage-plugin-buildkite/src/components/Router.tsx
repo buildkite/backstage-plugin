@@ -1,9 +1,10 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { buildkiteBuildRouteRef } from "../routes";
+import { buildkiteBuildRouteRef, buildkitePipelineRouteRef } from "../routes";
 import { PipelinePage } from "./PipelinePage";
 import { BuildPage } from "./BuildPage";
 import { Page, Header, HeaderLabel, Content } from "@backstage/core-components";
+import { ComponentPage } from "./ComponentPage";
 
 export const Router = () => (
   <Page themeId="tool">
@@ -13,7 +14,11 @@ export const Router = () => (
     </Header>
     <Content>
       <Routes>
-        <Route path="/" element={<PipelinePage />} />
+        <Route path="/" element={<ComponentPage />} />
+        <Route
+          path={buildkitePipelineRouteRef.path}
+          element={<PipelinePage />}
+        />
         <Route path={buildkiteBuildRouteRef.path} element={<BuildPage />} />
       </Routes>
     </Content>

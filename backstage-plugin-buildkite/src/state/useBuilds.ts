@@ -1,36 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { mockPipelines } from "../mockData";
-
-export type BuildParams = {
-  statusIcon: React.ReactElement;
-  buildMessage: string;
-  buildNumber: string;
-  author: {
-    avatar: string;
-    name: string;
-  };
-  branch: string;
-  commitId: string;
-  createdAt: string;
-  timeElapsed: string;
-  steps: BuildStepParams[];
-};
-
-export type BuildStepParams = {
-  id: string;
-  title: string;
-  icon: string;
-  status: "passed" | "failed" | "running";
-  url: string;
-};
-
-export type PipelineParams = {
-  name: string;
-  id: string;
-  navatarColor: string;
-  navatarImage: string;
-  builds: BuildParams[];
-};
+import {
+  BuildParams,
+  BuildStepParams,
+  PipelineParams,
+} from "../components/Types";
 
 export const useBuilds = (pipelineSlug: string, buildNumber: string) => {
   const [pipeline, setPipeline] = useState<PipelineParams | null>(null);

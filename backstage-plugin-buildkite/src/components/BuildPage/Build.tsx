@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { useParams } from "react-router-dom";
-import { useBuilds } from "../../state/useBuild"; // Ensure this path is correct
+import { useBuilds } from "../../state/useBuilds"; // Ensure this path is correct
 import { Navatar } from "../Navatar";
 
 export const BuildPage = () => {

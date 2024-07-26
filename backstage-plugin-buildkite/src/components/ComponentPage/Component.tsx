@@ -9,10 +9,15 @@ import { buildkitePipelineRouteRef } from "../../routes"; // Ensure this path is
 
 type PipelineProps = {
   pipeline: PipelineParams;
+  isUTC: boolean;
+  onTimeClick: () => void;
 };
 
-const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
-  const [isUTC, setIsUTC] = useState(false);
+const Pipeline: React.FC<PipelineProps> = ({
+  pipeline,
+  isUTC,
+  onTimeClick,
+}) => {
   const [expanded, setExpanded] = useState<boolean[]>(
     new Array(pipeline.builds.length).fill(false)
   );
@@ -23,10 +28,6 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
       newExpanded[index] = !newExpanded[index];
       return newExpanded;
     });
-  };
-
-  const handleTimeClick = () => {
-    setIsUTC(!isUTC);
   };
 
   const getPipelinePath = useRouteRef(buildkitePipelineRouteRef);
@@ -64,19 +65,31 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
           expanded={expanded[index]}
           onExpandClick={handleExpandClick}
           isUTC={isUTC}
-          onTimeClick={handleTimeClick}
+          onTimeClick={onTimeClick}
         />
       ))}
     </Paper>
   );
 };
 
-export const ComponentPage = () => (
-  <Grid container spacing={3} direction="column">
-    {mockPipelines.map((pipeline, index) => (
-      <Grid item key={index}>
-        <Pipeline pipeline={pipeline} />
-      </Grid>
-    ))}
-  </Grid>
-);
+export const ComponentPage = () => {
+  const [isUTC, setIsUTC] = useState(false);
+
+  const handleTimeClick = () => {
+    setIsUTC(!isUTC);
+  };
+
+  return (
+    <Grid container spacing={3} direction="column">
+      {mockPipelines.map((pipeline, index) => (
+        <Grid item key={index}>
+          <Pipeline
+            pipeline={pipeline}
+            isUTC={isUTC}
+            onTimeClick={handleTimeClick}
+          />
+        </Grid>
+      ))}
+    </Grid>
+  );
+};

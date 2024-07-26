@@ -101,13 +101,13 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
             <Box
               display="flex"
               flexDirection="row"
-              gridGap="8px"
+              gridGap="4px"
               alignItems="center"
               bgcolor="#F8F8F8"
               borderBottom="1px solid #E5E5E5"
               padding="8px"
             >
-              <BranchIcon size="small" />
+              <BranchIcon style={{ color: "grey", fontSize: "14px" }} />
               <Typography
                 variant="h5"
                 style={{

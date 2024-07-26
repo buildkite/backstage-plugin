@@ -16,7 +16,7 @@ import { BranchIcon, GithubIcon } from "../Icons";
 import { BuildStep } from "../BuildStepComponent";
 import { BuildParams, PipelineParams } from "../Types";
 import { useRouteRef } from "@backstage/core-plugin-api";
-import { buildkiteBuildRouteRef } from "../../routes";
+import { buildkiteBuildRouteRef } from "../../routes"; // Ensure this path is correct
 
 const useStyles = makeStyles({
   buildRow: {
@@ -56,24 +56,34 @@ export const BuildRow: React.FC<BuildRowProps> = ({
 
   const formatDate = (dateString: string, toUTC: boolean) => {
     const date = new Date(dateString);
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+
+    const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" });
+    const day = date.getDate();
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const time = date.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
+
     if (toUTC) {
-      const day = date.toUTCString().slice(0, 3);
-      const dayOfMonth = date.getUTCDate();
-      const month = date.toUTCString().slice(8, 11);
-      const year = date.getUTCFullYear();
-      const time = date.toUTCString().slice(17, 22);
-      return `Created ${day} ${dayOfMonth}th ${month} ${year} at ${time} UTC`;
+      const utcDay = date.toUTCString().slice(0, 3);
+      const utcDayOfMonth = date.getUTCDate();
+      const utcMonth = date.toUTCString().slice(8, 11);
+      const utcYear = date.getUTCFullYear();
+      const utcTime = date.toUTCString().slice(17, 22);
+      return `Created ${utcDay} ${utcDayOfMonth}th ${utcMonth} ${utcYear} at ${utcTime} UTC`;
+    } else if (date.toDateString() === now.toDateString()) {
+      return `Created today at ${time}`;
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return `Created yesterday at ${time}`;
+    } else if (now.getTime() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
+      return `Created ${dayOfWeek} at ${time}`;
     } else {
-      const now = new Date();
-      const isToday = date.toDateString() === now.toDateString();
-      const time = date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-      return isToday
-        ? `Created today at ${time}`
-        : `Created on ${date.toLocaleDateString()} at ${time}`;
+      return `Created ${dayOfWeek} ${day}th ${month} at ${time}`;
     }
   };
 

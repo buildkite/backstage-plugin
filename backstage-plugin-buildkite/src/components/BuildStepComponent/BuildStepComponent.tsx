@@ -55,12 +55,12 @@ const useStyles = makeStyles({
   blocked: {
     borderColor: "#4b19d5",
     boxShadow: "inset 0 0 0 2px #4b19d5, inset -20px 0 0 0 #4b19d5",
-    backgroundColor: "#FFF",
+    backgroundColor: "transparent",
     paddingRight: "2px",
   },
   unblocked: {
     borderColor: "transparent",
-    backgroundColor: "white",
+    backgroundColor: "transparent",
   },
   assigned: {
     borderStyle: "dashed",

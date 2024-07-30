@@ -68,6 +68,9 @@ const useStyles = makeStyles({
   accepted: {
     borderStyle: "dotted",
   },
+  skipped: {
+    textDecoration: "line-through",
+  },
 });
 
 export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
@@ -97,6 +100,8 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
       case "WAIT":
       case "WAITER":
         return classes.unblocked;
+      case "SKIPPED":
+        return classes.skipped;
       default:
         return "";
     }

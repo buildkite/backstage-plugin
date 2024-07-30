@@ -8,7 +8,11 @@ import {
   Grid,
   Link,
   Paper,
+  Tab,
+  Tabs,
   Typography,
+  makeStyles,
+  Theme,
 } from "@material-ui/core";
 import { useParams } from "react-router-dom";
 import { useRouteRef } from "@backstage/core-plugin-api";
@@ -48,6 +52,57 @@ const buildStateColors: Record<string, BuildStateColors> = {
 const getBuildStateColors = (state: string): BuildStateColors =>
   buildStateColors[state] || buildStateColors.DEFAULT;
 
+const useStyles = makeStyles((theme: Theme) => ({
+  tabs: {
+    border: "1px solid #e8e8e8",
+    borderRadius: "4px",
+    width: "fit-content",
+    padding: "2px",
+  },
+  indicator: {
+    backgroundColor: "transparent",
+  },
+  tab: {
+    fontSize: "13px",
+    width: "fit-content",
+    minWidth: "fit-content",
+    borderRadius: "2px",
+    padding: "4px 8px",
+    color: "#333333",
+    opacity: 1,
+    "&$selected": {
+      color: "#4B19D5",
+      backgroundColor: "#F1EFFF",
+      fontWeight: theme.typography.fontWeightMedium,
+      "&:focus": {
+        color: "#4B19D5",
+        backgroundColor: "#F1EFFF",
+      },
+      "&:active": {
+        color: "#4B19D5",
+        backgroundColor: "#F1EFFF",
+      },
+      "&:hover": {
+        color: "#4B19D5",
+        backgroundColor: "#F1EFFF",
+      },
+    },
+    "&:focus": {
+      color: "inherit",
+      backgroundColor: "inherit",
+    },
+    "&:active": {
+      color: "inherit",
+      backgroundColor: "inherit",
+    },
+    "&:hover": {
+      color: "inherit",
+      backgroundColor: "inherit",
+    },
+  },
+  selected: {},
+}));
+
 export const BuildPage = () => {
   const { pipelineSlug, buildNumber } = useParams<{
     pipelineSlug?: string;
@@ -61,10 +116,22 @@ export const BuildPage = () => {
   );
 
   const [isUTC, setIsUTC] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(0);
 
   const onTimeClick = () => {
     setIsUTC(!isUTC);
   };
+
+  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
+  const filteredSteps =
+    selectedTab === 0
+      ? steps
+      : steps.filter((step) => step.status === "FAILED");
+
+  const classes = useStyles();
 
   if (!pipelineSlug || !buildNumber) {
     return <Typography>Invalid URL parameters</Typography>;
@@ -304,10 +371,27 @@ export const BuildPage = () => {
           </Box>
         </Paper>
 
-        <Box display="flex" flexDirection="column" gridGap="8px" mt="12px">
-          {steps.map((step) => (
-            <Job key={step.id} {...{ step }} />
-          ))}
+        <Box display="flex" flexDirection="column" gridGap="8px" mt="30px">
+          <Tabs
+            value={selectedTab}
+            onChange={handleTabChange}
+            className={classes.tabs}
+            classes={{ indicator: classes.indicator }}
+          >
+            <Tab
+              label="All"
+              classes={{ root: classes.tab, selected: classes.selected }}
+            />
+            <Tab
+              label="Failures"
+              classes={{ root: classes.tab, selected: classes.selected }}
+            />
+          </Tabs>
+          <Box display="flex" flexDirection="column" gridGap="8px" mt="12px">
+            {filteredSteps.map((step) => (
+              <Job key={step.id} {...{ step }} />
+            ))}
+          </Box>
         </Box>
       </Grid>
     </Box>

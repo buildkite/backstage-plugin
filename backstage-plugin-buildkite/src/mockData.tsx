@@ -24,6 +24,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
             status: "PASSED",
             url: "#",
@@ -31,11 +32,13 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step2ish",
             title: "Unblocked step",
+            command: "script/ci",
             status: "UNBLOCKED",
           },
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
             status: "FAILED",
             url: "#",
@@ -43,6 +46,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
             status: "RUNNING",
             url: "#",
@@ -54,6 +58,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step4",
             title: "Unit Tests",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/jest.png",
             status: "BLOCKED",
             url: "#",
@@ -61,6 +66,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step5",
             title: "Integration Tests",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/cypress.png",
             status: "CANCELED",
             url: "#",
@@ -68,6 +74,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step6",
             title: "Deploy to Staging",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/kubernetes.png",
             status: "CANCELING",
             url: "#",
@@ -75,6 +82,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step7",
             title: "Deploy to Production",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/kubernetes.png",
             status: "CREATING",
             url: "#",
@@ -82,11 +90,13 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step7ish",
             title: "Blocked Step",
+            command: "script/ci",
             status: "BLOCKED",
           },
           {
             id: "step8",
             title: "Security Scan",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/snyk.png",
             status: "FAILING",
             url: "#",
@@ -94,6 +104,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step8ish",
             title: "Assigned",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/snyk.png",
             status: "ASSIGNED",
             url: "#",
@@ -101,6 +112,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step85ish",
             title: "Accepted",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/snyk.png",
             status: "ACCEPTED",
             url: "#",
@@ -108,6 +120,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step9",
             title: "Code Coverage",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/codecov.png",
             status: "NOT_RUN",
             url: "#",
@@ -115,6 +128,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step10",
             title: "Performance Tests",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/k6.png",
             status: "SCHEDULED",
             url: "#",
@@ -122,6 +136,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step11",
             title: "Documentation",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/storybook.png",
             status: "SKIPPED",
             url: "#",
@@ -129,6 +144,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step12",
             title: "Approval",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/github.png",
             status: "WAITING",
             url: "#",
@@ -136,6 +152,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step13",
             title: "Post-Deployment Check",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/datadog.png",
             status: "WAITING_FAILED",
             url: "#",
@@ -143,6 +160,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step14",
             title: "Code Review",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/github.png",
             status: "Undetermined",
             url: "#",
@@ -165,6 +183,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
             status: "PASSED",
             url: "#",
@@ -172,6 +191,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
             status: "PASSED",
             url: "#",
@@ -179,6 +199,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
             status: "RUNNING",
             url: "#",
@@ -201,6 +222,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
             status: "PASSED",
             url: "#",
@@ -208,6 +230,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
             status: "PASSED",
             url: "#",
@@ -215,6 +238,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
             status: "RUNNING",
             url: "#",
@@ -246,6 +270,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
             status: "PASSED",
             url: "#",
@@ -253,6 +278,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
             status: "PASSED",
             url: "#",
@@ -260,6 +286,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
             status: "RUNNING",
             url: "#",
@@ -282,6 +309,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
             status: "PASSED",
             url: "#",
@@ -289,6 +317,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
             status: "PASSED",
             url: "#",
@@ -296,6 +325,7 @@ export const mockPipelines: PipelineParams[] = [
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
             status: "RUNNING",
             url: "#",

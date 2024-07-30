@@ -89,6 +89,15 @@ const statusConfig: Record<Status, IconConfig> = {
     },
     animate: true,
   },
+  TIMING_OUT: {
+    color: colors.red,
+    icons: {
+      small: RunningSmall,
+      medium: RunningMedium,
+      large: RunningLarge,
+    },
+    animate: true,
+  },
   NOT_RUN: {
     color: colors.gray,
     icons: { small: SkippedSmall, medium: SkippedMedium, large: SkippedLarge },
@@ -151,6 +160,22 @@ const statusConfig: Record<Status, IconConfig> = {
     animate: true,
   },
   WAITING_FAILED: {
+    color: colors.gray,
+    icons: {
+      small: ScheduledSmall,
+      medium: ScheduledMedium,
+      large: ScheduledLarge,
+    },
+  },
+  LIMITING: {
+    color: colors.gray,
+    icons: {
+      small: ScheduledSmall,
+      medium: ScheduledMedium,
+      large: ScheduledLarge,
+    },
+  },
+  LIMITED: {
     color: colors.gray,
     icons: {
       small: ScheduledSmall,
@@ -879,8 +904,8 @@ export function PausedLarge(props: SvgIconProps) {
       <rect x="0.75" width="44" height="44" rx="22" fill="currentColor" />
       <circle cx="24" cy="22" r="22" fill="currentColor" />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M20.75 17.5C20.75 16.6716 20.0784 16 19.25 16C18.4216 16 17.75 16.6716 17.75 17.5V26.5C17.75 27.3284 18.4216 28 19.25 28C20.0784 28 20.75 27.3284 20.75 26.5L20.75 17.5ZM27.75 17.5C27.75 16.6716 27.0784 16 26.25 16C25.4216 16 24.75 16.6716 24.75 17.5L24.75 26.5C24.75 27.3284 25.4216 28 26.25 28C27.0784 28 27.75 27.3284 27.75 26.5V17.5Z"
         fill="white"
       />
@@ -971,6 +996,70 @@ export function BranchIcon(props: any) {
         d="M6.57129 6.85938H8.28557V12.4546C9.19545 11.6403 10.397 11.1451 11.7141 11.1451H15.1427C16.0895 11.1451 16.857 10.3776 16.857 9.4308V6.85938H18.5713V9.4308C18.5713 11.3244 17.0363 12.8594 15.1427 12.8594H13.4284H11.7141C9.8206 12.8594 8.28557 14.3944 8.28557 16.2879V17.1451H6.57129V16.2879V6.85938Z"
         fill="currentColor"
       />
+    </SvgIcon>
+  );
+}
+
+export function ClusterIcon(props: any) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 16 16" fontSize="16px">
+      <path
+        d="M4.45454 7H9.54545"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></path>
+      <path
+        d="M4.45454 9.54546H9.54545"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></path>
+      <path
+        d="M4.45454 4.45454H9.54545"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></path>
+      <path
+        d="M11.1814 12.0909C11.9845 12.0909 12.6361 11.4399 12.6361 10.6362V7.72736L13.3635 7L12.6361 6.27264V3.36382C12.6361 2.56009 11.9851 1.90909 11.1814 1.90909M2.81845 1.90909C2.01472 1.90909 1.36372 2.56009 1.36372 3.36382V6.27264L0.63636 7L1.36372 7.72736V10.6362C1.36372 11.4399 2.01472 12.0909 2.81845 12.0909"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></path>
+    </SvgIcon>
+  );
+}
+
+export function AlertIcon(props: any) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 16 16" fontSize="16px">
+      <path
+        fillRule="evenodd"
+        d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+        clipRule="evenodd"
+      ></path>
+    </SvgIcon>
+  );
+}
+
+export function AgentIcon(props: any) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 16 16" fontSize="16px">
+      <path
+        d="M6.5 6C6.22386 6 6 6.22386 6 6.5V7.5C6 7.77614 6.22386 8 6.5 8H7.5C7.77614 8 8 7.77614 8 7.5V6.5C8 6.22386 7.77614 6 7.5 6H6.5Z"
+        fill="currentColor"
+      ></path>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M9 0.75C9.41421 0.75 9.75 1.08579 9.75 1.5V2.51547C10.6547 2.62829 11.3717 3.34532 11.4845 4.25H12.5C12.9142 4.25 13.25 4.58579 13.25 5C13.25 5.41421 12.9142 5.75 12.5 5.75H11.5V8.25H12.5C12.9142 8.25 13.25 8.58579 13.25 9C13.25 9.41421 12.9142 9.75 12.5 9.75H11.4845C11.3717 10.6547 10.6547 11.3717 9.75 11.4845L9.75 12.5C9.75 12.9142 9.41421 13.25 9 13.25C8.58579 13.25 8.25 12.9142 8.25 12.5V11.5H5.75V12.5C5.75 12.9142 5.41421 13.25 5 13.25C4.58579 13.25 4.25 12.9142 4.25 12.5V11.4845C3.34532 11.3717 2.62829 10.6547 2.51547 9.75H1.5C1.08579 9.75 0.75 9.41421 0.75 9C0.75 8.58579 1.08579 8.25 1.5 8.25H2.5V5.75H1.5C1.08579 5.75 0.75 5.41421 0.75 5C0.75 4.58579 1.08579 4.25 1.5 4.25H2.51547C2.62829 3.34532 3.34532 2.62829 4.25 2.51547V1.5C4.25 1.08579 4.58579 0.75 5 0.75C5.41421 0.75 5.75 1.08579 5.75 1.5V2.5H8.25V1.5C8.25 1.08579 8.58579 0.75 9 0.75ZM9.5 3.8H4.5C4.1134 3.8 3.8 4.1134 3.8 4.5V9.5C3.8 9.8866 4.1134 10.2 4.5 10.2H9.5C9.8866 10.2 10.2 9.8866 10.2 9.5V4.5C10.2 4.1134 9.8866 3.8 9.5 3.8Z"
+        fill="currentColor"
+      ></path>
     </SvgIcon>
   );
 }

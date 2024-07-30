@@ -18,7 +18,10 @@ export type Status =
   | "WAITING"
   | "ACCEPTED"
   | "ASSIGNED"
+  | "LIMITED"
+  | "LIMITING"
   | "WAITING_FAILED"
+  | "TIMING_OUT"
   | "Undetermined";
 
 export type BuildParams = {
@@ -39,6 +42,7 @@ export type BuildParams = {
 export type BuildStepParams = {
   id: string;
   title?: string;
+  command?: string;
   icon?: string;
   status: Status;
   url?: string;

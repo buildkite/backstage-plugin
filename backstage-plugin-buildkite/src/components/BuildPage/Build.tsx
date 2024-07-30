@@ -129,7 +129,12 @@ export const BuildPage = () => {
   const filteredSteps =
     selectedTab === 0
       ? steps
-      : steps.filter((step) => step.status === "FAILED");
+      : steps.filter(
+          (step) =>
+            step.status === "FAILED" ||
+            step.status === "SKIPPED" ||
+            step.status === "CANCELED"
+        );
 
   const classes = useStyles();
 

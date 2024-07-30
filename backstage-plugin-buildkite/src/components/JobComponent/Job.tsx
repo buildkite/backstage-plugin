@@ -37,15 +37,35 @@ const useStyles = makeStyles({
   },
   fail_soft: {
     borderColor: "#f83f23",
+    backgroundColor: "#fdf5f5",
     boxShadow: "inset 4px 0 0 0 #f83f23",
   },
   fail: {
     borderColor: "#f83f23",
+    backgroundColor: "#fdf5f5",
     boxShadow: "inset 4px 0 0 0 #f83f23",
   },
   unblocked: {
     borderColor: "transparent",
     backgroundColor: "transparent",
+  },
+  wait: {
+    width: "fit-content",
+    marginLeft: "auto",
+    marginRight: "auto",
+    borderColor: "transparent",
+    "& svg": {
+      transform: "rotate(90deg)",
+    },
+    cursor: "default",
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
+  },
+  blocked: {
+    width: "fit-content",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   assigned: {
     borderStyle: "dashed",
@@ -87,9 +107,11 @@ export const Job: React.FC<JobProps> = ({ step }) => {
       case "ACCEPTED":
         return classes.accepted;
       case "UNBLOCKED":
+      case "BLOCKED":
+        return classes.blocked;
       case "WAIT":
       case "WAITER":
-        return classes.unblocked;
+        return classes.wait;
       case "SKIPPED":
         return classes.skipped;
       default:
@@ -144,32 +166,46 @@ export const Job: React.FC<JobProps> = ({ step }) => {
             >
               {step.title}
             </Typography>
-            <Typography
-              variant="h6"
-              style={{
-                margin: 0,
-                fontSize: "12px",
-                fontWeight: 500,
-                fontFamily: "monospace",
-              }}
+            {step.status !== "BLOCKED" && step.status !== "UNBLOCKED" && (
+              <Typography
+                variant="h6"
+                style={{
+                  margin: 0,
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  fontFamily: "monospace",
+                }}
+              >
+                {step.command}
+              </Typography>
+            )}
+          </Box>
+          {step.status !== "BLOCKED" && step.status !== "UNBLOCKED" && (
+            <Box
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              gridGap="8px"
+              marginLeft="auto"
             >
-              {step.command}
-            </Typography>
-          </Box>
-          <Box
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
-            gridGap="8px"
-            marginLeft="auto"
-          >
-            <Typography variant="h6" className={classes.statusText}>
-              {step.status}
-            </Typography>
-          </Box>
+              <Typography variant="h6" className={classes.statusText}>
+                {step.status}
+              </Typography>
+            </Box>
+          )}
         </Box>
       ) : (
-        <StatusIcon status={step.status} size="small" />
+        <Box
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          gridGap="8px"
+          paddingX="10px"
+          paddingY="14px"
+          className={`${classes.job} ${getStatusClass(step.status)}`}
+        >
+          <StatusIcon status={step.status} size="small" />
+        </Box>
       )}
     </>
   );

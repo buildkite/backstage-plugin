@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {
+  Avatar,
   Box,
   Breadcrumbs,
+  Button,
+  Chip,
   Grid,
   Link,
   Paper,
@@ -10,8 +13,40 @@ import {
 import { useParams } from "react-router-dom";
 import { useRouteRef } from "@backstage/core-plugin-api";
 import { useBuilds } from "../../state/useBuilds";
+import AutorenewIcon from "@material-ui/icons/Autorenew";
 import { Navatar } from "../Navatar";
 import { buildkitePipelineRouteRef } from "../../routes";
+import { Job } from "../JobComponent";
+import { BranchIcon, GithubIcon, StatusIcon } from "../Icons";
+import { BuildStep } from "../BuildStepComponent";
+import { TimeChip } from "../TimeChip";
+
+interface BuildStateColors {
+  main: string;
+  subtle: string;
+}
+
+const buildStateColors: Record<string, BuildStateColors> = {
+  PASSED: {
+    main: "#55BB3B",
+    subtle: "#FBFDFA",
+  },
+  FAILED: {
+    main: "#F83F23",
+    subtle: "#FDF5F5",
+  },
+  RUNNING: {
+    main: "#F5BD44",
+    subtle: "#FEF8E9",
+  },
+  DEFAULT: {
+    main: "#000000",
+    subtle: "#FFFFFF",
+  },
+};
+
+const getBuildStateColors = (state: string): BuildStateColors =>
+  buildStateColors[state] || buildStateColors.DEFAULT;
 
 export const BuildPage = () => {
   const { pipelineSlug, buildNumber } = useParams<{
@@ -19,17 +54,21 @@ export const BuildPage = () => {
     buildNumber?: string;
   }>();
 
-  // Ensure pipelineSlug and buildNumber are defined
+  const getPipelinePath = useRouteRef(buildkitePipelineRouteRef);
+  const { pipeline, build, steps, loading } = useBuilds(
+    pipelineSlug!,
+    buildNumber!
+  );
+
+  const [isUTC, setIsUTC] = useState(false);
+
+  const onTimeClick = () => {
+    setIsUTC(!isUTC);
+  };
+
   if (!pipelineSlug || !buildNumber) {
     return <Typography>Invalid URL parameters</Typography>;
   }
-
-  const { pipeline, build, steps, loading } = useBuilds(
-    pipelineSlug,
-    buildNumber
-  );
-
-  const getPipelinePath = useRouteRef(buildkitePipelineRouteRef);
 
   if (loading) {
     return <Typography>Loading...</Typography>;
@@ -42,6 +81,8 @@ export const BuildPage = () => {
   if (!build) {
     return <Typography>Build not found</Typography>;
   }
+
+  const { main, subtle } = getBuildStateColors(build.status);
 
   return (
     <Box display="flex" flexDirection="column" gridGap="20px">
@@ -82,27 +123,192 @@ export const BuildPage = () => {
       </Breadcrumbs>
       <Grid container spacing={3} direction="column">
         <Paper>
-          <Typography variant="h6">{build.buildMessage}</Typography>
-          <ul>
-            <li>Build Number: {build.buildNumber}</li>
-            <li>Author: {build.author.name}</li>
-            <li>Branch: {build.branch}</li>
-            <li>Commit ID: {build.commitId}</li>
-            <li>Created At: {build.createdAt}</li>
-            <li>Time Elapsed: {build.timeElapsed}</li>
-          </ul>
+          <Box
+            overflow="hidden"
+            borderRadius="4px"
+            border={`1px solid ${main}`}
+            borderTop={`4px solid ${main}`}
+            bgcolor={subtle}
+          >
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              paddingX="20px"
+              paddingY="12px"
+              borderBottom={`1px solid ${main}`}
+            >
+              <Box display="flex" flexDirection="column" gridGap="4px">
+                <Typography
+                  variant="h6"
+                  style={{ margin: 0, fontSize: "16px", fontWeight: 500 }}
+                >
+                  {build.buildMessage}
+                </Typography>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  margin={0}
+                  gridGap="3px"
+                  marginLeft="-8px"
+                >
+                  <Chip
+                    style={{
+                      color: "#4F4F4F",
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                    }}
+                    label={"Build #" + build.buildNumber}
+                    variant="outlined"
+                    size="small"
+                  />
+
+                  <Typography style={{ color: "#111111", fontSize: "12px" }}>
+                    ·
+                  </Typography>
+                  <Chip
+                    style={{
+                      color: "#4F4F4F",
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                      paddingLeft: "4px",
+                    }}
+                    icon={<BranchIcon size="small" />}
+                    label={build.branch}
+                    variant="outlined"
+                    size="small"
+                  />
+                  <Typography variant="caption">/</Typography>
+                  <Chip
+                    style={{
+                      color: "#4F4F4F",
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                      paddingLeft: "4px",
+                    }}
+                    icon={<GithubIcon viewBox="0 0 13 13" />}
+                    label={build.commitId}
+                    variant="outlined"
+                    size="small"
+                  />
+                </Box>
+              </Box>
+              <Box
+                display="flex"
+                flexDirection="row"
+                gridGap="8px"
+                alignItems="center"
+              >
+                <span>Running for {build.timeElapsed}</span>
+                <StatusIcon status={build.status} size="large" />
+              </Box>
+            </Box>
+            <Box
+              display="flex"
+              gridGap="4px"
+              alignItems="center"
+              flexWrap="wrap"
+              bgcolor="white"
+              paddingX="20px"
+              paddingY="12px"
+            >
+              {build.steps.map((step) => (
+                <BuildStep key={step.id} step={step} />
+              ))}
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              bgcolor="#f8f8f8"
+              paddingX="20px"
+              paddingY="12px"
+              boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
+            >
+              <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                gridGap="4px"
+                color="#4F4F4F"
+              >
+                <Chip
+                  style={{
+                    color: "#4F4F4F",
+                    border: "none",
+                    borderRadius: "4px",
+                    margin: 0,
+                  }}
+                  avatar={<Avatar src={build.author.avatar} />}
+                  label={build.author.name}
+                  variant="outlined"
+                  size="small"
+                />
+                <Typography style={{ color: "#111111", fontSize: "12px" }}>
+                  ·
+                </Typography>
+                <TimeChip
+                  {...{
+                    dateString: build.createdAt,
+                    isUTC,
+                    onTimeClick,
+                    triggerType: "Webhook",
+                  }}
+                />
+              </Box>
+              <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                gridGap="8px"
+              >
+                <Button
+                  variant="contained"
+                  color="default"
+                  size="small"
+                  style={{
+                    backgroundColor: "white",
+                    textTransform: "none",
+                  }}
+                  startIcon={
+                    <AutorenewIcon
+                      fontSize="small"
+                      style={{
+                        rotate: "45deg",
+                      }}
+                    />
+                  }
+                >
+                  Rebuild
+                </Button>
+                {build.status === "RUNNING" && (
+                  <Button
+                    variant="contained"
+                    color="default"
+                    size="small"
+                    style={{
+                      textTransform: "none",
+                      backgroundColor: "white",
+                      color: "#F83F23",
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          </Box>
         </Paper>
-        <Paper>
-          <Typography variant="h6">Build Steps</Typography>
-          <ul>
-            {steps.map((step) => (
-              <li key={step.id}>
-                <img src={step.icon} alt={step.title} width="20" height="20" />{" "}
-                {step.title} - {step.status}
-              </li>
-            ))}
-          </ul>
-        </Paper>
+
+        <Box display="flex" flexDirection="column" gridGap="8px" mt="12px">
+          {steps.map((step) => (
+            <Job {...{ step }} />
+          ))}
+        </Box>
       </Grid>
     </Box>
   );

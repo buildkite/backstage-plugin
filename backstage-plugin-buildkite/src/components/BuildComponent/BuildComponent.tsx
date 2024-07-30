@@ -7,16 +7,16 @@ import {
   Link,
   IconButton,
   Collapse,
-  Tooltip,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore";
 import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
-import { BranchIcon, GithubIcon } from "../Icons";
+import { BranchIcon, GithubIcon, StatusIcon } from "../Icons";
 import { BuildStep } from "../BuildStepComponent";
 import { BuildParams, PipelineParams } from "../Types";
 import { useRouteRef } from "@backstage/core-plugin-api";
-import { buildkiteBuildRouteRef } from "../../routes"; // Ensure this path is correct
+import { buildkiteBuildRouteRef } from "../../routes";
+import { TimeChip } from "../TimeChip";
 
 const useStyles = makeStyles({
   buildRow: {
@@ -54,39 +54,6 @@ export const BuildRow: React.FC<BuildRowProps> = ({
   const classes = useStyles();
   const getBuildPath = useRouteRef(buildkiteBuildRouteRef);
 
-  const formatDate = (dateString: string, toUTC: boolean) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-
-    const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" });
-    const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const time = date.toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
-
-    if (toUTC) {
-      const utcDay = date.toUTCString().slice(0, 3);
-      const utcDayOfMonth = date.getUTCDate();
-      const utcMonth = date.toUTCString().slice(8, 11);
-      const utcYear = date.getUTCFullYear();
-      const utcTime = date.toUTCString().slice(17, 22);
-      return `Created ${utcDay} ${utcDayOfMonth}th ${utcMonth} ${utcYear} at ${utcTime} UTC`;
-    } else if (date.toDateString() === now.toDateString()) {
-      return `Created today at ${time}`;
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Created yesterday at ${time}`;
-    } else if (now.getTime() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
-      return `Created ${dayOfWeek} at ${time}`;
-    } else {
-      return `Created ${dayOfWeek} ${day}th ${month} at ${time}`;
-    }
-  };
-
   return (
     <Box className={classes.buildRow} key={build.buildNumber}>
       <Box
@@ -101,7 +68,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           gridGap="6px"
           alignItems="center"
         >
-          {build.statusIcon}
+          <StatusIcon status={build.status} size="medium" />
           <Typography
             variant="caption"
             style={{ color: "#737373", paddingTop: "1px" }}
@@ -134,7 +101,13 @@ export const BuildRow: React.FC<BuildRowProps> = ({
               #{build.buildNumber}
             </Typography>
           </Box>
-          <Box display="flex" alignItems="center" margin={0} gridGap="3px">
+          <Box
+            display="flex"
+            alignItems="center"
+            margin={0}
+            gridGap="3px"
+            color="#737373"
+          >
             <Chip
               className={classes.chip}
               avatar={<Avatar src={build.author.avatar} />}
@@ -165,18 +138,11 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             <Typography style={{ color: "#111111", fontSize: "12px" }}>
               ·
             </Typography>
-            <Tooltip
-              title="Click to toggle between local and UTC"
-              placement="top"
-            >
-              <Chip
-                className={classes.chip}
-                label={formatDate(build.createdAt, isUTC)}
-                variant="outlined"
-                size="small"
-                onClick={onTimeClick}
-              />
-            </Tooltip>
+            <TimeChip
+              dateString={build.createdAt}
+              isUTC={isUTC}
+              onTimeClick={onTimeClick}
+            />
           </Box>
         </Box>
         <IconButton

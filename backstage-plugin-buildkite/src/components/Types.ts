@@ -1,5 +1,24 @@
+export type Status =
+  | "CANCELED"
+  | "CANCELING"
+  | "CREATING"
+  | "FAILED"
+  | "FAILING"
+  | "NOT_RUN"
+  | "BLOCKED"
+  | "UNBLOCKED"
+  | "PAUSED"
+  | "CONTINUE"
+  | "PASSED"
+  | "RUNNING"
+  | "SCHEDULED"
+  | "SKIPPED"
+  | "WAITING"
+  | "WAITING_FAILED"
+  | "Undetermined";
+
 export type BuildParams = {
-  statusIcon: React.ReactElement;
+  status: Status;
   buildMessage: string;
   buildNumber: string;
   author: {
@@ -17,7 +36,7 @@ export type BuildStepParams = {
   id: string;
   title: string;
   icon: string;
-  status: "passed" | "failed" | "running";
+  status: Status;
   url: string;
 };
 

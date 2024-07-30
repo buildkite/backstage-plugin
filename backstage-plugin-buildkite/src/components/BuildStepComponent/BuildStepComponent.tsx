@@ -1,10 +1,8 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box, Chip } from "@material-ui/core";
-import AutorenewIcon from "@material-ui/icons/Autorenew";
-import CloseIcon from "@material-ui/icons/Close";
-import DoneIcon from "@material-ui/icons/Done";
 import { BuildStepParams } from "../Types";
+import { StatusIcon } from "../Icons";
 
 type BuildStepProps = {
   step: BuildStepParams;
@@ -65,36 +63,13 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
     console.info("You clicked the Chip.");
   };
 
-  const getStatusIcon = (status: BuildStepParams["status"]) => {
-    switch (status) {
-      case "passed":
-        return (
-          <DoneIcon fontSize="small" style={{ color: "green", fontSize: 16 }} />
-        );
-      case "failed":
-        return (
-          <CloseIcon fontSize="small" style={{ color: "red", fontSize: 16 }} />
-        );
-      case "running":
-        return (
-          <AutorenewIcon
-            fontSize="small"
-            className={classes.animationSpinSlow}
-            style={{ color: "#FFBA11", fontSize: 16 }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
   const getStatusClass = (status: BuildStepParams["status"]) => {
     switch (status) {
-      case "passed":
+      case "PASSED":
         return classes.passed;
-      case "failed":
+      case "FAILED":
         return classes.failed;
-      case "running":
+      case "RUNNING":
         return classes.running;
       default:
         return "";
@@ -107,7 +82,7 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
       style={{ paddingLeft: "4px" }}
       icon={
         <Box className={classes.statusIcon}>
-          {getStatusIcon(step.status)}
+          <StatusIcon status={step.status} size="small" />
           {step.icon && (
             <img
               height="16"

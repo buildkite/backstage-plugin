@@ -18,35 +18,24 @@ const useStyles = makeStyles({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-  "@keyframes spin": {
-    from: {
-      transform: "rotate(0deg)",
-    },
-    to: {
-      transform: "rotate(360deg)",
-    },
-  },
-  animationSpinSlow: {
-    animation: "$spin 2s linear infinite",
-  },
-  statusIcon: {
+  statusIcons: {
     display: "flex",
+    gridGap: "4px",
     alignItems: "center",
-    marginRight: "14px",
+    width: "fit-content",
+    minWidth: "fit-content",
   },
   buildStep: {
-    color: "#737373",
+    color: "#111111",
     borderRadius: "4px",
     margin: 0,
+    minWidth: 0,
+    borderColor: "#4f5d66",
+    backgroundColor: "#f9fafb",
   },
   passed: {
     borderColor: "#00be141c",
     backgroundColor: "#f4f9f5",
-    color: "#00522b",
-  },
-  failed: {
-    borderColor: "#f83f23",
-    backgroundColor: "#fdf5f5",
     color: "#00522b",
   },
   running: {
@@ -54,12 +43,36 @@ const useStyles = makeStyles({
     backgroundColor: "#FFF8E7",
     color: "#111111",
   },
+  fail_soft: {
+    borderColor: "#f83f23",
+    backgroundColor: "#fdf5f5",
+  },
+  fail: {
+    borderColor: "#f83f23",
+    boxShadow: "inset 0 0 0 2px #f83f23, inset 20px 0 0 0 #f83f23",
+    backgroundColor: "#fdf5f5",
+  },
+  blocked: {
+    borderColor: "#4b19d5",
+    boxShadow: "inset 0 0 0 2px #4b19d5, inset -20px 0 0 0 #4b19d5",
+    backgroundColor: "#FFF",
+    paddingRight: "2px",
+  },
+  unblocked: {
+    borderColor: "transparent",
+    backgroundColor: "white",
+  },
+  assigned: {
+    borderStyle: "dashed",
+  },
+  accepted: {
+    borderStyle: "dotted",
+  },
 });
 
 export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
   const classes = useStyles();
-
-  const handleClick = () => {
+  const onDelete = () => {
     console.info("You clicked the Chip.");
   };
 
@@ -68,38 +81,75 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step }) => {
       case "PASSED":
         return classes.passed;
       case "FAILED":
-        return classes.failed;
+        return classes.fail;
+      case "FAILING":
+      case "CANCELING":
+        return classes.fail_soft;
       case "RUNNING":
         return classes.running;
+      case "BLOCKED":
+        return classes.blocked;
+      case "ASSIGNED":
+        return classes.assigned;
+      case "ACCEPTED":
+        return classes.accepted;
+      case "UNBLOCKED":
+      case "WAIT":
+      case "WAITER":
+        return classes.unblocked;
       default:
         return "";
     }
   };
 
   return (
-    <Chip
-      className={`${classes.buildStep} ${getStatusClass(step.status)}`}
-      style={{ paddingLeft: "4px" }}
-      icon={
-        <Box className={classes.statusIcon}>
-          <StatusIcon status={step.status} size="small" />
-          {step.icon && (
-            <img
-              height="16"
-              width="16"
-              src={step.icon}
-              alt={step.title}
-              className="emoji"
-              style={{ marginLeft: "4px" }}
-            />
-          )}
-        </Box>
-      }
-      label={step.title}
-      variant="outlined"
-      size="small"
-      onClick={handleClick}
-    />
+    <>
+      {step.title ? (
+        <Chip
+          className={`${classes.buildStep} ${getStatusClass(step.status)}`}
+          icon={
+            <Box className={classes.statusIcons}>
+              <StatusIcon
+                status={step.status}
+                size="small"
+                color={step.status === "FAILED" ? "#ffffff" : undefined}
+              />
+              {Array.isArray(step.icon) && step.icon.length > 0 ? (
+                step.icon.map((iconSrc, index) => (
+                  <img
+                    key={index}
+                    height="16"
+                    width="16"
+                    src={iconSrc}
+                    alt={step.title}
+                    className="emoji"
+                  />
+                ))
+              ) : step.icon ? (
+                <img
+                  height="16"
+                  width="16"
+                  src={step.icon}
+                  alt={step.title}
+                  className="emoji"
+                />
+              ) : null}
+            </Box>
+          }
+          label={step.title}
+          variant="outlined"
+          size="small"
+          {...(step.status === "BLOCKED" && {
+            deleteIcon: (
+              <StatusIcon status="CONTINUE" size="small" color="#FFFFFF" />
+            ),
+            onDelete: onDelete,
+          })}
+        />
+      ) : (
+        <StatusIcon status={step.status} size="small" />
+      )}
+    </>
   );
 };
 

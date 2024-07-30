@@ -306,7 +306,7 @@ export const BuildPage = () => {
 
         <Box display="flex" flexDirection="column" gridGap="8px" mt="12px">
           {steps.map((step) => (
-            <Job {...{ step }} />
+            <Job key={step.id} {...{ step }} />
           ))}
         </Box>
       </Grid>

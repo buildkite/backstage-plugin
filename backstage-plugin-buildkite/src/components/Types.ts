@@ -13,7 +13,11 @@ export type Status =
   | "RUNNING"
   | "SCHEDULED"
   | "SKIPPED"
+  | "WAIT"
+  | "WAITER"
   | "WAITING"
+  | "ACCEPTED"
+  | "ASSIGNED"
   | "WAITING_FAILED"
   | "Undetermined";
 
@@ -34,10 +38,10 @@ export type BuildParams = {
 
 export type BuildStepParams = {
   id: string;
-  title: string;
-  icon: string;
+  title?: string;
+  icon?: string;
   status: Status;
-  url: string;
+  url?: string;
 };
 
 export type PipelineParams = {

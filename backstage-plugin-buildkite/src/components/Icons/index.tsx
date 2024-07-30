@@ -21,12 +21,16 @@ const useStyles = makeStyles({
   hourHand: {
     animation: "$tick 144s linear infinite",
   },
+  icon: {
+    color: (props: { color: string }) => props.color,
+  },
 });
 
 type Size = "small" | "medium" | "large";
 interface StatusIconProps {
   status: Status;
   size: Size;
+  color?: string;
 }
 
 const colors = {
@@ -50,7 +54,7 @@ const statusConfig: Record<Status, IconConfig> = {
     icons: { small: PassedSmall, medium: PassedMedium, large: PassedLarge },
   },
   CREATING: {
-    color: colors.orange,
+    color: colors.gray,
     icons: { small: RunningSmall, medium: RunningMedium, large: RunningLarge },
     animate: true,
   },
@@ -68,7 +72,6 @@ const statusConfig: Record<Status, IconConfig> = {
     icons: { small: FailingSmall, medium: FailingMedium, large: FailingLarge },
     animate: true,
   },
-
   CANCELED: {
     color: colors.gray,
     icons: {
@@ -78,12 +81,13 @@ const statusConfig: Record<Status, IconConfig> = {
     },
   },
   CANCELING: {
-    color: colors.gray,
+    color: colors.red,
     icons: {
-      small: CanceledSmall,
-      medium: CanceledMedium,
-      large: CanceledLarge,
+      small: RunningSmall,
+      medium: RunningMedium,
+      large: RunningLarge,
     },
+    animate: true,
   },
   NOT_RUN: {
     color: colors.gray,
@@ -101,9 +105,25 @@ const statusConfig: Record<Status, IconConfig> = {
       large: UnblockedLarge,
     },
   },
+  WAIT: {
+    color: colors.gray,
+    icons: {
+      small: UnblockedSmall,
+      medium: UnblockedMedium,
+      large: UnblockedLarge,
+    },
+  },
+  WAITER: {
+    color: colors.gray,
+    icons: {
+      small: UnblockedSmall,
+      medium: UnblockedMedium,
+      large: UnblockedLarge,
+    },
+  },
   BLOCKED: {
     color: colors.gray,
-    icons: { small: BlockedSmall, medium: BlockedMedium, large: BlockedLarge },
+    icons: { small: PausedSmall, medium: PausedMedium, large: PausedLarge },
   },
   CONTINUE: {
     color: colors.gray,
@@ -138,6 +158,22 @@ const statusConfig: Record<Status, IconConfig> = {
       large: ScheduledLarge,
     },
   },
+  ASSIGNED: {
+    color: colors.gray,
+    icons: {
+      small: ScheduledSmall,
+      medium: ScheduledMedium,
+      large: ScheduledLarge,
+    },
+  },
+  ACCEPTED: {
+    color: colors.gray,
+    icons: {
+      small: ScheduledSmall,
+      medium: ScheduledMedium,
+      large: ScheduledLarge,
+    },
+  },
   Undetermined: {
     color: colors.gray,
     icons: {
@@ -148,9 +184,13 @@ const statusConfig: Record<Status, IconConfig> = {
   },
 };
 
-export const StatusIcon: React.FC<StatusIconProps> = ({ status, size }) => {
-  const classes = useStyles();
-  const { color, animate, icons } = statusConfig[status];
+export const StatusIcon: React.FC<StatusIconProps> = ({
+  status,
+  size,
+  color,
+}) => {
+  const { color: defaultColor, animate, icons } = statusConfig[status];
+  const classes = useStyles({ color: color || defaultColor });
   const IconComponent = icons[size];
 
   const fontSizeMap = {
@@ -163,7 +203,7 @@ export const StatusIcon: React.FC<StatusIconProps> = ({ status, size }) => {
 
   return (
     <IconComponent
-      style={{ color, fontSize: fontSizeMap[size] }}
+      style={{ color: color || defaultColor, fontSize: fontSizeMap[size] }}
       className={
         isWaitingIcon
           ? `${classes.minuteHand} ${classes.hourHand}`
@@ -231,14 +271,14 @@ export function FailedSmall(props: SvgIconProps) {
       <path
         d="M11.75 5L5.75 11"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <path
         d="M5.75 5L11.75 11"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -253,19 +293,19 @@ export function FailedMedium(props: SvgIconProps) {
         r="11.25"
         fill="white"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M10.0984 9.375L15.4017 14.6783"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
       <path
         d="M15.4016 9.375L10.0983 14.6783"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -292,8 +332,8 @@ export function FailingSmall(props: SvgIconProps) {
       <path
         d="M12.25 8C12.25 10.2091 10.4591 12 8.25 12M4.25 8C4.25 5.79086 6.04086 4 8.25 4"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -308,21 +348,21 @@ export function FailingMedium(props: SvgIconProps) {
         r="11.25"
         fill="white"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M12.25 16.5C13.4435 16.5 14.5881 16.0259 15.432 15.182C16.2759 14.3381 16.75 13.1935 16.75 12"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
       <path
         d="M11.75 7C10.5565 7 9.41193 7.47411 8.56802 8.31802C7.72411 9.16193 7.25 10.3065 7.25 11.5"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -335,16 +375,16 @@ export function FailingLarge(props: SvgIconProps) {
       <path
         d="M22.25 29C24.1065 29 25.887 28.2625 27.1997 26.9497C28.5125 25.637 29.25 23.8565 29.25 22"
         stroke="white"
-        stroke-width="3"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="3"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
       <path
         d="M22.25 15C20.3935 15 18.613 15.7375 17.3003 17.0503C15.9875 18.363 15.25 20.1435 15.25 22"
         stroke="white"
-        stroke-width="3"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="3"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -356,8 +396,8 @@ export function RunningSmall(props: SvgIconProps) {
       <path
         d="M12.25 8C12.25 10.2091 10.4591 12 8.25 12M4.25 8C4.25 5.79086 6.04086 4 8.25 4"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -372,21 +412,21 @@ export function RunningMedium(props: SvgIconProps) {
         r="11.25"
         fill="white"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M12.25 16.5C13.4435 16.5 14.5881 16.0259 15.432 15.182C16.2759 14.3381 16.75 13.1935 16.75 12"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
       <path
         d="M11.75 7C10.5565 7 9.41193 7.47411 8.56802 8.31802C7.72411 9.16193 7.25 10.3065 7.25 11.5"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -399,23 +439,24 @@ export function RunningLarge(props: SvgIconProps) {
       <path
         d="M22.25 29C24.1065 29 25.887 28.2625 27.1997 26.9497C28.5125 25.637 29.25 23.8565 29.25 22"
         stroke="white"
-        stroke-width="3"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="3"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
       <path
         d="M22.25 15C20.3935 15 18.613 15.7375 17.3003 17.0503C15.9875 18.363 15.25 20.1435 15.25 22"
         stroke="white"
-        stroke-width="3"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="3"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
 }
 
 export function WaitingSmall(props: SvgIconProps) {
-  const classes = useStyles();
+  const { color = "currentColor" } = props;
+  const classes = useStyles({ color });
 
   return (
     <SvgIcon {...props} viewBox="0 0 16 16" fontSize="inherit">
@@ -448,7 +489,8 @@ export function WaitingSmall(props: SvgIconProps) {
 }
 
 export function WaitingMedium(props: SvgIconProps) {
-  const classes = useStyles();
+  const { color = "currentColor" } = props;
+  const classes = useStyles({ color });
 
   return (
     <SvgIcon {...props} viewBox="0 0 24 24" fontSize="inherit">
@@ -481,7 +523,8 @@ export function WaitingMedium(props: SvgIconProps) {
 }
 
 export function WaitingLarge(props: SvgIconProps) {
-  const classes = useStyles();
+  const { color = "currentColor" } = props;
+  const classes = useStyles({ color });
 
   return (
     <SvgIcon {...props} viewBox="0 0 32 32" fontSize="inherit">
@@ -519,8 +562,8 @@ export function CanceledSmall(props: SvgIconProps) {
       <path
         d="M11.25 5L5.25 11"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -534,30 +577,30 @@ export function CanceledMedium(props: SvgIconProps) {
         cy="12"
         r="11.25"
         stroke="#C2CACE"
-        stroke-width="1.5"
+        strokeWidth="1.5"
         fill="none"
       />
       <path
         d="M12.25 16.5C13.4435 16.5 14.5881 16.0259 15.432 15.182C16.2759 14.3381 16.75 13.1935 16.75 12"
         stroke="#C2CACE"
-        stroke-width="1.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
         fill="none"
       />
       <path
         d="M12.25 7.5C11.0565 7.5 9.91193 7.97411 9.06802 8.81802C8.22411 9.66193 7.75 10.8065 7.75 12"
         stroke="#C2CACE"
-        stroke-width="1.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
         fill="none"
       />
       <path
         d="M15.9624 8.28809L8.53778 15.7127"
         stroke="#C2CACE"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
         fill="none"
       />
     </SvgIcon>
@@ -571,17 +614,17 @@ export function CanceledLarge(props: SvgIconProps) {
       <path
         d="M22.25 30C24.3717 30 26.4066 29.1571 27.9069 27.6569C29.4071 26.1566 30.25 24.1217 30.25 22"
         stroke="white"
-        stroke-width="2.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="2.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
         fill="none"
       />
       <path
         d="M22.25 14C20.1283 14 18.0934 14.8429 16.5931 16.3431C15.0929 17.8434 14.25 19.8783 14.25 22"
         stroke="white"
-        stroke-width="2.5"
-        stroke-miterlimit="10"
-        stroke-linecap="round"
+        strokeWidth="2.5"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
         fill="none"
       />
       <rect
@@ -605,21 +648,21 @@ export function ScheduledSmall(props: SvgIconProps) {
         cy="8"
         r="6.25"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
         fill="none"
       />
       <path
         d="M8.75 8.33301L10.75 9.99967"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
         fill="none"
       />
       <path
         d="M8.75 5V8.33333"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
         fill="none"
       />
     </SvgIcon>
@@ -634,13 +677,13 @@ export function ScheduledMedium(props: SvgIconProps) {
         cy="12"
         r="11.25"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M12.75 7.5V12.75L15.375 15.375"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -654,7 +697,7 @@ export function ScheduledLarge(props: SvgIconProps) {
         d="M22.8214 17C23.4152 17 23.8929 17.4807 23.8929 18.0781V22.3053L25.683 24.1426C26.1384 24.5648 26.1384 25.2477 25.683 25.6295C25.3036 26.0877 24.625 26.0877 24.2054 25.6295L22.0625 23.4732C21.8616 23.3115 21.75 23.0375 21.75 22.75V18.0781C21.75 17.4807 22.2277 17 22.8214 17Z"
         fill="white"
       />
-      <circle cx="22.75" cy="22" r="10" stroke="white" stroke-width="2" />
+      <circle cx="22.75" cy="22" r="10" stroke="white" strokeWidth="2" />
     </SvgIcon>
   );
 }
@@ -665,8 +708,8 @@ export function SkippedSmall(props: SvgIconProps) {
       <path
         d="M11.25 8L5.25 8"
         stroke="#888888"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -675,18 +718,12 @@ export function SkippedSmall(props: SvgIconProps) {
 export function SkippedMedium(props: SvgIconProps) {
   return (
     <SvgIcon {...props} viewBox="0 0 24 24" fontSize="inherit">
-      <circle
-        cx="12.25"
-        cy="12"
-        r="11.25"
-        stroke="#C2CACE"
-        stroke-width="1.5"
-      />
+      <circle cx="12.25" cy="12" r="11.25" stroke="#C2CACE" strokeWidth="1.5" />
       <path
         d="M9.25 12H15.25"
         stroke="#C2CACE"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -707,9 +744,9 @@ export function BlockedSmall(props: SvgIconProps) {
       <path
         d="M6.25 4L10.75 8L6.25 12"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         fill="none"
       />
     </SvgIcon>
@@ -722,9 +759,9 @@ export function BlockedMedium(props: SvgIconProps) {
       <path
         d="M10.25 8L14.75 12L10.25 16"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         fill="none"
       />
     </SvgIcon>
@@ -738,9 +775,9 @@ export function BlockedLarge(props: SvgIconProps) {
       <path
         d="M20.25 18L24.75 22L20.25 26"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </SvgIcon>
   );
@@ -752,9 +789,9 @@ export function UnblockedSmall(props: SvgIconProps) {
       <path
         d="M6.25 4L10.75 8L6.25 12"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         fill="none"
       />
     </SvgIcon>
@@ -767,9 +804,9 @@ export function UnblockedMedium(props: SvgIconProps) {
       <path
         d="M10.25 8L14.75 12L10.25 16"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         fill="none"
       />
     </SvgIcon>
@@ -783,9 +820,9 @@ export function UnblockedLarge(props: SvgIconProps) {
       <path
         d="M20.25 18L24.75 22L20.25 26"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </SvgIcon>
   );
@@ -797,14 +834,14 @@ export function PausedSmall(props: SvgIconProps) {
       <path
         d="M6.75 5V11"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <path
         d="M10.75 5V11"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -818,19 +855,19 @@ export function PausedMedium(props: SvgIconProps) {
         cy="12"
         r="11.25"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M10.875 15L10.875 9"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
       <path
         d="M14.625 15L14.625 9"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </SvgIcon>
   );
@@ -857,9 +894,9 @@ export function ContinueSmall(props: SvgIconProps) {
       <path
         d="M4.75 8H8.25H12.75M9.25 4.5L12.75 8M9.25 11.5L12.75 8"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </SvgIcon>
   );
@@ -871,9 +908,9 @@ export function ContinueMedium(props: SvgIconProps) {
       <path
         d="M8.75 12H12.25H16.75M13.25 8.5L16.75 12M13.25 15.5L16.75 12"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </SvgIcon>
   );
@@ -886,9 +923,9 @@ export function ContinueLarge(props: SvgIconProps) {
       <path
         d="M18.75 22H22.25H26.75M23.25 18.5L26.75 22M23.25 25.5L26.75 22"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </SvgIcon>
   );

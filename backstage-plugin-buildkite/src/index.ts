@@ -1,1 +1,1 @@
-export { buildkitePlugin, BuildkitePage } from './plugin';
+export { buildkitePlugin, BuildkitePage, BuildkiteViewerPage } from "./plugin";

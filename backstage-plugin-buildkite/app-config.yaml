@@ -6,14 +6,11 @@ backend:
   listen: 0.0.0.0:7007
   baseUrl: http://localhost:7007
 
-buildkite:
-  apiToken: ${BUILDKITE_API_TOKEN}
-
 organization:
   name: Buildkite
 
 proxy:
   '/buildkite/api':
-    target: https://graphql.buildkite.com/v1
+    target: https://api.buildkite.com/v2
     headers:
       Authorization: 'Bearer ${BUILDKITE_API_TOKEN}'

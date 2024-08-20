@@ -8,7 +8,6 @@ import {
 
 import { rootRouteRef } from "./routes";
 import { BuildkiteClient, buildkiteAPIRef } from "./api";
-import { BuildkiteAPI } from "./api/BuildkiteAPI";
 
 export const buildkitePlugin = createPlugin({
   id: "buildkite",
@@ -16,9 +15,8 @@ export const buildkitePlugin = createPlugin({
     createApiFactory({
       api: buildkiteAPIRef,
       deps: { discoveryAPI: discoveryApiRef, fetchAPI: fetchApiRef },
-      factory: ({ discoveryAPI, fetchAPI }): BuildkiteAPI => {
-        return new BuildkiteClient({ discoveryAPI, fetchAPI });
-      },
+      factory: ({ discoveryAPI, fetchAPI }) =>
+        new BuildkiteClient({ discoveryAPI, fetchAPI }),
     }),
   ],
   routes: {

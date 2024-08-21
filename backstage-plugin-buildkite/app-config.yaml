@@ -10,7 +10,8 @@ organization:
   name: Buildkite
 
 proxy:
-  '/buildkite/api':
-    target: https://api.buildkite.com/v2
-    headers:
-      Authorization: 'Bearer ${BUILDKITE_API_TOKEN}'
+  endpoints:
+    '/buildkite/api':
+      target: https://api.buildkite.com/v2
+      headers:
+        Authorization: 'Bearer ${BUILDKITE_API_TOKEN}'

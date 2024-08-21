@@ -10,18 +10,18 @@ export class BuildkiteClient implements BuildkiteAPI {
     this.fetchAPI = options.fetchAPI;
   }
 
-  private async getBaseUrl(): Promise<string> {
-    const proxyUrl = await this.discoveryAPI.getBaseUrl("proxy");
-    console.log("Proxy URL from discoveryAPI:", proxyUrl);
-    const baseUrl = `${proxyUrl}/buildkite/api`;
-    console.log("Constructed base URL:", baseUrl);
-    return baseUrl;
+  private async getBaseURL(): Promise<string> {
+    const proxyURL = await this.discoveryAPI.getBaseUrl("proxy");
+    console.log("Proxy URL from discoveryAPI:", proxyURL);
+    const baseURL = `${proxyURL}/buildkite/api`;
+    console.log("Constructed base URL:", baseURL);
+    return baseURL;
   }
 
   async getUser(): Promise<User> {
     try {
-      const baseUrl = await this.getBaseUrl();
-      const url = `${baseUrl}/user`;
+      const baseURL = await this.getBaseURL();
+      const url = `${baseURL}/user`;
       console.log("Requesting URL:", url);
 
       const response = await this.fetchAPI.fetch(url, {

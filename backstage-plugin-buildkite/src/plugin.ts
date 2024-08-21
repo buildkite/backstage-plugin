@@ -1,4 +1,5 @@
 import {
+  configApiRef,
   createApiFactory,
   createPlugin,
   createRoutableExtension,
@@ -14,7 +15,10 @@ export const buildkitePlugin = createPlugin({
   apis: [
     createApiFactory({
       api: buildkiteAPIRef,
-      deps: { discoveryAPI: discoveryApiRef, fetchAPI: fetchApiRef },
+      deps: {
+        discoveryAPI: discoveryApiRef,
+        fetchAPI: fetchApiRef,
+      },
       factory: ({ discoveryAPI, fetchAPI }) =>
         new BuildkiteClient({ discoveryAPI, fetchAPI }),
     }),

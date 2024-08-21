@@ -4,6 +4,6 @@ module.exports = {
   ...baseConfig,
   rules: {
     ...baseConfig.rules,
-    'no-console': off,
+    'no-console': 'off',
   },
 }

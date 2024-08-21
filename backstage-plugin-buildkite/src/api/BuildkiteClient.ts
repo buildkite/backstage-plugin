@@ -12,9 +12,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
   private async getBaseURL(): Promise<string> {
     const proxyURL = await this.discoveryAPI.getBaseUrl("proxy");
-    console.log("Proxy URL from discoveryAPI:", proxyURL);
     const baseURL = `${proxyURL}/buildkite/api`;
-    console.log("Constructed base URL:", baseURL);
     return baseURL;
   }
 

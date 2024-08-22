@@ -1,0 +1,18 @@
+import { createApiRef } from "@backstage/core-plugin-api";
+
+export interface User {
+  avatar_url: string;
+  created_at: string;
+  email: string;
+  graphql_id: string;
+  id: string;
+  name: string;
+}
+
+export interface BuildkiteAPI {
+  getUser(): Promise<User>;
+}
+
+export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({
+  id: "plugin.buildkite.service",
+});

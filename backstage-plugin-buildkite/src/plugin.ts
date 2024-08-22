@@ -1,13 +1,11 @@
+import { buildkiteRouteRef } from "./routes";
 import {
-  configApiRef,
   createApiFactory,
   createPlugin,
   createRoutableExtension,
   discoveryApiRef,
   fetchApiRef,
 } from "@backstage/core-plugin-api";
-
-import { rootRouteRef } from "./routes";
 import { BuildkiteClient, buildkiteAPIRef } from "./api";
 
 export const buildkitePlugin = createPlugin({
@@ -24,16 +22,15 @@ export const buildkitePlugin = createPlugin({
     }),
   ],
   routes: {
-    root: rootRouteRef,
+    root: buildkiteRouteRef,
   },
 });
 
-export const BuildkitePage = buildkitePlugin.provide(
+export const EntityBuildkiteContent = buildkitePlugin.provide(
   createRoutableExtension({
-    name: "BuildkitePage",
-    component: () =>
-      import("./components/PipelineComponent").then((m) => m.PipelineComponent),
-    mountPoint: rootRouteRef,
+    name: "EntityBuildkiteContent",
+    component: () => import("./components/Router").then((m) => m.Router),
+    mountPoint: buildkiteRouteRef,
   }),
 );
 
@@ -44,6 +41,6 @@ export const BuildkiteViewerPage = buildkitePlugin.provide(
       import("./components/ViewerFetchComponent").then(
         (m) => m.ViewerFetchComponent,
       ),
-    mountPoint: rootRouteRef,
+    mountPoint: buildkiteRouteRef,
   }),
 );

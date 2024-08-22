@@ -1,32 +1,15 @@
-import React from "react";
-import { Grid } from "@material-ui/core";
-import {
-  Header,
-  Page,
-  Content,
-  ContentHeader,
-  HeaderLabel,
-} from "@backstage/core-components";
-import { BuildFailed, BuildPassed, BuildRunning } from "../Icons";
-import { PipelineFetchComponent } from "../PipelineFetchComponent";
-import { Build } from "../PipelineFetchComponent/PipelineFetchComponent";
+import { PipelineParams } from "./components/Types";
 
-export type Pipeline = {
-  name: string;
-  navatarColor: string;
-  navatarImage: string;
-  builds: Build[];
-};
-
-const pipelines: Pipeline[] = [
+export const mockPipelines: PipelineParams[] = [
   {
     name: "ads-promo-client",
+    id: "asd145fg6153df",
     navatarColor: "#D1FAFF",
     navatarImage:
       "https://buildkiteassets.com/emojis/img-buildkite-64/react.png",
     builds: [
       {
-        statusIcon: <BuildFailed />,
+        status: "FAILED",
         buildMessage: "Fix issue with user login",
         buildNumber: "123",
         author: {
@@ -41,28 +24,151 @@ const pipelines: Pipeline[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
+          },
+          {
+            id: "step2ish",
+            title: "Unblocked step",
+            command: "script/ci",
+            status: "UNBLOCKED",
           },
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
-            status: "passed",
+            status: "FAILED",
             url: "#",
           },
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
-            status: "running",
+            status: "RUNNING",
+            url: "#",
+          },
+          {
+            id: "stepWait",
+            status: "WAITER",
+          },
+          {
+            id: "step4",
+            title: "Unit Tests",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/jest.png",
+            status: "BLOCKED",
+            url: "#",
+          },
+          {
+            id: "step5",
+            title: "Integration Tests",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/cypress.png",
+            status: "CANCELED",
+            url: "#",
+          },
+          {
+            id: "step6",
+            title: "Deploy to Staging",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/kubernetes.png",
+            status: "CANCELING",
+            url: "#",
+          },
+          {
+            id: "step7",
+            title: "Deploy to Production",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/kubernetes.png",
+            status: "CREATING",
+            url: "#",
+          },
+          {
+            id: "step7ish",
+            title: "Blocked Step",
+            command: "script/ci",
+            status: "BLOCKED",
+          },
+          {
+            id: "step8",
+            title: "Security Scan",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/snyk.png",
+            status: "FAILING",
+            url: "#",
+          },
+          {
+            id: "step8ish",
+            title: "Assigned",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/snyk.png",
+            status: "ASSIGNED",
+            url: "#",
+          },
+          {
+            id: "step85ish",
+            title: "Accepted",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/snyk.png",
+            status: "ACCEPTED",
+            url: "#",
+          },
+          {
+            id: "step9",
+            title: "Code Coverage",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/codecov.png",
+            status: "NOT_RUN",
+            url: "#",
+          },
+          {
+            id: "step10",
+            title: "Performance Tests",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/k6.png",
+            status: "SCHEDULED",
+            url: "#",
+          },
+          {
+            id: "step11",
+            title: "Documentation",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/storybook.png",
+            status: "SKIPPED",
+            url: "#",
+          },
+          {
+            id: "step12",
+            title: "Approval",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/github.png",
+            status: "WAITING",
+            url: "#",
+          },
+          {
+            id: "step13",
+            title: "Post-Deployment Check",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/datadog.png",
+            status: "WAITING_FAILED",
+            url: "#",
+          },
+          {
+            id: "step14",
+            title: "Code Review",
+            command: "script/ci",
+            icon: "https://buildkiteassets.com/emojis/img-buildkite-64/github.png",
+            status: "Undetermined",
             url: "#",
           },
         ],
       },
       {
-        statusIcon: <BuildRunning />,
+        status: "RUNNING",
         buildMessage: "Add transaction context to all queries",
         buildNumber: "124",
         author: {
@@ -77,28 +183,31 @@ const pipelines: Pipeline[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
-            status: "running",
+            status: "RUNNING",
             url: "#",
           },
         ],
       },
       {
-        statusIcon: <BuildPassed />,
+        status: "PASSED",
         buildMessage: "Add new feature for payments",
         buildNumber: "125",
         author: {
@@ -113,22 +222,25 @@ const pipelines: Pipeline[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
-            status: "running",
+            status: "RUNNING",
             url: "#",
           },
         ],
@@ -137,12 +249,13 @@ const pipelines: Pipeline[] = [
   },
   {
     name: "ads-promo-deploy",
+    id: "45j48ktyu85mf",
     navatarColor: "#326DE6",
     navatarImage:
       "https://buildkiteassets.com/emojis/img-buildkite-64/kubernetes.png",
     builds: [
       {
-        statusIcon: <BuildFailed />,
+        status: "FAILED",
         buildMessage: "Fix issue with checkout",
         buildNumber: "201",
         author: {
@@ -157,28 +270,31 @@ const pipelines: Pipeline[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
-            status: "running",
+            status: "RUNNING",
             url: "#",
           },
         ],
       },
       {
-        statusIcon: <BuildRunning />,
+        status: "RUNNING",
         buildMessage: "Add new payment gateway",
         buildNumber: "202",
         author: {
@@ -193,22 +309,25 @@ const pipelines: Pipeline[] = [
           {
             id: "step1",
             title: "Upload Pipeline",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/pipeline.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step2",
             title: "Build Docker Image",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/docker.png",
-            status: "passed",
+            status: "PASSED",
             url: "#",
           },
           {
             id: "step3",
             title: "Linting",
+            command: "script/ci",
             icon: "https://buildkiteassets.com/emojis/img-buildkite-64/eslint.png",
-            status: "running",
+            status: "RUNNING",
             url: "#",
           },
         ],
@@ -216,22 +335,3 @@ const pipelines: Pipeline[] = [
     ],
   },
 ];
-
-export const PipelineComponent = () => (
-  <Page themeId="tool">
-    <Header title="Welcome to buildkite!" subtitle="Optional subtitle">
-      <HeaderLabel label="Owner" value="Team X" />
-      <HeaderLabel label="Lifecycle" value="Alpha" />
-    </Header>
-    <Content>
-      <ContentHeader title="CI/CD" />
-      <Grid container spacing={3} direction="column">
-        {pipelines.map((pipeline, index) => (
-          <Grid item key={index}>
-            <PipelineFetchComponent pipeline={pipeline} />
-          </Grid>
-        ))}
-      </Grid>
-    </Content>
-  </Page>
-);

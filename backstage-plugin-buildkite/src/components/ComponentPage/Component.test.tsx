@@ -1,5 +1,5 @@
 import React from "react";
-import { PipelineComponent } from "./Pipelines";
+import { ComponentPage } from "./Component";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 import { screen } from "@testing-library/react";
@@ -8,7 +8,7 @@ import {
   renderInTestApp,
 } from "@backstage/test-utils";
 
-describe("PipelineComponent", () => {
+describe("ComponentPage", () => {
   const server = setupServer();
   // Enable sane handlers for network requests
   setupRequestMockHandlers(server);
@@ -21,12 +21,12 @@ describe("PipelineComponent", () => {
   });
 
   it("should render", async () => {
-    await renderInTestApp(<PipelineComponent />);
+    await renderInTestApp(<ComponentPage />);
     expect(screen.getByText("Welcome to buildkite!")).toBeInTheDocument();
   });
 
   it("renders multiple pipelines with builds", async () => {
-    await renderInTestApp(<PipelineComponent />);
+    await renderInTestApp(<ComponentPage />);
 
     // Check for the first pipeline
     expect(await screen.findByText("ads-promo-client")).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Breadcrumbs,
@@ -6,17 +6,15 @@ import {
   Paper,
   Typography,
   Link,
-} from "@material-ui/core";
-import { Navatar } from "../Navatar";
-import { BuildParams, PipelineParams } from "../Types";
-import { BuildRow } from "../BuildComponent/BuildComponent";
-import { useParams } from "react-router-dom";
-import { usePipeline } from "../../state/usePipelines";
-import { BranchIcon } from "../Icons";
-
-type PipelineProps = {
-  pipeline: PipelineParams;
-};
+  CircularProgress,
+} from '@material-ui/core';
+import { useApi, errorApiRef } from '@backstage/core-plugin-api';
+import { Navatar } from '../Navatar';
+import { BuildParams, PipelineParams } from '../Types';
+import { BuildRow } from '../BuildComponent/BuildComponent';
+import { useParams } from 'react-router-dom';
+import { BranchIcon } from '../Icons';
+import { buildkiteAPIRef } from '../../api/BuildkiteAPI';
 
 interface BuildsByBranch {
   [branch: string]: BuildParams[];
@@ -32,25 +30,29 @@ const groupBuildsByBranch = (builds: BuildParams[]): BuildsByBranch => {
   }, {});
 };
 
-const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
+const Pipeline: React.FC<{ pipeline: PipelineParams }> = ({ pipeline }) => {
   const [isUTC, setIsUTC] = useState(false);
-  const [expanded, setExpanded] = useState<{ [branch: string]: boolean[] }>(
-    Object.fromEntries(
-      Object.keys(groupBuildsByBranch(pipeline.builds)).map((branch) => [
-        branch,
-        new Array(groupBuildsByBranch(pipeline.builds)[branch].length).fill(
-          false
-        ),
-      ])
-    )
-  );
+  const [expanded, setExpanded] = useState<{ [branch: string]: boolean[] }>({});
+
+  useEffect(() => {
+    const buildsByBranch = groupBuildsByBranch(pipeline.builds);
+    setExpanded(
+      Object.fromEntries(
+        Object.keys(buildsByBranch).map((branch) => [
+          branch,
+          new Array(buildsByBranch[branch].length).fill(false),
+        ]),
+      ),
+    );
+  }, [pipeline.builds]);
 
   const handleExpandClick = (branch: string, index: number) => {
-    setExpanded((prevExpanded) => {
-      const newExpanded = { ...prevExpanded };
-      newExpanded[branch][index] = !newExpanded[branch][index];
-      return newExpanded;
-    });
+    setExpanded((prevExpanded) => ({
+      ...prevExpanded,
+      [branch]: prevExpanded[branch].map((value, i) =>
+        i === index ? !value : value,
+      ),
+    }));
   };
 
   const handleTimeClick = () => {
@@ -63,41 +65,24 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
     <>
       <Breadcrumbs aria-label="breadcrumb">
         <Link color="inherit" href="/">
-          <Typography
-            variant="h5"
-            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
-          >
+          <Typography variant="h5" style={{ fontSize: '13px', fontWeight: 500, margin: 0 }}>
             Home
           </Typography>
         </Link>
-        <Box
-          display="flex"
-          flexDirection="row"
-          gridGap="8px"
-          alignItems="center"
-        >
-          <Navatar
-            color={pipeline.navatarColor}
-            image={pipeline.navatarImage}
-          />
-
+        <Box display="flex" flexDirection="row" gridGap="8px" alignItems="center">
+          <Navatar color={pipeline.navatarColor} image={pipeline.navatarImage} />
           <Typography
             variant="h5"
             color="textPrimary"
-            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+            style={{ fontSize: '13px', fontWeight: 500, margin: 0 }}
           >
             {pipeline.name}
           </Typography>
         </Box>
       </Breadcrumbs>
-      <Box
-        display="flex"
-        flexDirection="column"
-        gridGap="30px"
-        marginTop="20px"
-      >
+      <Box display="flex" flexDirection="column" gridGap="30px" marginTop="20px">
         {Object.entries(buildsByBranch).map(([branch, builds]) => (
-          <Paper key={branch} variant="outlined" style={{ overflow: "hidden" }}>
+          <Paper key={branch} variant="outlined" style={{ overflow: 'hidden' }}>
             <Box
               display="flex"
               flexDirection="row"
@@ -107,12 +92,12 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
               borderBottom="1px solid #E5E5E5"
               padding="8px"
             >
-              <BranchIcon style={{ color: "grey", fontSize: "14px" }} />
+              <BranchIcon style={{ color: 'grey', fontSize: '14px' }} />
               <Typography
                 variant="h5"
                 style={{
-                  fontSize: "13px",
-                  color: "#737373",
+                  fontSize: '13px',
+                  color: '#737373',
                   fontWeight: 500,
                   margin: 0,
                 }}
@@ -120,14 +105,13 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
                 {branch}
               </Typography>
             </Box>
-
             {builds.map((build, index) => (
               <BuildRow
                 key={build.buildNumber}
                 build={build}
                 pipeline={pipeline}
                 index={index}
-                expanded={expanded[branch][index]}
+                expanded={expanded[branch]?.[index] || false}
                 onExpandClick={() => handleExpandClick(branch, index)}
                 isUTC={isUTC}
                 onTimeClick={handleTimeClick}
@@ -140,19 +124,51 @@ const Pipeline: React.FC<PipelineProps> = ({ pipeline }) => {
   );
 };
 
-export const PipelinePage = () => {
-  const { pipelineSlug } = useParams<{
+export const PipelinePage: React.FC = () => {
+  const { orgSlug, pipelineSlug } = useParams<{
+    orgSlug?: string;
     pipelineSlug?: string;
   }>();
+  const [pipeline, setPipeline] = useState<PipelineParams | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  if (!pipelineSlug) {
-    return <Typography>Invalid URL parameters</Typography>;
-  }
+  const buildkiteApi = useApi(buildkiteAPIRef);
+  const errorApi = useApi(errorApiRef);
 
-  const { pipeline, loading } = usePipeline(pipelineSlug);
+  useEffect(() => {
+    const fetchPipeline = async () => {
+      if (!orgSlug || !pipelineSlug) {
+        setError(new Error('Missing organization slug or pipeline slug'));
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const fetchedPipeline = await buildkiteApi.getPipeline(orgSlug, pipelineSlug);
+        setPipeline(fetchedPipeline);
+      } catch (err) {
+        setError(err as Error);
+        errorApi.post(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPipeline();
+  }, [orgSlug, pipelineSlug, buildkiteApi, errorApi]);
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Typography color="error">Error: {error.message}</Typography>;
   }
 
   if (!pipeline) {

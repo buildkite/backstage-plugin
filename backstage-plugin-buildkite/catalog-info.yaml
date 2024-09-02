@@ -1,0 +1,27 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-plugin-buildkite
+  title: Backstage Buildkite Plugin
+  description: |
+    A Backstage plugin that integrates with Buildkite CI/CD platform,
+    allowing users to view and manage their Buildkite pipelines directly
+    within Backstage.
+  annotations:
+    buildkite.com/pipeline-slug: buildkite/backstage-plugin
+    github.com/project-slug: buildkite/backstage-plugin
+    backstage.io/source-location: url:https://github.com/buildkite/backstage-plugin
+  tags:
+    - backstage
+    - plugin
+    - buildkite
+    - ci-cd
+spec:
+  type: backstage-plugin
+  lifecycle: experimental
+  owner: buildkite
+  system: backstage-plugins
+  dependsOn:
+    - resource:buildkiteApi
+  providesApis:
+    - buildkite

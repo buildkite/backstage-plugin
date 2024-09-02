@@ -1,4 +1,5 @@
 import { DiscoveryApi, FetchApi } from "@backstage/core-plugin-api";
+import { PipelineParams } from "../components/Types";
 import { BuildkiteAPI, User } from "./BuildkiteAPI";
 
 export class BuildkiteClient implements BuildkiteAPI {
@@ -49,5 +50,24 @@ export class BuildkiteClient implements BuildkiteAPI {
       console.error("Error in getUser:", error);
       throw error;
     }
+  }
+
+  async getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams> {
+    const baseUrl = await this.getBaseURL();
+    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
+    
+    const response = await this.fetchAPI.fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch pipeline: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return {
+      name: data.name,
+      id: data.id,
+      navatarColor: data.color || '#000000',
+      navatarImage: data.icon || '',
+      builds: [],
+    };
   }
 }

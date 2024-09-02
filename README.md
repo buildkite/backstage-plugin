@@ -20,6 +20,13 @@ proxy:
         target: https://api.buildkite.com/v2
         headers:
         Authorization: Bearer ${BUILDKITE_API_TOKEN}
+
+...
+
+backend:
+  plugins:
+    buildkite:
+      enabled: true
 ```
 
 In your `packages/app/components/catalog/EntityPage.tsx` add the following:

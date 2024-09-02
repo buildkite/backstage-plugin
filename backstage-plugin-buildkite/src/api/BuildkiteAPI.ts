@@ -1,4 +1,5 @@
 import { createApiRef } from "@backstage/core-plugin-api";
+import { PipelineParams } from "../components/Types";
 
 export interface User {
   avatar_url: string;
@@ -11,6 +12,7 @@ export interface User {
 
 export interface BuildkiteAPI {
   getUser(): Promise<User>;
+  getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams>;
 }
 
 export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({

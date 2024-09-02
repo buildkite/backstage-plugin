@@ -1,5 +1,5 @@
 {
-  "name": "backstage-plugin-buildkite",
+  "name": "plugin-buildkite",
   "exports": {
     ".": "./src/index.ts",
     "./components": "./src/components.ts",

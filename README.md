@@ -31,7 +31,7 @@ backend:
 
 In your `packages/app/components/catalog/EntityPage.tsx` add the following:
 
-```react
+```ts
 const cicdContent = (
   <EntityLayout.Route path="/ci-cd" title="Buildkite">
     <Grid container spacing={3} alignItems="stretch">
@@ -49,6 +49,4 @@ You'll then want to copy (`cp`) this cloned repo in to your Backstage instance a
 cp ./backstage-plugin-buildkite ../<backstage instance name>/plugins
 
 yarn dev
-``
-
-
+```

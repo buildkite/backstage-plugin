@@ -19,9 +19,4 @@ metadata:
 spec:
   type: backstage-plugin
   lifecycle: experimental
-  owner: buildkite
-  system: backstage-plugins
-  dependsOn:
-    - resource:buildkiteApi
-  providesApis:
-    - buildkite
+  owner: guest

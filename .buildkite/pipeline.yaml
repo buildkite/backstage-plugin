@@ -1,0 +1,12 @@
+steps:
+  - label: ":docker: Build and Test"
+    plugins:
+      - docker-compose#v5.4.0:
+          run: app
+          config: compose.yaml
+    artifact_paths:
+      - coverage/**/*
+      - dist/**/*
+
+notify:
+  - slack: "#project-backstage-spotify-plugin"

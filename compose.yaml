@@ -1,0 +1,19 @@
+services:
+  app:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NODE_ENV=test
+    command: >
+      bash -c "
+        npm install -g yarn &&
+        yarn install --frozen-lockfile &&
+        yarn lint &&
+        yarn test:ci &&
+        yarn tsc &&
+        yarn build &&
+        yarn backstage-cli plugin:check
+      "

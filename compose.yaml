@@ -9,7 +9,6 @@ services:
       - NODE_ENV=test
     command: >
       bash -c "
-        npm install -g yarn &&
         yarn install --frozen-lockfile &&
         yarn lint &&
         yarn test:ci &&

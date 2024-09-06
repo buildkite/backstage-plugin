@@ -15,4 +15,3 @@ services:
         bun run tsc &&
         bun run build &&
         bun run backstage-cli plugin:check
-      "

@@ -9,12 +9,12 @@ steps:
     key: install
     plugins:
       - *bun
-    command: install --frozen-lockfile
+    command: bun install --frozen-lockfile
     artifact_paths:
       - "node_modules/**/*"
   - label: ":lint_roller: Lint"
     plugins:
       - *bun
-    command: run lint
+    command: bun run lint
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

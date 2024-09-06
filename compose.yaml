@@ -1,6 +1,6 @@
 services:
   app:
-    image: node:20
+    image: oven/bun:latest
     working_dir: /app
     volumes:
       - .:/app
@@ -8,12 +8,11 @@ services:
     environment:
       - NODE_ENV=test
     command: >
-      bash -c "
-        npm install -g yarn &&
-        yarn install --frozen-lockfile &&
-        yarn lint &&
-        yarn test:ci &&
-        yarn tsc &&
-        yarn build &&
-        yarn backstage-cli plugin:check
+      sh -c "
+        bun install &&
+        bun run lint &&
+        bun run test:ci &&
+        bun run tsc &&
+        bun run build &&
+        bun run backstage-cli plugin:check
       "

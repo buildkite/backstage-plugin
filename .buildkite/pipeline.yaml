@@ -1,12 +1,20 @@
-steps:
-  - label: ":docker: Build and Test"
-    plugins:
-      - docker-compose#v5.4.0:
-          run: app
-          config: compose.yaml
-    artifact_paths:
-      - coverage/**/*
-      - dist/**/*
+config:
+  bun: &bun
+    docker-compose#v5.4.0:
+      run: bun
+      config: compose.yaml
 
-notify:
-  - slack: "#project-backstage-spotify-plugin"
+steps:
+  - label: ":bun: Install modules"
+    key: install
+    plugins:
+      - *bun
+    command: install --frozen-lockfile
+    artifact_paths:
+      - "node_modules/**/*"
+  - label: ":lint_roller: Lint"
+    plugins:
+      - *bun
+    command: run lint
+# notify:
+#   - slack: "#project-backstage-spotify-plugin"

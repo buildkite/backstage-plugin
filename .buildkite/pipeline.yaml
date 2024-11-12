@@ -1,5 +1,13 @@
 steps:
   - label: ":docker: Build and Test"
+    command: >
+      sh -c "
+        bun install &&
+        bun run lint &&
+        bun run test:ci &&
+        bun run tsc &&
+        bun run build &&
+        bun run backstage-cli plugin:check
     plugins:
       - docker-compose#v5.4.0:
           run: app

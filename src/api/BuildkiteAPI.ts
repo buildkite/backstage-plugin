@@ -13,6 +13,8 @@ export interface User {
 export interface BuildkiteAPI {
   getUser(): Promise<User>;
   getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams>;
+  getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]>;
+  getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: string): Promise<BuildStepParams[]>;
 }
 
 export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({

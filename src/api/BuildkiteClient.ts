@@ -70,4 +70,48 @@ export class BuildkiteClient implements BuildkiteAPI {
       builds: [],
     };
   }
+
+  async getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]> {
+    const baseUrl = await this.getBaseURL();
+    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
+
+    const response = await this.fetchAPI.fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch builds: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.map((build: any) => {
+      return {
+        id: build.id,
+        number: build.number,
+        state: build.state,
+        startedAt: build.started_at,
+        finishedAt: build.finished_at,
+        branch: build.branch,
+        commit: build.commit,
+        message: build.message,
+  }
+
+  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: number): Promise<StepParams[]> {
+    const baseUrl = await this.getBaseURL();
+    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
+
+    const response = await this.fetchAPI.fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch build steps: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.jobs.map((job: any) => {
+      return {
+        id: job.id,
+        name: job.name,
+        state: job.state,
+        startedAt: job.started_at,
+        finishedAt: job.finished_at,
+        command: job.command,
+      };
+    });
+  }
 }

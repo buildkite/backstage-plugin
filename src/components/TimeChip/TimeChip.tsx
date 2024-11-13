@@ -18,7 +18,7 @@ type TimeChipProps = {
   triggerType?: string; // Optional triggerType prop
 };
 
-export const TimeChip: React.FC<TimeChipProps> = (TimeChipProps) => {
+export const TimeChip: React.FC<TimeChipProps> = ({ dateString, isUTC, onTimeClick, triggerType }) => {
   const classes = useStyles();
 
   const formatDate = (

@@ -1,12 +1,13 @@
 import { DiscoveryApi, FetchApi } from "@backstage/core-plugin-api";
-import { PipelineParams } from "../components/Types";
+import { BuildParams, BuildStepParams, PipelineParams } from "../components/Types";
 import { BuildkiteAPI, User } from "./BuildkiteAPI";
+import { BuildkitePluginConfig } from "../plugin";
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
   private readonly fetchAPI: FetchApi;
 
-  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi }) {
+  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi; config: BuildkitePluginConfig }) {
     this.discoveryAPI = options.discoveryAPI;
     this.fetchAPI = options.fetchAPI;
   }
@@ -69,5 +70,51 @@ export class BuildkiteClient implements BuildkiteAPI {
       navatarImage: data.icon || '',
       builds: [],
     };
+  }
+
+  async getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]> {
+    const baseUrl = await this.getBaseURL();
+    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
+
+    const response = await this.fetchAPI.fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch builds: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.map((build: any) => {
+      return {
+        id: build.id,
+        number: build.number,
+        state: build.state,
+        startedAt: build.started_at,
+        finishedAt: build.finished_at,
+        branch: build.branch,
+        commit: build.commit,
+        message: build.message,
+      };
+    });
+  }
+
+  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: string): Promise<BuildStepParams[]> {
+    const baseUrl = await this.getBaseURL();
+    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
+
+    const response = await this.fetchAPI.fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch build steps: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.jobs.map((job: any) => {
+      return {
+        id: job.id,
+        name: job.name,
+        state: job.state,
+        startedAt: job.started_at,
+        finishedAt: job.finished_at,
+        command: job.command,
+      };
+    });
   }
 }

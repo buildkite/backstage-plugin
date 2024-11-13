@@ -7,7 +7,7 @@ import { BuildStepParams } from "../Types";
 describe("BuildStep Component", () => {
   const stepPassed: BuildStepParams = {
     id: "step1",
-    status: "passed",
+    status: "PASSED",
     icon: "https://example.com/icon.png",
     title: "Step Passed",
     url: "#",
@@ -15,7 +15,7 @@ describe("BuildStep Component", () => {
 
   const stepFailed: BuildStepParams = {
     id: "step2",
-    status: "failed",
+    status: "FAILED",
     icon: "https://example.com/icon.png",
     title: "Step Failed",
     url: "#",
@@ -23,7 +23,7 @@ describe("BuildStep Component", () => {
 
   const stepRunning: BuildStepParams = {
     id: "step3",
-    status: "running",
+    status: "RUNNING",
     icon: "https://example.com/icon.png",
     title: "Step Running",
     url: "#",

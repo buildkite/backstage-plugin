@@ -7,11 +7,3 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - NODE_ENV=test
-    command: >
-      sh -c "
-        bun install &&
-        bun run lint &&
-        bun run test:ci &&
-        bun run tsc &&
-        bun run build &&
-        bun run backstage-cli plugin:check

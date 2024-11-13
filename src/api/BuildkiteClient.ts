@@ -91,6 +91,8 @@ export class BuildkiteClient implements BuildkiteAPI {
         branch: build.branch,
         commit: build.commit,
         message: build.message,
+      };
+    });
   }
 
   async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: number): Promise<StepParams[]> {

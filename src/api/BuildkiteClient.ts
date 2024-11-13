@@ -5,10 +5,12 @@ import { BuildkiteAPI, User } from "./BuildkiteAPI";
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
   private readonly fetchAPI: FetchApi;
+  private readonly config: BuildkitePluginConfig;
 
-  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi }) {
+  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi; config: BuildkitePluginConfig }) {
     this.discoveryAPI = options.discoveryAPI;
     this.fetchAPI = options.fetchAPI;
+    this.config = options.config;
   }
 
   private async getBaseURL(): Promise<string> {

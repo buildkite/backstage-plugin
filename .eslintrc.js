@@ -5,5 +5,6 @@ module.exports = {
   rules: {
     ...baseConfig.rules,
     'no-console': 'off',
+    'no-nested-ternary': 'off',
   },
 }

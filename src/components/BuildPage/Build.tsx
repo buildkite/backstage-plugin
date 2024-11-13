@@ -231,7 +231,7 @@ export const BuildPage = () => {
                       borderRadius: "4px",
                       margin: 0,
                     }}
-                    label={"Build #" + build.buildNumber}
+                    label={`Build #${build.buildNumber}`}
                     variant="outlined"
                     size="small"
                   />

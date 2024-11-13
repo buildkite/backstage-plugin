@@ -1,5 +1,5 @@
 import { createApiRef } from "@backstage/core-plugin-api";
-import { PipelineParams } from "../components/Types";
+import { PipelineParams, BuildParams, BuildStepParams } from "../components/Types";
 
 export interface User {
   avatar_url: string;

@@ -1,5 +1,5 @@
 import { DiscoveryApi, FetchApi } from "@backstage/core-plugin-api";
-import { PipelineParams } from "../components/Types";
+import { BuildParams, BuildStepParams, PipelineParams } from "../components/Types";
 import { BuildkiteAPI, User } from "./BuildkiteAPI";
 
 export class BuildkiteClient implements BuildkiteAPI {
@@ -95,7 +95,7 @@ export class BuildkiteClient implements BuildkiteAPI {
     });
   }
 
-  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: number): Promise<StepParams[]> {
+  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: number): Promise<BuildStepParams[]> {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
 

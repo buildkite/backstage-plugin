@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme: Theme) => ({
       backgroundColor: "inherit",
     },
   },
-  selected: object,
+  selected: Object,
 }));
 
 export const BuildPage = () => {

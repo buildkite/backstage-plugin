@@ -2,12 +2,12 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import BuildStep from "./BuildStepComponent";
-import { BuildStepParams } from "../Types";
+import { BuildStepParams, Status } from "../Types";
 
 describe("BuildStep Component", () => {
   const stepPassed: BuildStepParams = {
     id: "step1",
-    status: "passed",
+    status: Status.PASSED,
     icon: "https://example.com/icon.png",
     title: "Step Passed",
     url: "#",
@@ -15,7 +15,7 @@ describe("BuildStep Component", () => {
 
   const stepFailed: BuildStepParams = {
     id: "step2",
-    status: "failed",
+    status: Status.FAILED,
     icon: "https://example.com/icon.png",
     title: "Step Failed",
     url: "#",
@@ -23,7 +23,7 @@ describe("BuildStep Component", () => {
 
   const stepRunning: BuildStepParams = {
     id: "step3",
-    status: "running",
+    status: Status.RUNNING,
     icon: "https://example.com/icon.png",
     title: "Step Running",
     url: "#",

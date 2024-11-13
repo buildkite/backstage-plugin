@@ -95,7 +95,7 @@ export class BuildkiteClient implements BuildkiteAPI {
     });
   }
 
-  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: number): Promise<BuildStepParams[]> {
+  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: string): Promise<BuildStepParams[]> {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
 

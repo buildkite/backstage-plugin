@@ -1,16 +1,15 @@
 import { DiscoveryApi, FetchApi } from "@backstage/core-plugin-api";
 import { BuildParams, BuildStepParams, PipelineParams } from "../components/Types";
 import { BuildkiteAPI, User } from "./BuildkiteAPI";
+import { BuildkitePluginConfig } from "../plugin";
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
   private readonly fetchAPI: FetchApi;
-  private readonly config: BuildkitePluginConfig;
 
   constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi; config: BuildkitePluginConfig }) {
     this.discoveryAPI = options.discoveryAPI;
     this.fetchAPI = options.fetchAPI;
-    this.config = options.config;
   }
 
   private async getBaseURL(): Promise<string> {

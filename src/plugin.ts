@@ -68,5 +68,3 @@ export const buildkitePlugin = createPlugin({
 
 export { PipelinePage } from './components/PipelinePage';
 export { BuildPage } from './components/BuildPage';
-
-export type { BuildkitePluginConfig };

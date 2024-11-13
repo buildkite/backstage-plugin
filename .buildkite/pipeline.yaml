@@ -15,5 +15,5 @@ steps:
       - coverage/**/*
       - dist/**/*
 
-notify:
-  - slack: "#project-backstage-spotify-plugin"
+# notify:
+#   - slack: "#project-backstage-spotify-plugin"

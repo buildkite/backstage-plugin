@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme: Theme) => ({
       backgroundColor: "inherit",
     },
   },
-  selected: {},
+  selected: object,
 }));
 
 export const BuildPage = () => {
@@ -122,7 +122,7 @@ export const BuildPage = () => {
     setIsUTC(!isUTC);
   };
 
-  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleTabChange = (event: React.ChangeEvent<object>, newValue: number) => {
     setSelectedTab(newValue);
   };
 

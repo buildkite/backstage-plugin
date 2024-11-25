@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { buildkiteBuildRouteRef, buildkitePipelineRouteRef } from "../routes";
 import { PipelinePage } from "./PipelinePage";
 import { BuildPage } from "./BuildPage";
 import { Page, Header, HeaderLabel, Content } from "@backstage/core-components";
@@ -16,10 +15,13 @@ export const Router = () => (
       <Routes>
         <Route path="/" element={<ComponentPage />} />
         <Route
-          path={buildkitePipelineRouteRef.path}
+          path="/pipeline"
           element={<PipelinePage />}
         />
-        <Route path={buildkiteBuildRouteRef.path} element={<BuildPage />} />
+        <Route 
+          path="/pipeline/:pipelineSlug/build/:buildNumber" 
+          element={<BuildPage />} 
+        />
       </Routes>
     </Content>
   </Page>

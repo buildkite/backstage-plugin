@@ -7,9 +7,9 @@ export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
   private readonly fetchAPI: FetchApi;
 
-  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi; config: BuildkitePluginConfig }) {
-    this.discoveryAPI = options.discoveryAPI;
-    this.fetchAPI = options.fetchAPI;
+  constructor(options: { discoveryApi: DiscoveryApi; fetchApi: FetchApi; config: BuildkitePluginConfig }) {
+    this.discoveryAPI = options.discoveryApi;
+    this.fetchAPI = options.fetchApi;
   }
 
   private async getBaseURL(): Promise<string> {
@@ -57,18 +57,22 @@ export class BuildkiteClient implements BuildkiteAPI {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
     
-    const response = await this.fetchAPI.fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch pipeline: ${response.statusText}`);
+    const [pipelineResponse, buildsResponse] = await Promise.all([
+      this.fetchAPI.fetch(url),
+      this.getBuilds(orgSlug, pipelineSlug)
+    ]);
+
+    if (!pipelineResponse.ok) {
+      throw new Error(`Failed to fetch pipeline: ${pipelineResponse.statusText}`);
     }
     
-    const data = await response.json();
+    const data = await pipelineResponse.json();
     return {
       name: data.name,
       id: data.id,
       navatarColor: data.color || '#000000',
       navatarImage: data.icon || '',
-      builds: [],
+      builds: buildsResponse,
     };
   }
 

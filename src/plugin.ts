@@ -4,6 +4,7 @@ import {
   discoveryApiRef,
   fetchApiRef,
   configApiRef,
+  createRoutableExtension,
 } from '@backstage/core-plugin-api';
 import { BuildkiteClient, buildkiteAPIRef } from './api';
 import { buildkiteRouteRef } from './routes';
@@ -34,11 +35,11 @@ export const buildkitePlugin = createPlugin({
     createApiFactory({
       api: buildkiteAPIRef,
       deps: {
-        discoveryAPI: discoveryApiRef,
-        fetchAPI: fetchApiRef,
+        discoveryApi: discoveryApiRef,
+        fetchApi: fetchApiRef,
         config: configApiRef,
       },
-      factory: ({ discoveryAPI, fetchAPI, config }) => {
+      factory: ({ discoveryApi, fetchApi, config }) => {
         const buildkiteConfig = config.getOptionalConfig('buildkite');
         
         const pluginConfig: BuildkitePluginConfig = {
@@ -54,8 +55,8 @@ export const buildkitePlugin = createPlugin({
         }
 
         return new BuildkiteClient({
-          discoveryAPI,
-          fetchAPI,
+          discoveryApi,
+          fetchApi,
           config: pluginConfig,
         });
       },
@@ -65,6 +66,14 @@ export const buildkitePlugin = createPlugin({
     root: buildkiteRouteRef,
   },
 });
+
+export const EntityBuildkiteContent = buildkitePlugin.provide(
+  createRoutableExtension({
+    name: 'EntityBuildkiteContent',
+    component: () => import('./components/PipelinePage/Pipelines').then(m => m.PipelinePage as any),
+    mountPoint: buildkiteRouteRef,
+  }),
+);
 
 export { PipelinePage } from './components/PipelinePage';
 export { BuildPage } from './components/BuildPage';

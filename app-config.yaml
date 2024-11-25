@@ -1,21 +1,6 @@
 organization:
   name: Buildkite
 
-buildkite:
-  apiToken: ${BUILDKITE_API_TOKEN}
-
 app:
   title: Buildkite Plugin
   baseUrl: http://localhost:3000
-
-backend:
-  listen:
-    port: 7000
-  baseUrl: http://localhost:7000
-
-proxy:
-  endpoints:
-    '/buildkite/api':
-      target: https://api.buildkite.com/v2
-      headers:
-        Authorization: 'Bearer ${BUILDKITE_API_TOKEN}'

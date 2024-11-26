@@ -51,6 +51,8 @@ export type BuildStepParams = {
 export type PipelineParams = {
   name: string;
   id: string;
+  orgSlug: string;
+  slug: string;
   navatarColor: string;
   navatarImage: string;
   builds: BuildParams[];

@@ -54,3 +54,7 @@ export function isBuildkiteAvailable(entity: Entity): boolean {
     return false;
   }
 }
+
+export function getBuildkiteUrl(organizationSlug: string, pipelineSlug: string, buildNumber: string): string {
+  return `https://buildkite.com/${organizationSlug}/${pipelineSlug}/builds/${buildNumber}`;
+}

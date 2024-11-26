@@ -14,9 +14,10 @@ import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import { BranchIcon, GithubIcon, StatusIcon } from "../Icons";
 import { BuildStep } from "../BuildStepComponent";
 import { BuildParams, PipelineParams } from "../Types";
-import { useRouteRef } from "@backstage/core-plugin-api";
-import { buildkiteBuildRouteRef } from "../../routes";
+import { useEntity } from '@backstage/plugin-catalog-react';
+import { getBuildkiteProjectSlug, parseBuildkiteProjectSlug, getBuildkiteUrl } from '../../utils';
 import { TimeChip } from "../TimeChip";
+
 
 const useStyles = makeStyles({
   buildRow: {
@@ -29,6 +30,14 @@ const useStyles = makeStyles({
     border: "none",
     borderRadius: "4px",
     margin: 0,
+  },
+  buildLink: {
+    '&:hover': {
+      textDecoration: 'none',
+      '& .MuiTypography-root': {
+        textDecoration: 'underline',
+      },
+    },
   },
 });
 
@@ -52,7 +61,14 @@ export const BuildRow: React.FC<BuildRowProps> = ({
   onTimeClick,
 }) => {
   const classes = useStyles();
-  const getBuildPath = useRouteRef(buildkiteBuildRouteRef);
+  const { entity } = useEntity();
+  
+  // Get the organization and pipeline slugs from the entity annotation
+  const projectSlug = getBuildkiteProjectSlug(entity);
+  const { organizationSlug, pipelineSlug } = parseBuildkiteProjectSlug(projectSlug);
+  
+  // Construct Buildkite URL using the utility function
+  const buildkiteUrl = getBuildkiteUrl(organizationSlug, pipelineSlug, build.buildNumber);
 
   return (
     <Box className={classes.buildRow} key={build.buildNumber}>
@@ -85,10 +101,10 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           >
             <Link
               color="textPrimary"
-              href={getBuildPath({
-                pipelineSlug: pipeline.name,
-                buildNumber: build.buildNumber,
-              })}
+              href={buildkiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes.buildLink}
             >
               <Typography variant="subtitle2">
                 <strong>{build.buildMessage}</strong>

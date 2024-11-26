@@ -11,6 +11,34 @@ export class BuildkiteClient implements BuildkiteAPI {
     this.discoveryAPI = options.discoveryAPI;
     this.fetchAPI = options.fetchAPI;
   }
+   
+  private mapBuildState(state: string): string {
+    switch (state) {
+      case 'passed':
+        return 'success';
+      case 'failed':
+        return 'failure';
+      case 'blocked':
+      case 'canceled':
+        return 'canceled';
+      case 'running':
+        return 'running';
+      default:
+        return 'pending';
+    }
+  }
+
+  private calculateTimeElapsed(dateStr: string): string {
+    if (!dateStr) return '0s';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diff < 60) return `${diff}s`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    return `${Math.floor(diff / 86400)}d`;
+  }
 
   private async getBaseURL(): Promise<string> {
     const proxyURL = await this.discoveryAPI.getBaseUrl("proxy");

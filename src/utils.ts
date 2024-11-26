@@ -9,7 +9,6 @@ export function getBuildkiteProjectSlug(entity: Entity): string {
     annotationKey: BUILDKITE_ANNOTATION,
   });
   
-  // Make sure we're accessing the annotation correctly
   const projectSlug = entity.metadata.annotations?.[BUILDKITE_ANNOTATION];
   return projectSlug || '';
 }
@@ -34,12 +33,24 @@ export function parseBuildkiteProjectSlug(projectSlug: string): {
 }
 
 export function isBuildkiteAvailable(entity: Entity): boolean {
-  const projectSlug = getBuildkiteProjectSlug(entity);
-  console.log('Checking Buildkite availability:', {
-    entityName: entity.metadata.name,
-    projectSlug,
-    hasAnnotation: Boolean(projectSlug),
-    annotations: entity.metadata.annotations,
-  });
-  return Boolean(projectSlug);
+  try {
+    const projectSlug = getBuildkiteProjectSlug(entity);
+    if (!projectSlug) return false;
+    
+    const { organizationSlug, pipelineSlug } = parseBuildkiteProjectSlug(projectSlug);
+    
+    console.log('Checking Buildkite availability:', {
+      entityName: entity.metadata.name,
+      projectSlug,
+      organizationSlug,
+      pipelineSlug,
+      hasAnnotation: Boolean(projectSlug),
+      annotations: entity.metadata.annotations,
+    });
+    
+    return Boolean(organizationSlug && pipelineSlug);
+  } catch (error) {
+    console.error('Error checking Buildkite availability:', error);
+    return false;
+  }
 }

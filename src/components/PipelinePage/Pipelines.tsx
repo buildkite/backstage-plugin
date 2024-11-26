@@ -12,7 +12,6 @@ import { useApi, errorApiRef } from '@backstage/core-plugin-api';
 import { Navatar } from '../Navatar';
 import { BuildParams, PipelineParams } from '../Types';
 import { BuildRow } from '../BuildComponent/BuildComponent';
-import { useParams } from 'react-router-dom';
 import { BranchIcon } from '../Icons';
 import { buildkiteAPIRef } from '../../api/BuildkiteAPI';
 
@@ -124,11 +123,12 @@ const Pipeline: React.FC<{ pipeline: PipelineParams }> = ({ pipeline }) => {
   );
 };
 
-export const PipelinePage: React.FC = () => {
-  const { orgSlug, pipelineSlug } = useParams<{
-    orgSlug?: string;
-    pipelineSlug?: string;
-  }>();
+interface PipelinePageProps {
+  orgSlug: string;
+  pipelineSlug: string;
+}
+
+export const PipelinePage: React.FC<PipelinePageProps> = ({ orgSlug, pipelineSlug }) => {
   const [pipeline, setPipeline] = useState<PipelineParams | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -138,12 +138,6 @@ export const PipelinePage: React.FC = () => {
 
   useEffect(() => {
     const fetchPipeline = async () => {
-      if (!orgSlug || !pipelineSlug) {
-        setError(new Error('Missing organization slug or pipeline slug'));
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
         const fetchedPipeline = await buildkiteApi.getPipeline(orgSlug, pipelineSlug);

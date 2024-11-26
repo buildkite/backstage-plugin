@@ -18,35 +18,41 @@ export class BuildkiteClient implements BuildkiteAPI {
     return baseURL;
   }
 
+  private calculateTimeElapsed(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diff < 60) return `${diff}s`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    return `${Math.floor(diff / 86400)}d`;
+  }
+
+  private mapBuildState(state: string): 'passed' | 'failed' | 'running' {
+    switch (state.toLowerCase()) {
+      case 'passed':
+        return 'passed';
+      case 'failed':
+      case 'canceled':
+        return 'failed';
+      default:
+        return 'running';
+    }
+  }
+
   async getUser(): Promise<User> {
     try {
       const baseURL = await this.getBaseURL();
       const url = `${baseURL}/user`;
       console.log("Requesting URL:", url);
 
-      const response = await this.fetchAPI.fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("Response status:", response.status);
-
+      const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {
-        const text = await response.text();
-        console.error(
-          "Response not OK:",
-          response.status,
-          response.statusText,
-          text,
-        );
-        throw new Error(`Buildkite API request failed: ${response.statusText}`);
+        throw new Error(`Failed to fetch user: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      console.log("Received data:", data);
-      return data as User;
+      return await response.json();
     } catch (error) {
       console.error("Error in getUser:", error);
       throw error;
@@ -54,67 +60,99 @@ export class BuildkiteClient implements BuildkiteAPI {
   }
 
   async getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams> {
-    const baseUrl = await this.getBaseURL();
-    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
-    
-    const response = await this.fetchAPI.fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch pipeline: ${response.statusText}`);
+    try {
+      const baseUrl = await this.getBaseURL();
+      console.log(`Fetching pipeline from: ${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`);
+      
+      // Fetch pipeline details
+      const pipelineResponse = await this.fetchAPI.fetch(
+        `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`
+      );
+      
+      if (!pipelineResponse.ok) {
+        throw new Error(`Failed to fetch pipeline: ${pipelineResponse.statusText}`);
+      }
+      
+      const pipelineData = await pipelineResponse.json();
+      
+      // Fetch builds for this pipeline
+      const buildsResponse = await this.fetchAPI.fetch(
+        `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`
+      );
+      
+      if (!buildsResponse.ok) {
+        throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
+      }
+      
+      const buildsData = await buildsResponse.json();
+      
+      // Transform the data into the expected format
+      const builds = await Promise.all(
+        buildsData.map(async (build: any) => {
+          // Fetch build steps
+          const steps = await this.getBuildSteps(orgSlug, pipelineSlug, build.number);
+          
+          return {
+            statusIcon: this.mapBuildState(build.state),
+            buildMessage: build.message || 'No message provided',
+            buildNumber: build.number,
+            author: {
+              avatar: build.creator?.avatar_url || '',
+              name: build.creator?.name || 'Unknown',
+            },
+            branch: build.branch,
+            commitId: build.commit.substring(0, 7),
+            createdAt: build.created_at,
+            timeElapsed: this.calculateTimeElapsed(build.created_at),
+            steps: steps.map(step => ({
+              id: step.id,
+              title: step.name,
+              icon: '', // You might want to map step type to an icon
+              status: this.mapBuildState(step.state),
+              url: `https://buildkite.com/${orgSlug}/${pipelineSlug}/builds/${build.number}#${step.id}`,
+            })),
+          };
+        })
+      );
+
+      return {
+        name: pipelineData.name,
+        navatarColor: '#D1FAFF', // You might want to derive this from the pipeline data
+        navatarImage: pipelineData.repository?.provider?.icon || 
+                     'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',
+        builds: builds,
+      };
+    } catch (error) {
+      console.error('Error fetching pipeline:', error);
+      throw error;
     }
-    
-    const data = await response.json();
-    return {
-      name: data.name,
-      id: data.id,
-      navatarColor: data.color || '#000000',
-      navatarImage: data.icon || '',
-      builds: [],
-    };
   }
 
   async getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]> {
     const baseUrl = await this.getBaseURL();
-    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
-
-    const response = await this.fetchAPI.fetch(url);
+    const response = await this.fetchAPI.fetch(
+      `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`
+    );
+    
     if (!response.ok) {
       throw new Error(`Failed to fetch builds: ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.map((build: any) => {
-      return {
-        id: build.id,
-        number: build.number,
-        state: build.state,
-        startedAt: build.started_at,
-        finishedAt: build.finished_at,
-        branch: build.branch,
-        commit: build.commit,
-        message: build.message,
-      };
-    });
+    return data;
   }
 
   async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: string): Promise<BuildStepParams[]> {
     const baseUrl = await this.getBaseURL();
-    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
-
-    const response = await this.fetchAPI.fetch(url);
+    const response = await this.fetchAPI.fetch(
+      `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`
+    );
+    
     if (!response.ok) {
       throw new Error(`Failed to fetch build steps: ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.jobs.map((job: any) => {
-      return {
-        id: job.id,
-        name: job.name,
-        state: job.state,
-        startedAt: job.started_at,
-        finishedAt: job.finished_at,
-        command: job.command,
-      };
-    });
+    return data.jobs || [];
   }
 }

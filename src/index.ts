@@ -4,3 +4,5 @@ export { BuildkiteClient } from './api/BuildkiteClient';
 export { BUILDKITE_ANNOTATION, isBuildkiteAvailable } from './utils';
 export { parseBuildkiteProjectSlug } from './utils';
 export { BuildkiteWrapper } from './plugin';
+export { BuildRow } from './plugin';
+export { BuildPage } from './plugin';

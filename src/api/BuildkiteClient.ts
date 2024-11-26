@@ -12,22 +12,6 @@ export class BuildkiteClient implements BuildkiteAPI {
     this.fetchAPI = options.fetchAPI;
   }
    
-  private mapBuildState(state: string): string {
-    switch (state) {
-      case 'passed':
-        return 'success';
-      case 'failed':
-        return 'failure';
-      case 'blocked':
-      case 'canceled':
-        return 'canceled';
-      case 'running':
-        return 'running';
-      default:
-        return 'pending';
-    }
-  }
-
   private calculateTimeElapsed(dateStr: string): string {
     if (!dateStr) return '0s';
     const date = new Date(dateStr);
@@ -86,114 +70,81 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
       
-      console.log('BuildkiteClient: Making pipeline request:', {
-        method: 'GET',
-        url,
-        orgSlug,
-        pipelineSlug,
-      });
+      console.log('Making pipeline request:', { url });
 
-      const response = await this.fetchAPI.fetch(url);
+      const pipelineResponse = await this.fetchAPI.fetch(url);
       
-      console.log('BuildkiteClient: Received response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        url: response.url,
-      });
-
-      if (!response.ok) {
-        let errorDetails = '';
-        try {
-          // Try to get error details from response body
-          const errorText = await response.text();
-          console.error('BuildkiteClient: Error response body:', errorText);
-          try {
-            // Try to parse as JSON if possible
-            const errorJson = JSON.parse(errorText);
-            console.error('BuildkiteClient: Parsed error response:', errorJson);
-            errorDetails = JSON.stringify(errorJson, null, 2);
-          } catch {
-            // If not JSON, use text directly
-            errorDetails = errorText;
-          }
-        } catch (e) {
-          console.error('BuildkiteClient: Could not read error response:', e);
-          errorDetails = 'Could not read error details';
-        }
-
-        throw new Error(
-          `Failed to fetch pipeline: ${response.status} ${response.statusText}\nDetails: ${errorDetails}`
-        );
+      if (!pipelineResponse.ok) {
+        throw new Error(`Failed to fetch pipeline: ${pipelineResponse.statusText}`);
       }
 
-      const pipelineData = await response.json();
-      console.log('BuildkiteClient: Successfully fetched pipeline data:', pipelineData);
+      const pipelineData = await pipelineResponse.json();
+      console.log('Raw pipeline data:', pipelineData);
 
-      // Now fetch the builds
+      // Now fetch builds
       const buildsUrl = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
-      console.log('BuildkiteClient: Fetching builds:', {
-        method: 'GET',
-        url: buildsUrl,
-      });
-
       const buildsResponse = await this.fetchAPI.fetch(buildsUrl);
       
-      console.log('BuildkiteClient: Received builds response:', {
-        status: buildsResponse.status,
-        statusText: buildsResponse.statusText,
-        headers: Object.fromEntries(buildsResponse.headers.entries()),
-      });
-
       if (!buildsResponse.ok) {
-        const errorText = await buildsResponse.text();
-        console.error('BuildkiteClient: Error fetching builds:', errorText);
         throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
       }
 
       const buildsData = await buildsResponse.json();
-      console.log('BuildkiteClient: Successfully fetched builds data:', buildsData);
+      console.log('Raw builds data:', buildsData);
 
-      // Transform the data
-      const transformedData = {
-        name: pipelineData.name,
+      // Transform the data into the expected format
+      const transformedData: PipelineParams = {
+        id: pipelineData.id || '',
+        name: pipelineData.name || 'Pipeline',
         navatarColor: '#D1FAFF',
-        navatarImage: pipelineData.repository?.provider?.icon || 
-                     'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',
+        navatarImage: pipelineData.repository?.provider?.icon || 'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',
         builds: buildsData.map((build: any) => ({
-          statusIcon: this.mapBuildState(build.state),
-          buildMessage: build.message || 'No message',
-          buildNumber: build.number.toString(),
+          buildNumber: build.number?.toString() || '',
+          status: this.mapBuildkiteStatus(build.state),
+          buildMessage: build.message || '',
           author: {
-            avatar: build.creator?.avatar_url || '',
             name: build.creator?.name || 'Unknown',
+            avatar: build.creator?.avatar_url || '',
           },
           branch: build.branch || 'main',
-          commitId: (build.commit || '').substring(0, 7),
-          createdAt: build.created_at,
+          commitId: build.commit?.substring(0, 7) || '',
+          createdAt: build.created_at || new Date().toISOString(),
           timeElapsed: this.calculateTimeElapsed(build.created_at),
           steps: (build.jobs || []).map((job: any) => ({
-            id: job.id,
-            title: job.name || 'Unknown Step',
-            icon: '',
-            status: this.mapBuildState(job.state),
-            url: job.web_url || '#',
+            id: job.id || '',
+            title: job.name || '',
+            status: this.mapBuildkiteStatus(job.state),
+            url: job.web_url || '',
           })),
         })),
       };
 
-      console.log('BuildkiteClient: Transformed pipeline data:', transformedData);
+      console.log('Transformed pipeline data:', transformedData);
       return transformedData;
-
     } catch (error) {
-      console.error('BuildkiteClient: Error in getPipeline:', {
-        error,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        errorStack: error instanceof Error ? error.stack : undefined,
-        orgSlug,
-        pipelineSlug,
-      });
+      console.error('Error in getPipeline:', error);
       throw error;
+    }
+  }
+
+  private mapBuildkiteStatus(status: string): Status {
+    switch (status?.toLowerCase()) {
+      case 'passed':
+        return 'PASSED';
+      case 'failed':
+        return 'FAILED';
+      case 'running':
+        return 'RUNNING';
+      case 'scheduled':
+        return 'SCHEDULED';
+      case 'canceled':
+        return 'CANCELED';
+      case 'skipped':
+        return 'SKIPPED';
+      case 'waiting':
+        return 'WAITING';
+      default:
+        return 'NOT_RUN';
     }
   }
 

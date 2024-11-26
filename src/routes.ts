@@ -7,11 +7,11 @@ export const buildkiteRouteRef = createRouteRef({
 export const buildkitePipelineRouteRef = createSubRouteRef({
   id: "buildkite/pipeline",
   parent: buildkiteRouteRef,
-  path: "/:pipelineSlug",
+  path: "/pipeline/:orgSlug/:pipelineSlug",
 });
 
 export const buildkiteBuildRouteRef = createSubRouteRef({
   id: "buildkite/build",
   parent: buildkiteRouteRef,
-  path: "/:pipelineSlug/:buildNumber",
+  path: "/build/:pipelineSlug/:buildNumber",
 });

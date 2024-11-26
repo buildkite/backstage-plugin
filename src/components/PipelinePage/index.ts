@@ -1,1 +1,1 @@
-export { PipelinePage } from "./Pipelines";
+export { PipelinePage } from "./PipelinePage";

@@ -1,30 +1,17 @@
 import {
   createApiFactory,
   createPlugin,
+  createRoutableExtension,
   discoveryApiRef,
   fetchApiRef,
   configApiRef,
 } from '@backstage/core-plugin-api';
 import { BuildkiteClient, buildkiteAPIRef } from './api';
-import { buildkiteRouteRef } from './routes';
+import { buildkiteRouteRef, buildkitePipelineRouteRef, buildkiteBuildRouteRef } from './routes';
 
-/**
- * The configuration for the buildkite integration.
- */
 export interface BuildkiteIntegrationConfig {
-  /**
-   * The Buildkite organization slug
-   */
   organization: string;
-  /**
-   * The number of builds to fetch per page (optional)
-   * @default 25
-   */
   defaultPageSize?: number;
-  /**
-   * Custom API base URL (optional)
-   * @default https://api.buildkite.com/v2
-   */
   apiBaseUrl?: string;
 }
 
@@ -39,7 +26,6 @@ export const buildkitePlugin = createPlugin({
         config: configApiRef,
       },
       factory: ({ discoveryAPI, fetchAPI, config }) => {
-        // Get the first configured integration
         const buildkiteConfig = config.getOptionalConfig('integrations.buildkite.0');
         
         const pluginConfig: BuildkiteIntegrationConfig = {
@@ -64,9 +50,29 @@ export const buildkitePlugin = createPlugin({
   ],
   routes: {
     root: buildkiteRouteRef,
+    pipeline: buildkitePipelineRouteRef,
+    build: buildkiteBuildRouteRef,
   },
 });
 
-export { PipelinePage } from './components/PipelinePage';
-export { BuildPage } from './components/BuildPage';
+export const PipelinePage = buildkitePlugin.provide(
+  createRoutableExtension({
+    name: 'PipelinePage',
+    component: () =>
+      import('./components/PipelinePage').then(m => m.PipelinePage),
+    mountPoint: buildkiteRouteRef,
+  })
+);
+
+export const BuildPage = buildkitePlugin.provide(
+  createRoutableExtension({
+    name: 'BuildPage',
+    component: () =>
+      import('./components/BuildPage').then(m => m.BuildPage),
+    mountPoint: buildkiteBuildRouteRef,
+  })
+);
+
 export { BuildkiteWrapper } from './components/BuildkiteWrapper';
+export { BuildRow } from './components/BuildRow';
+

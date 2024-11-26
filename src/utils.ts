@@ -18,7 +18,13 @@ export function parseBuildkiteProjectSlug(projectSlug: string): {
   organizationSlug: string;
   pipelineSlug: string;
 } {
+  console.log('Parsing Buildkite project slug:', {
+    projectSlug,
+    splitResult: projectSlug.split('/'),
+  });
+  
   const [organizationSlug, pipelineSlug] = projectSlug.split('/');
+  
   if (!organizationSlug || !pipelineSlug) {
     throw new Error(
       `Invalid Buildkite project slug: ${projectSlug}. Expected format: organization-slug/pipeline-slug`,

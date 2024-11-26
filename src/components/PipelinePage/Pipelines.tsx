@@ -136,13 +136,26 @@ export const PipelinePage: React.FC<PipelinePageProps> = ({ orgSlug, pipelineSlu
   const buildkiteApi = useApi(buildkiteAPIRef);
   const errorApi = useApi(errorApiRef);
 
+  console.log('PipelinePage rendered with props:', {
+    orgSlug,
+    pipelineSlug
+  });
+
   useEffect(() => {
     const fetchPipeline = async () => {
+      console.log('Fetching pipeline data for:', {
+        orgSlug,
+        pipelineSlug,
+        buildkiteApi
+      });
+
       try {
         setLoading(true);
         const fetchedPipeline = await buildkiteApi.getPipeline(orgSlug, pipelineSlug);
+        console.log('Received pipeline data:', fetchedPipeline);
         setPipeline(fetchedPipeline);
       } catch (err) {
+        console.error('Error fetching pipeline:', err);
         setError(err as Error);
         errorApi.post(err as Error);
       } finally {
@@ -154,6 +167,7 @@ export const PipelinePage: React.FC<PipelinePageProps> = ({ orgSlug, pipelineSlu
   }, [orgSlug, pipelineSlug, buildkiteApi, errorApi]);
 
   if (loading) {
+    console.log('Pipeline page is loading');
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
         <CircularProgress />
@@ -162,12 +176,16 @@ export const PipelinePage: React.FC<PipelinePageProps> = ({ orgSlug, pipelineSlu
   }
 
   if (error) {
+    console.error('Pipeline page encountered an error:', error);
     return <Typography color="error">Error: {error.message}</Typography>;
   }
 
   if (!pipeline) {
+    console.warn('No pipeline data received');
     return <Typography>Pipeline not found</Typography>;
   }
+
+  console.log('Rendering pipeline:', pipeline);
 
   return (
     <Grid container spacing={3} direction="column">

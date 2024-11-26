@@ -9,9 +9,9 @@ import { BuildkiteClient, buildkiteAPIRef } from './api';
 import { buildkiteRouteRef } from './routes';
 
 /**
- * The configuration for the buildkite plugin.
+ * The configuration for the buildkite integration.
  */
-export interface BuildkitePluginConfig {
+export interface BuildkiteIntegrationConfig {
   /**
    * The Buildkite organization slug
    */
@@ -39,17 +39,18 @@ export const buildkitePlugin = createPlugin({
         config: configApiRef,
       },
       factory: ({ discoveryAPI, fetchAPI, config }) => {
-        const buildkiteConfig = config.getOptionalConfig('buildkite');
+        // Get the first configured integration
+        const buildkiteConfig = config.getOptionalConfig('integrations.buildkite.0');
         
-        const pluginConfig: BuildkitePluginConfig = {
+        const pluginConfig: BuildkiteIntegrationConfig = {
           organization: buildkiteConfig?.getString('organization') ?? '',
           defaultPageSize: buildkiteConfig?.getOptionalNumber('defaultPageSize') ?? 25,
-          apiBaseUrl: buildkiteConfig?.getOptionalString('apiBaseUrl'),
+          apiBaseUrl: buildkiteConfig?.getOptionalString('apiBaseUrl') ?? 'https://api.buildkite.com/v2',
         };
 
         if (!pluginConfig.organization) {
           throw new Error(
-            'Missing required config value for buildkite.organization',
+            'Missing required config value for integrations.buildkite[0].organization',
           );
         }
 

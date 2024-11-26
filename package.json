@@ -1,5 +1,5 @@
 {
-  "name": "plugin-buildkite",
+  "name": "@internal/plugin-buildkite",
   "exports": {
     ".": "./src/index.ts",
     "./components": "./src/components.ts",

@@ -1,17 +1,25 @@
-import { DiscoveryApi, FetchApi } from "@backstage/core-plugin-api";
-import { BuildParams, BuildStepParams, PipelineParams } from "../components/Types";
-import { BuildkiteAPI, User } from "./BuildkiteAPI";
-import { BuildkitePluginConfig } from "../plugin";
+import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
+import {
+  BuildParams,
+  BuildStepParams,
+  PipelineParams,
+} from '../components/Types';
+import { BuildkiteAPI, User } from './BuildkiteAPI';
+import { BuildkitePluginConfig } from '../plugin';
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
   private readonly fetchAPI: FetchApi;
 
-  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi; config: BuildkitePluginConfig }) {
+  constructor(options: {
+    discoveryAPI: DiscoveryApi;
+    fetchAPI: FetchApi;
+    config: BuildkitePluginConfig;
+  }) {
     this.discoveryAPI = options.discoveryAPI;
     this.fetchAPI = options.fetchAPI;
   }
-   
+
   private calculateTimeElapsed(dateStr: string): string {
     if (!dateStr) return '0s';
     const date = new Date(dateStr);
@@ -25,7 +33,7 @@ export class BuildkiteClient implements BuildkiteAPI {
   }
 
   private async getBaseURL(): Promise<string> {
-    const proxyURL = await this.discoveryAPI.getBaseUrl("proxy");
+    const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
     const baseURL = `${proxyURL}/buildkite/api`;
     return baseURL;
   }
@@ -34,21 +42,21 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseURL = await this.getBaseURL();
       const url = `${baseURL}/user`;
-      console.log("Requesting URL:", url);
+      console.log('Requesting URL:', url);
 
       const response = await this.fetchAPI.fetch(url, {
-        method: "GET",
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
 
-      console.log("Response status:", response.status);
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const text = await response.text();
         console.error(
-          "Response not OK:",
+          'Response not OK:',
           response.status,
           response.statusText,
           text,
@@ -57,25 +65,30 @@ export class BuildkiteClient implements BuildkiteAPI {
       }
 
       const data = await response.json();
-      console.log("Received data:", data);
+      console.log('Received data:', data);
       return data as User;
     } catch (error) {
-      console.error("Error in getUser:", error);
+      console.error('Error in getUser:', error);
       throw error;
     }
   }
 
-  async getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams> {
+  async getPipeline(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<PipelineParams> {
     try {
       const baseUrl = await this.getBaseURL();
       const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
-      
+
       console.log('Making pipeline request:', { url });
 
       const pipelineResponse = await this.fetchAPI.fetch(url);
-      
+
       if (!pipelineResponse.ok) {
-        throw new Error(`Failed to fetch pipeline: ${pipelineResponse.statusText}`);
+        throw new Error(
+          `Failed to fetch pipeline: ${pipelineResponse.statusText}`,
+        );
       }
 
       const pipelineData = await pipelineResponse.json();
@@ -84,7 +97,7 @@ export class BuildkiteClient implements BuildkiteAPI {
       // Now fetch builds
       const buildsUrl = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
       const buildsResponse = await this.fetchAPI.fetch(buildsUrl);
-      
+
       if (!buildsResponse.ok) {
         throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
       }
@@ -97,7 +110,9 @@ export class BuildkiteClient implements BuildkiteAPI {
         id: pipelineData.id || '',
         name: pipelineData.name || 'Pipeline',
         navatarColor: '#D1FAFF',
-        navatarImage: pipelineData.repository?.provider?.icon || 'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',
+        navatarImage:
+          pipelineData.repository?.provider?.icon ||
+          'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',
         builds: buildsData.map((build: any) => ({
           buildNumber: build.number?.toString() || '',
           status: this.mapBuildkiteStatus(build.state),
@@ -148,7 +163,10 @@ export class BuildkiteClient implements BuildkiteAPI {
     }
   }
 
-  async getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]> {
+  async getBuilds(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<BuildParams[]> {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
 
@@ -172,7 +190,11 @@ export class BuildkiteClient implements BuildkiteAPI {
     });
   }
 
-  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: string): Promise<BuildStepParams[]> {
+  async getBuildSteps(
+    orgSlug: string,
+    pipelineSlug: string,
+    buildNumber: string,
+  ): Promise<BuildStepParams[]> {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
 

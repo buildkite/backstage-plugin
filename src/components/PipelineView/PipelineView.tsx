@@ -11,9 +11,12 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Button,
 } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
+import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BuildRow } from '../BuildComponent';
 import { Navatar } from '../Navatar';
 import { PipelineParams, BuildParams } from '../Types';
@@ -54,6 +57,15 @@ const useStyles = makeStyles({
     fontSize: '12px',
     color: '#666',
     marginLeft: '8px',
+  },
+  expandButton: {
+    textTransform: 'none',
+    minWidth: '40px',
+    width: '40px',
+    height: '40px',
+    '& .MuiButton-startIcon': {
+      margin: 0,
+    },
   },
 });
 
@@ -119,6 +131,22 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     [key: string]: boolean;
   }>({});
 
+  const allExpanded = useMemo(() => {
+    return pipeline.builds.every(build => expandedBuilds[build.buildNumber]);
+  }, [expandedBuilds, pipeline.builds]);
+
+  const toggleAllBuilds = () => {
+    const newExpandedState = !allExpanded;
+    const updatedExpanded = pipeline.builds.reduce(
+      (acc, build) => ({
+        ...acc,
+        [build.buildNumber]: newExpandedState,
+      }),
+      {},
+    );
+    setExpandedBuilds(updatedExpanded);
+  };
+
   if (!pipeline?.builds) {
     console.error('Invalid pipeline data:', pipeline);
     return <Typography>Invalid pipeline data</Typography>;
@@ -146,10 +174,8 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   };
 
   const filterOptions = useMemo(() => {
-    // Get all builds that match current filters
     const builds = pipeline.builds;
 
-    // Calculate available branches and their counts based on creator filter
     const branchOptions = builds
       .filter(
         build =>
@@ -161,7 +187,6 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
         return acc;
       }, {} as Record<string, number>);
 
-    // Calculate available creators and their counts based on branch filter
     const creatorOptions = builds
       .filter(
         build => selectedBranch === 'all' || build.branch === selectedBranch,
@@ -199,7 +224,6 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
         selectedCreator === 'all' || build.author.name === selectedCreator,
     );
 
-    // If no builds match the creator filter, or branch doesn't match filter, don't show section
     if (
       filteredBuilds.length === 0 ||
       (selectedBranch !== 'all' && selectedBranch !== branch)
@@ -258,60 +282,70 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
 
       <Grid container spacing={3} direction="column">
         <Grid item>
-          <Box className={classes.filterContainer}>
-            <FormControl
-              variant="outlined"
-              size="small"
-              className={classes.filter}
-            >
-              <InputLabel>Branch</InputLabel>
-              <Select
-                value={selectedBranch}
-                onChange={e => setSelectedBranch(e.target.value as string)}
-                label="Branch"
+          <Box display="flex" justifyContent="flex-end">
+            <Box className={classes.filterContainer}>
+              <FormControl
+                variant="outlined"
+                size="small"
+                className={classes.filter}
               >
-                <MenuItem value="all">All branches</MenuItem>
-                {Object.entries(filterOptions.branches)
-                  .sort(([a], [b]) =>
-                    a === 'main' ? -1 : b === 'main' ? 1 : a.localeCompare(b),
-                  )
-                  .map(([branch, count]) => (
-                    <MenuItem key={branch} value={branch}>
-                      {branch} ({count} builds)
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
+                <InputLabel>Branch</InputLabel>
+                <Select
+                  value={selectedBranch}
+                  onChange={e => setSelectedBranch(e.target.value as string)}
+                  label="Branch"
+                >
+                  <MenuItem value="all">All branches</MenuItem>
+                  {Object.entries(filterOptions.branches)
+                    .sort(([a], [b]) =>
+                      a === 'main' ? -1 : b === 'main' ? 1 : a.localeCompare(b),
+                    )
+                    .map(([branch, count]) => (
+                      <MenuItem key={branch} value={branch}>
+                        {branch} ({count} builds)
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
 
-            <FormControl
-              variant="outlined"
-              size="small"
-              className={classes.filter}
-            >
-              <InputLabel>Creator</InputLabel>
-              <Select
-                value={selectedCreator}
-                onChange={e => setSelectedCreator(e.target.value as string)}
-                label="Creator"
+              <FormControl
+                variant="outlined"
+                size="small"
+                className={classes.filter}
               >
-                <MenuItem value="all">All creators</MenuItem>
-                {Object.entries(filterOptions.creators)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([creator, count]) => (
-                    <MenuItem key={creator} value={creator}>
-                      {creator} ({count} builds)
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
+                <InputLabel>Creator</InputLabel>
+                <Select
+                  value={selectedCreator}
+                  onChange={e => setSelectedCreator(e.target.value as string)}
+                  label="Creator"
+                >
+                  <MenuItem value="all">All creators</MenuItem>
+                  {Object.entries(filterOptions.creators)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([creator, count]) => (
+                      <MenuItem key={creator} value={creator}>
+                        {creator} ({count} builds)
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={toggleAllBuilds}
+                aria-label={allExpanded ? 'Collapse all' : 'Expand all'}
+                className={classes.expandButton}
+              >
+                {allExpanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
+              </Button>
+            </Box>
           </Box>
 
           <Paper variant="outlined">
-            {/* Main branch builds */}
             {groupedBuilds.main.length > 0 &&
               renderBranchSection('main', groupedBuilds.main)}
 
-            {/* Other branch builds */}
             {sortedBranches.map(branch =>
               renderBranchSection(branch, groupedBuilds.other[branch]),
             )}
@@ -321,3 +355,5 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     </Box>
   );
 };
+
+export default PipelineView;

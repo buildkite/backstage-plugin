@@ -1,17 +1,17 @@
-import { createRouteRef, createSubRouteRef } from "@backstage/core-plugin-api";
+import { createRouteRef, createSubRouteRef } from '@backstage/core-plugin-api';
 
 export const buildkiteRouteRef = createRouteRef({
-  id: "buildkite",
+  id: 'buildkite',
 });
 
 export const buildkitePipelineRouteRef = createSubRouteRef({
-  id: "buildkite/pipeline",
+  id: 'buildkite/pipeline',
   parent: buildkiteRouteRef,
-  path: "/pipeline/:orgSlug/:pipelineSlug",
+  path: '/pipelines/:pipelineSlug',
 });
 
 export const buildkiteBuildRouteRef = createSubRouteRef({
-  id: "buildkite/build",
+  id: 'buildkite/build',
   parent: buildkiteRouteRef,
-  path: "/build/:pipelineSlug/:buildNumber",
+  path: '/builds/:buildNumber',
 });

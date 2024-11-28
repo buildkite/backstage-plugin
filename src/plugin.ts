@@ -7,9 +7,13 @@ import {
   configApiRef,
 } from '@backstage/core-plugin-api';
 import { BuildkiteClient, buildkiteAPIRef } from './api';
-import { buildkiteRouteRef, buildkitePipelineRouteRef, buildkiteBuildRouteRef } from './routes';
+import {
+  buildkiteRouteRef,
+  buildkitePipelineRouteRef,
+  buildkiteBuildRouteRef,
+} from './routes';
 
-export interface BuildkiteIntegrationConfig {
+export interface BuildkitePluginConfig {
   organization: string;
   defaultPageSize?: number;
   apiBaseUrl?: string;
@@ -26,12 +30,17 @@ export const buildkitePlugin = createPlugin({
         config: configApiRef,
       },
       factory: ({ discoveryAPI, fetchAPI, config }) => {
-        const buildkiteConfig = config.getOptionalConfig('integrations.buildkite.0');
-        
-        const pluginConfig: BuildkiteIntegrationConfig = {
+        const buildkiteConfig = config.getOptionalConfig(
+          'integrations.buildkite.0',
+        );
+
+        const pluginConfig: BuildkitePluginConfig = {
           organization: buildkiteConfig?.getString('organization') ?? '',
-          defaultPageSize: buildkiteConfig?.getOptionalNumber('defaultPageSize') ?? 25,
-          apiBaseUrl: buildkiteConfig?.getOptionalString('apiBaseUrl') ?? 'https://api.buildkite.com/v2',
+          defaultPageSize:
+            buildkiteConfig?.getOptionalNumber('defaultPageSize') ?? 25,
+          apiBaseUrl:
+            buildkiteConfig?.getOptionalString('apiBaseUrl') ??
+            'https://api.buildkite.com/v2',
         };
 
         if (!pluginConfig.organization) {
@@ -61,18 +70,16 @@ export const PipelinePage = buildkitePlugin.provide(
     component: () =>
       import('./components/PipelinePage').then(m => m.PipelinePage),
     mountPoint: buildkiteRouteRef,
-  })
+  }),
 );
 
 export const BuildPage = buildkitePlugin.provide(
   createRoutableExtension({
     name: 'BuildPage',
-    component: () =>
-      import('./components/BuildPage').then(m => m.BuildPage),
-    mountPoint: buildkiteBuildRouteRef,
-  })
+    component: () => import('./components/BuildPage').then(m => m.BuildPage),
+    mountPoint: buildkiteRouteRef,
+  }),
 );
 
 export { BuildkiteWrapper } from './components/BuildkiteWrapper';
 export { BuildRow } from './components/BuildRow';
-

@@ -1,41 +1,48 @@
-import React from 'react';
-import { Typography } from '@material-ui/core';
-import { useEntity } from '@backstage/plugin-catalog-react';
-import { PipelineView } from '../PipelineView';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useApi } from '@backstage/core-plugin-api';
+import { buildkiteAPIRef } from '../../api';
 import { Progress, ResponseErrorPanel } from '@backstage/core-components';
-import { getBuildkiteProjectSlug, parseBuildkiteProjectSlug } from '../../utils';
-import { useBuildkiteApi } from '../../hooks/useBuildkiteApi';
+import { PipelineView } from '../PipelineView';
+import { PipelineParams } from '../Types';
 
-export const PipelinePage = () => {
-  const { entity } = useEntity();
-  
-  console.log('Entity loaded:', entity);
-  
-  const projectSlug = getBuildkiteProjectSlug(entity);
-  console.log('Project slug:', projectSlug);
-  
-  if (!projectSlug) {
-    return (
-      <Typography>
-        Missing Buildkite annotation. Please add buildkite.com/pipeline-slug to your entity.
-      </Typography>
-    );
-  }
+interface PipelinePageProps {
+  orgSlug: string;
+  pipelineSlug: string;
+}
 
-  let orgSlug: string;
-  let pipelineSlug: string;
+export const PipelinePage: React.FC<PipelinePageProps> = ({
+  orgSlug,
+  pipelineSlug,
+}) => {
+  const buildkiteApi = useApi(buildkiteAPIRef);
+  const [pipeline, setPipeline] = useState<PipelineParams | undefined>();
+  const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const parsed = parseBuildkiteProjectSlug(projectSlug);
-    orgSlug = parsed.organizationSlug;
-    pipelineSlug = parsed.pipelineSlug;
-    console.log('Parsed slugs:', { orgSlug, pipelineSlug });
-  } catch (error) {
-    return <Typography>Invalid pipeline slug format. Expected: organization-slug/pipeline-slug</Typography>;
-  }
+  const fetchPipelineData = useCallback(async () => {
+    try {
+      const pipelineData = await buildkiteApi.getPipeline(
+        orgSlug,
+        pipelineSlug,
+      );
+      setPipeline(pipelineData);
+      setError(undefined);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, [buildkiteApi, orgSlug, pipelineSlug]);
 
-  const { pipeline, loading, error } = useBuildkiteApi(orgSlug, pipelineSlug);
-  console.log('Pipeline data:', { pipeline, loading, error });
+  useEffect(() => {
+    fetchPipelineData();
+
+    const intervalId = setInterval(fetchPipelineData, 2000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [fetchPipelineData]);
 
   if (loading) {
     return <Progress />;
@@ -46,7 +53,9 @@ export const PipelinePage = () => {
   }
 
   if (!pipeline) {
-    return <Typography>Pipeline not found</Typography>;
+    return (
+      <ResponseErrorPanel error={new Error('No pipeline data available')} />
+    );
   }
 
   return <PipelineView pipeline={pipeline} />;

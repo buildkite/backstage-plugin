@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -7,28 +7,35 @@ import {
   Link,
   IconButton,
   Collapse,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import UnfoldMoreIcon from "@material-ui/icons/UnfoldMore";
-import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
-import { BranchIcon, GithubIcon, StatusIcon } from "../Icons";
-import { BuildStep } from "../BuildStepComponent";
-import { BuildParams, PipelineParams } from "../Types";
+  Tooltip,
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import ReplayIcon from '@material-ui/icons/Replay';
+import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
+import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
+import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
+import { BuildStep } from '../BuildStepComponent';
+import { BuildParams, PipelineParams } from '../Types';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { getBuildkiteProjectSlug, parseBuildkiteProjectSlug, getBuildkiteUrl } from '../../utils';
-import { TimeChip } from "../TimeChip";
-
+import {
+  getBuildkiteProjectSlug,
+  parseBuildkiteProjectSlug,
+  getBuildkiteUrl,
+} from '../../utils';
+import { useApi } from '@backstage/core-plugin-api';
+import { buildkiteAPIRef } from '../../api';
+import { TimeChip } from '../TimeChip';
 
 const useStyles = makeStyles({
   buildRow: {
-    "&:not(:last-child)": {
-      borderBottom: "1px solid #E5E5E5",
+    '&:not(:last-child)': {
+      borderBottom: '1px solid #E5E5E5',
     },
   },
   chip: {
-    color: "#737373",
-    border: "none",
-    borderRadius: "4px",
+    color: '#737373',
+    border: 'none',
+    borderRadius: '4px',
     margin: 0,
   },
   buildLink: {
@@ -37,6 +44,22 @@ const useStyles = makeStyles({
       '& .MuiTypography-root': {
         textDecoration: 'underline',
       },
+    },
+  },
+  actionsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: '4px',
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    minHeight: '40px',
+  },
+  retryButton: {
+    width: '32px',
+    height: '32px',
+    '&:disabled': {
+      opacity: 0.5,
     },
   },
 });
@@ -53,7 +76,6 @@ type BuildRowProps = {
 
 export const BuildRow: React.FC<BuildRowProps> = ({
   build,
-  pipeline,
   index,
   expanded,
   onExpandClick,
@@ -62,13 +84,40 @@ export const BuildRow: React.FC<BuildRowProps> = ({
 }) => {
   const classes = useStyles();
   const { entity } = useEntity();
-  
+
+  const buildkiteApi = useApi(buildkiteAPIRef);
+  const [isRebuilding, setIsRebuilding] = useState(false);
+
+  const handleRebuild = async () => {
+    try {
+      setIsRebuilding(true);
+      const projectSlug = getBuildkiteProjectSlug(entity);
+      const { organizationSlug, pipelineSlug } =
+        parseBuildkiteProjectSlug(projectSlug);
+
+      await buildkiteApi.rebuildBuild(
+        organizationSlug,
+        pipelineSlug,
+        build.buildNumber,
+      );
+    } catch (error) {
+      console.error('Failed to rebuild:', error);
+    } finally {
+      setIsRebuilding(false);
+    }
+  };
+
   // Get the organization and pipeline slugs from the entity annotation
   const projectSlug = getBuildkiteProjectSlug(entity);
-  const { organizationSlug, pipelineSlug } = parseBuildkiteProjectSlug(projectSlug);
-  
+  const { organizationSlug, pipelineSlug } =
+    parseBuildkiteProjectSlug(projectSlug);
+
   // Construct Buildkite URL using the utility function
-  const buildkiteUrl = getBuildkiteUrl(organizationSlug, pipelineSlug, build.buildNumber);
+  const buildkiteUrl = getBuildkiteUrl(
+    organizationSlug,
+    pipelineSlug,
+    build.buildNumber,
+  );
 
   return (
     <Box className={classes.buildRow} key={build.buildNumber}>
@@ -87,7 +136,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           <StatusIcon status={build.status} size="medium" />
           <Typography
             variant="caption"
-            style={{ color: "#737373", paddingTop: "1px" }}
+            style={{ color: '#737373', paddingTop: '1px' }}
           >
             {build.timeElapsed}
           </Typography>
@@ -112,7 +161,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             </Link>
             <Typography
               variant="caption"
-              style={{ color: "#737373", paddingTop: "3px" }}
+              style={{ color: '#737373', paddingTop: '3px' }}
             >
               #{build.buildNumber}
             </Typography>
@@ -131,12 +180,12 @@ export const BuildRow: React.FC<BuildRowProps> = ({
               variant="outlined"
               size="small"
             />
-            <Typography style={{ color: "#111111", fontSize: "12px" }}>
+            <Typography style={{ color: '#111111', fontSize: '12px' }}>
               ·
             </Typography>
             <Chip
               className={classes.chip}
-              style={{ paddingLeft: "4px" }}
+              style={{ paddingLeft: '4px' }}
               icon={<BranchIcon size="small" />}
               label={build.branch}
               variant="outlined"
@@ -145,13 +194,13 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             <Typography variant="caption">/</Typography>
             <Chip
               className={classes.chip}
-              style={{ paddingLeft: "4px" }}
+              style={{ paddingLeft: '4px' }}
               icon={<GithubIcon viewBox="0 0 13 13" />}
               label={build.commitId}
               variant="outlined"
               size="small"
             />
-            <Typography style={{ color: "#111111", fontSize: "12px" }}>
+            <Typography style={{ color: '#111111', fontSize: '12px' }}>
               ·
             </Typography>
             <TimeChip
@@ -161,19 +210,31 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             />
           </Box>
         </Box>
-        <IconButton
-          size="small"
-          onClick={() => onExpandClick(index)}
-          aria-expanded={expanded}
-          aria-label="show more"
-          style={{ marginLeft: "auto", borderRadius: "4px" }}
-        >
-          {expanded ? (
-            <UnfoldLessIcon fontSize="inherit" />
-          ) : (
-            <UnfoldMoreIcon fontSize="inherit" />
-          )}
-        </IconButton>
+        <Box className={classes.actionsContainer}>
+          <IconButton
+            size="small"
+            onClick={() => onExpandClick(index)}
+            aria-expanded={expanded}
+            aria-label="show more"
+            style={{ marginLeft: 'auto', borderRadius: '4px' }}
+          >
+            {expanded ? (
+              <UnfoldLessIcon fontSize="inherit" />
+            ) : (
+              <UnfoldMoreIcon fontSize="inherit" />
+            )}
+          </IconButton>
+          <Tooltip title="Retry build">
+            <IconButton
+              size="small"
+              onClick={handleRebuild}
+              disabled={isRebuilding}
+              className={classes.retryButton}
+            >
+              <ReplayIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <Box
@@ -185,7 +246,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           padding="12px"
           boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
         >
-          {build.steps.map((step) => (
+          {build.steps.map(step => (
             <BuildStep key={step.id} step={step} />
           ))}
         </Box>

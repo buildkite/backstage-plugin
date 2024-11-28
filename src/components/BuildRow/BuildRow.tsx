@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Chip,
@@ -9,11 +9,19 @@ import {
   Link,
   Avatar,
 } from '@material-ui/core';
+import ReplayIcon from '@material-ui/icons/Replay';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import { BuildStep } from '../BuildStepComponent';
 import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
 import { makeStyles } from '@material-ui/core/styles';
 import { BuildParams } from '../Types';
+import { useEntity } from '@backstage/plugin-catalog-react';
+import { useApi } from '@backstage/core-plugin-api';
+import { buildkiteAPIRef } from '../../api';
+import {
+  getBuildkiteProjectSlug,
+  parseBuildkiteProjectSlug,
+} from '../../utils';
 
 const useStyles = makeStyles({
   chip: {
@@ -25,6 +33,18 @@ const useStyles = makeStyles({
   buildBox: {
     '&:not(:last-child)': {
       borderBottom: '1px solid #E5E5E5',
+    },
+  },
+  actionsContainer: {
+    display: 'flex',
+    gap: '4px',
+    marginLeft: 'auto',
+  },
+  retryButton: {
+    width: '32px',
+    height: '32px',
+    '&:disabled': {
+      opacity: 0.5,
     },
   },
 });
@@ -46,6 +66,28 @@ export const BuildRow: React.FC<BuildRowProps> = ({
   onTimeClick,
 }) => {
   const classes = useStyles();
+  const { entity } = useEntity();
+  const buildkiteApi = useApi(buildkiteAPIRef);
+  const [isRebuilding, setIsRebuilding] = useState(false);
+
+  const handleRebuild = async () => {
+    try {
+      setIsRebuilding(true);
+      const projectSlug = getBuildkiteProjectSlug(entity);
+      const { organizationSlug, pipelineSlug } =
+        parseBuildkiteProjectSlug(projectSlug);
+
+      await buildkiteApi.rebuildBuild(
+        organizationSlug,
+        pipelineSlug,
+        build.buildNumber,
+      );
+    } catch (error) {
+      console.error('Failed to rebuild:', error);
+    } finally {
+      setIsRebuilding(false);
+    }
+  };
 
   if (!build) {
     return null;
@@ -88,21 +130,14 @@ export const BuildRow: React.FC<BuildRowProps> = ({
 
   return (
     <Box className={classes.buildBox}>
-      <Box
-        display="flex"
-        padding="12px"
-        gridGap="12px"
-      >
+      <Box display="flex" padding="12px" gridGap="12px">
         <Box
           display="flex"
           flexDirection="column"
           gridGap="6px"
           alignItems="center"
         >
-          <StatusIcon 
-            status={status}
-            size="small"
-          />
+          <StatusIcon status={status} size="small" />
           <Typography
             variant="caption"
             style={{ color: '#737373', paddingTop: '1px' }}
@@ -117,7 +152,11 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             gridGap="6px"
             alignItems="center"
           >
-            <Link color="textPrimary" href="#" onClick={(e) => e.preventDefault()}>
+            <Link
+              color="textPrimary"
+              href="#"
+              onClick={e => e.preventDefault()}
+            >
               <Typography variant="subtitle2">
                 <strong>{buildMessage}</strong>
               </Typography>
@@ -184,6 +223,27 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           <UnfoldMoreIcon fontSize="inherit" />
         </IconButton>
       </Box>
+      <Box className={classes.actionsContainer}>
+        <Tooltip title="Retry build">
+          <IconButton
+            size="small"
+            onClick={handleRebuild}
+            disabled={isRebuilding}
+            className={classes.retryButton}
+          >
+            <ReplayIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <IconButton
+          size="small"
+          onClick={onExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+          style={{ borderRadius: '4px' }}
+        >
+          <UnfoldMoreIcon fontSize="inherit" />
+        </IconButton>
+      </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <Box
           display="flex"
@@ -194,11 +254,8 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           padding="12px"
           boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
         >
-          {steps?.map((step) => (
-            <BuildStep 
-              key={step.id} 
-              step={step}
-            />
+          {steps?.map(step => (
+            <BuildStep key={step.id} step={step} />
           ))}
         </Box>
       </Collapse>

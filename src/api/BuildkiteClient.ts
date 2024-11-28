@@ -236,12 +236,16 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/rebuild`;
 
+      console.log('Rebuilding build:', url);
+
       const response = await this.fetchAPI.fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+
+      console.log(response);
 
       if (!response.ok) {
         const errorText = await response.text();

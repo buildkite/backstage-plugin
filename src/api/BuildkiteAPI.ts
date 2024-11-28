@@ -27,7 +27,7 @@ export interface BuildkiteAPI {
     orgSlug: string,
     pipelineSlug: string,
     buildNumber: string,
-  ): Promise<void>;
+  ): Promise<BuildParams>;
 }
 
 export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({

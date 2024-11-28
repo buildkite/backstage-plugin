@@ -1,6 +1,7 @@
 steps:
-  - label: ":docker: Build and Test"
+  - label: ':docker: Build and Test'
     command: |
+      corepack enable
       yarn
       yarn lint
     plugins:
@@ -10,6 +11,5 @@ steps:
     artifact_paths:
       - coverage/**/*
       - dist/**/*
-
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

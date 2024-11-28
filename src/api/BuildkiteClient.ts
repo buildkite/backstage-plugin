@@ -6,6 +6,7 @@ import {
 } from '../components/Types';
 import { BuildkiteAPI, User } from './BuildkiteAPI';
 import { BuildkitePluginConfig } from '../plugin';
+import { Status } from '../components/Types';
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
@@ -122,6 +123,8 @@ export class BuildkiteClient implements BuildkiteAPI {
         id: pipelineData.id || '',
         name: pipelineData.name || 'Pipeline',
         navatarColor: '#D1FAFF',
+        slug: pipelineData.slug || undefined,
+        orgSlug: pipelineData.organization?.slug || undefined,
         navatarImage:
           pipelineData.repository?.provider?.icon ||
           'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',

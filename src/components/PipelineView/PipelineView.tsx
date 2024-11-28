@@ -127,6 +127,7 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   }>({});
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
   const [selectedCreator, setSelectedCreator] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [collapsedBranches, setCollapsedBranches] = useState<{
     [key: string]: boolean;
   }>({});
@@ -197,11 +198,24 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
         return acc;
       }, {} as Record<string, number>);
 
+    const statusOptions = builds
+      .filter(
+        build =>
+          (selectedBranch === 'all' || build.branch === selectedBranch) &&
+          (selectedCreator === 'all' || build.author.name === selectedCreator),
+      )
+      .reduce((acc, build) => {
+        const status = build.status;
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
     return {
       branches: branchOptions,
       creators: creatorOptions,
+      statuses: statusOptions,
     };
-  }, [pipeline.builds, selectedBranch, selectedCreator]);
+  }, [pipeline.builds, selectedBranch, selectedCreator, selectedStatus]);
 
   const renderBuilds = (builds: BuildParams[]) => {
     return builds.map((build, index) => (
@@ -221,7 +235,8 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   const renderBranchSection = (branch: string, builds: BuildParams[]) => {
     const filteredBuilds = builds.filter(
       build =>
-        selectedCreator === 'all' || build.author.name === selectedCreator,
+        (selectedCreator === 'all' || build.author.name === selectedCreator) &&
+        (selectedStatus === 'all' || build.status === selectedStatus),
     );
 
     if (
@@ -325,6 +340,30 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
                     .map(([creator, count]) => (
                       <MenuItem key={creator} value={creator}>
                         {creator} ({count} builds)
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+
+              <FormControl
+                variant="outlined"
+                size="small"
+                className={classes.filter}
+              >
+                <InputLabel>State</InputLabel>
+                <Select
+                  value={selectedStatus}
+                  onChange={e => setSelectedStatus(e.target.value as string)}
+                  label="Status"
+                >
+                  <MenuItem value="all">All states</MenuItem>
+                  {Object.entries(filterOptions.statuses)
+                    .sort(([a, _], [b, __]) => a.localeCompare(b))
+                    .map(([status, count]) => (
+                      <MenuItem key={status} value={status}>
+                        {status.charAt(0).toUpperCase() +
+                          status.slice(1).toLowerCase()}{' '}
+                        ({count} builds)
                       </MenuItem>
                     ))}
                 </Select>

@@ -20,16 +20,36 @@ export class BuildkiteClient implements BuildkiteAPI {
     this.fetchAPI = options.fetchAPI;
   }
 
-  private calculateTimeElapsed(dateStr: string): string {
-    if (!dateStr) return '0s';
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+  private calculateBuildDuration(build: any): string {
+    if (this.isRunning(build.state) && build.started_at) {
+      const startedAt = new Date(build.started_at);
+      const now = new Date();
+      return this.formatDuration(
+        Math.floor((now.getTime() - startedAt.getTime()) / 1000),
+      );
+    }
 
-    if (diff < 60) return `${diff}s`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    return `${Math.floor(diff / 86400)}d`;
+    if (build.started_at && build.finished_at) {
+      const startedAt = new Date(build.started_at);
+      const finishedAt = new Date(build.finished_at);
+      return this.formatDuration(
+        Math.floor((finishedAt.getTime() - startedAt.getTime()) / 1000),
+      );
+    }
+
+    return '0s';
+  }
+
+  private isRunning(state: string): boolean {
+    return state?.toLowerCase() === 'running';
+  }
+
+  private formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   }
 
   private async getBaseURL(): Promise<string> {
@@ -81,10 +101,7 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
 
-      console.log('Making pipeline request:', { url });
-
       const pipelineResponse = await this.fetchAPI.fetch(url);
-
       if (!pipelineResponse.ok) {
         throw new Error(
           `Failed to fetch pipeline: ${pipelineResponse.statusText}`,
@@ -92,20 +109,15 @@ export class BuildkiteClient implements BuildkiteAPI {
       }
 
       const pipelineData = await pipelineResponse.json();
-      console.log('Raw pipeline data:', pipelineData);
 
-      // Now fetch builds
       const buildsUrl = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
       const buildsResponse = await this.fetchAPI.fetch(buildsUrl);
-
       if (!buildsResponse.ok) {
         throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
       }
 
       const buildsData = await buildsResponse.json();
-      console.log('Raw builds data:', buildsData);
 
-      // Transform the data into the expected format
       const transformedData: PipelineParams = {
         id: pipelineData.id || '',
         name: pipelineData.name || 'Pipeline',
@@ -124,7 +136,7 @@ export class BuildkiteClient implements BuildkiteAPI {
           branch: build.branch || 'main',
           commitId: build.commit?.substring(0, 7) || '',
           createdAt: build.created_at || new Date().toISOString(),
-          timeElapsed: this.calculateTimeElapsed(build.created_at),
+          timeElapsed: this.calculateBuildDuration(build),
           steps: (build.jobs || []).map((job: any) => ({
             id: job.id || '',
             title: job.name || '',
@@ -134,7 +146,6 @@ export class BuildkiteClient implements BuildkiteAPI {
         })),
       };
 
-      console.log('Transformed pipeline data:', transformedData);
       return transformedData;
     } catch (error) {
       console.error('Error in getPipeline:', error);

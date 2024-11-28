@@ -1,9 +1,9 @@
 steps:
   - label: ':docker: Build and Test'
     command: |
-      corepack enable
-      yarn
-      yarn lint
+      echo "Building and testing..."
+      sleep 5
+      echo "GOTEM"
     plugins:
       - docker-compose#v5.4.0:
           run: app

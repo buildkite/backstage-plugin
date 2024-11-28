@@ -226,4 +226,51 @@ export class BuildkiteClient implements BuildkiteAPI {
       };
     });
   }
+
+  async rebuildBuild(
+    orgSlug: string,
+    pipelineSlug: string,
+    buildNumber: string,
+  ): Promise<BuildParams> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/rebuild`;
+
+      const response = await this.fetchAPI.fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to rebuild build: ${errorText}`);
+      }
+
+      const data = await response.json();
+      return {
+        buildNumber: data.number?.toString() || '',
+        status: this.mapBuildkiteStatus(data.state),
+        buildMessage: data.message || '',
+        author: {
+          name: data.creator?.name || 'Unknown',
+          avatar: data.creator?.avatar_url || '',
+        },
+        branch: data.branch || 'main',
+        commitId: data.commit?.substring(0, 7) || '',
+        createdAt: data.created_at || new Date().toISOString(),
+        timeElapsed: this.calculateBuildDuration(data),
+        steps: (data.jobs || []).map((job: any) => ({
+          id: job.id || '',
+          title: job.name || '',
+          status: this.mapBuildkiteStatus(job.state),
+          url: job.web_url || '',
+        })),
+      };
+    } catch (error) {
+      console.error('Error rebuilding build:', error);
+      throw error;
+    }
+  }
 }

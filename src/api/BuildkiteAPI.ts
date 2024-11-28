@@ -23,6 +23,11 @@ export interface BuildkiteAPI {
     pipelineSlug: string,
     buildNumber: string,
   ): Promise<BuildStepParams[]>;
+  rebuildBuild(
+    orgSlug: string,
+    pipelineSlug: string,
+    buildNumber: string,
+  ): Promise<void>;
 }
 
 export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({

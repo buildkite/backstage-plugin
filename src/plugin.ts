@@ -82,4 +82,4 @@ export const BuildPage = buildkitePlugin.provide(
 );
 
 export { BuildkiteWrapper } from './components/BuildkiteWrapper';
-export { BuildRow } from './components/BuildRow';
+export { BuildRow } from './components/BuildComponent';

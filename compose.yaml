@@ -1,6 +1,6 @@
 services:
   app:
-    image: oven/bun:latest
+    image: node:22
     working_dir: /app
     volumes:
       - .:/app

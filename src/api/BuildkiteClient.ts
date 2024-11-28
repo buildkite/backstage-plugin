@@ -1,19 +1,59 @@
-import { DiscoveryApi, FetchApi } from "@backstage/core-plugin-api";
-import { BuildParams, BuildStepParams, PipelineParams } from "../components/Types";
-import { BuildkiteAPI, User } from "./BuildkiteAPI";
-import { BuildkitePluginConfig } from "../plugin";
+import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
+import {
+  BuildParams,
+  BuildStepParams,
+  PipelineParams,
+} from '../components/Types';
+import { BuildkiteAPI, User } from './BuildkiteAPI';
+import { BuildkitePluginConfig } from '../plugin';
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
   private readonly fetchAPI: FetchApi;
 
-  constructor(options: { discoveryAPI: DiscoveryApi; fetchAPI: FetchApi; config: BuildkitePluginConfig }) {
+  constructor(options: {
+    discoveryAPI: DiscoveryApi;
+    fetchAPI: FetchApi;
+    config: BuildkitePluginConfig;
+  }) {
     this.discoveryAPI = options.discoveryAPI;
     this.fetchAPI = options.fetchAPI;
   }
 
+  private calculateBuildDuration(build: any): string {
+    if (this.isRunning(build.state) && build.started_at) {
+      const startedAt = new Date(build.started_at);
+      const now = new Date();
+      return this.formatDuration(
+        Math.floor((now.getTime() - startedAt.getTime()) / 1000),
+      );
+    }
+
+    if (build.started_at && build.finished_at) {
+      const startedAt = new Date(build.started_at);
+      const finishedAt = new Date(build.finished_at);
+      return this.formatDuration(
+        Math.floor((finishedAt.getTime() - startedAt.getTime()) / 1000),
+      );
+    }
+
+    return '0s';
+  }
+
+  private isRunning(state: string): boolean {
+    return state?.toLowerCase() === 'running';
+  }
+
+  private formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+
   private async getBaseURL(): Promise<string> {
-    const proxyURL = await this.discoveryAPI.getBaseUrl("proxy");
+    const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
     const baseURL = `${proxyURL}/buildkite/api`;
     return baseURL;
   }
@@ -22,21 +62,21 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseURL = await this.getBaseURL();
       const url = `${baseURL}/user`;
-      console.log("Requesting URL:", url);
+      console.log('Requesting URL:', url);
 
       const response = await this.fetchAPI.fetch(url, {
-        method: "GET",
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
 
-      console.log("Response status:", response.status);
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const text = await response.text();
         console.error(
-          "Response not OK:",
+          'Response not OK:',
           response.status,
           response.statusText,
           text,
@@ -45,34 +85,99 @@ export class BuildkiteClient implements BuildkiteAPI {
       }
 
       const data = await response.json();
-      console.log("Received data:", data);
+      console.log('Received data:', data);
       return data as User;
     } catch (error) {
-      console.error("Error in getUser:", error);
+      console.error('Error in getUser:', error);
       throw error;
     }
   }
 
-  async getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams> {
-    const baseUrl = await this.getBaseURL();
-    const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
-    
-    const response = await this.fetchAPI.fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch pipeline: ${response.statusText}`);
+  async getPipeline(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<PipelineParams> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
+
+      const pipelineResponse = await this.fetchAPI.fetch(url);
+      if (!pipelineResponse.ok) {
+        throw new Error(
+          `Failed to fetch pipeline: ${pipelineResponse.statusText}`,
+        );
+      }
+
+      const pipelineData = await pipelineResponse.json();
+
+      const buildsUrl = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
+      const buildsResponse = await this.fetchAPI.fetch(buildsUrl);
+      if (!buildsResponse.ok) {
+        throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
+      }
+
+      const buildsData = await buildsResponse.json();
+
+      const transformedData: PipelineParams = {
+        id: pipelineData.id || '',
+        name: pipelineData.name || 'Pipeline',
+        navatarColor: '#D1FAFF',
+        navatarImage:
+          pipelineData.repository?.provider?.icon ||
+          'https://buildkiteassets.com/emojis/img-buildkite-64/buildkite.png',
+        builds: buildsData.map((build: any) => ({
+          buildNumber: build.number?.toString() || '',
+          status: this.mapBuildkiteStatus(build.state),
+          buildMessage: build.message || '',
+          author: {
+            name: build.creator?.name || 'Unknown',
+            avatar: build.creator?.avatar_url || '',
+          },
+          branch: build.branch || 'main',
+          commitId: build.commit?.substring(0, 7) || '',
+          createdAt: build.created_at || new Date().toISOString(),
+          timeElapsed: this.calculateBuildDuration(build),
+          steps: (build.jobs || []).map((job: any) => ({
+            id: job.id || '',
+            title: job.name || '',
+            status: this.mapBuildkiteStatus(job.state),
+            url: job.web_url || '',
+          })),
+        })),
+      };
+
+      return transformedData;
+    } catch (error) {
+      console.error('Error in getPipeline:', error);
+      throw error;
     }
-    
-    const data = await response.json();
-    return {
-      name: data.name,
-      id: data.id,
-      navatarColor: data.color || '#000000',
-      navatarImage: data.icon || '',
-      builds: [],
-    };
   }
 
-  async getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]> {
+  private mapBuildkiteStatus(status: string): Status {
+    switch (status?.toLowerCase()) {
+      case 'passed':
+        return 'PASSED';
+      case 'failed':
+        return 'FAILED';
+      case 'running':
+        return 'RUNNING';
+      case 'scheduled':
+        return 'SCHEDULED';
+      case 'canceled':
+        return 'CANCELED';
+      case 'skipped':
+        return 'SKIPPED';
+      case 'waiting':
+        return 'WAITING';
+      default:
+        return 'NOT_RUN';
+    }
+  }
+
+  async getBuilds(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<BuildParams[]> {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
 
@@ -96,7 +201,11 @@ export class BuildkiteClient implements BuildkiteAPI {
     });
   }
 
-  async getBuildSteps(orgSlug: string, pipelineSlug: string, buildNumber: string): Promise<BuildStepParams[]> {
+  async getBuildSteps(
+    orgSlug: string,
+    pipelineSlug: string,
+    buildNumber: string,
+  ): Promise<BuildStepParams[]> {
     const baseUrl = await this.getBaseURL();
     const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
 

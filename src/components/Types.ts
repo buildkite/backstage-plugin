@@ -1,28 +1,28 @@
 export type Status =
-  | "CANCELED"
-  | "CANCELING"
-  | "CREATING"
-  | "FAILED"
-  | "FAILING"
-  | "NOT_RUN"
-  | "BLOCKED"
-  | "UNBLOCKED"
-  | "PAUSED"
-  | "CONTINUE"
-  | "PASSED"
-  | "RUNNING"
-  | "SCHEDULED"
-  | "SKIPPED"
-  | "WAIT"
-  | "WAITER"
-  | "WAITING"
-  | "ACCEPTED"
-  | "ASSIGNED"
-  | "LIMITED"
-  | "LIMITING"
-  | "WAITING_FAILED"
-  | "TIMING_OUT"
-  | "Undetermined";
+  | 'CANCELED'
+  | 'CANCELING'
+  | 'CREATING'
+  | 'FAILED'
+  | 'FAILING'
+  | 'NOT_RUN'
+  | 'BLOCKED'
+  | 'UNBLOCKED'
+  | 'PAUSED'
+  | 'CONTINUE'
+  | 'PASSED'
+  | 'RUNNING'
+  | 'SCHEDULED'
+  | 'SKIPPED'
+  | 'WAIT'
+  | 'WAITER'
+  | 'WAITING'
+  | 'ACCEPTED'
+  | 'ASSIGNED'
+  | 'LIMITED'
+  | 'LIMITING'
+  | 'WAITING_FAILED'
+  | 'TIMING_OUT'
+  | 'Undetermined';
 
 export type BuildParams = {
   status: Status;
@@ -51,6 +51,8 @@ export type BuildStepParams = {
 export type PipelineParams = {
   name: string;
   id: string;
+  orgSlug: string;
+  slug: string;
   navatarColor: string;
   navatarImage: string;
   builds: BuildParams[];

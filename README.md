@@ -14,6 +14,10 @@ npx @backstage/create-app@latest
 
 Adjust the `app-config` to include the following, you'll need to ensure a value for `BUILDKITE_API_TOKEN` is present in your environment.
 
+Your token will need the following permissions: `read_pipelines`, `read_builds`.
+
+Optionally, you can include `write_builds` if you want to allow re-builds.
+
 ```yaml
 proxy:
   endpoints:

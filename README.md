@@ -2,7 +2,7 @@
 
 A Buildkite plugin for Backstage.
 
-## Development
+## Using the plugin
 
 Clone down this repo using your preferred method.
 
@@ -13,6 +13,10 @@ npx @backstage/create-app@latest
 ```
 
 Adjust the `app-config` to include the following, you'll need to ensure a value for `BUILDKITE_API_TOKEN` is present in your environment.
+
+Your token will need the following permissions: `read_pipelines`, `read_builds`, `read_user`.
+
+Optionally, you can include `write_builds` if you want to allow re-builds.
 
 ```yaml
 proxy:
@@ -115,6 +119,7 @@ const defaultEntityPage = (
     </EntityLayout.Route>
   </EntityLayoutWrapper>
 );
+```
 
 You'll then want to copy (`cp`) this cloned repo in to your Backstage instance and run the instance in `dev` mode:
 

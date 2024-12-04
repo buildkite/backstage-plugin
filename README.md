@@ -2,7 +2,7 @@
 
 A Buildkite plugin for Backstage.
 
-## Development
+## Using the plugin
 
 Clone down this repo using your preferred method.
 
@@ -115,6 +115,7 @@ const defaultEntityPage = (
     </EntityLayout.Route>
   </EntityLayoutWrapper>
 );
+```
 
 You'll then want to copy (`cp`) this cloned repo in to your Backstage instance and run the instance in `dev` mode:
 

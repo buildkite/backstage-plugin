@@ -7,19 +7,13 @@ import {
   Paper,
   Typography,
   makeStyles,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
 } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
-import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BuildRow } from '../BuildComponent';
 import { Navatar } from '../Navatar';
 import { PipelineParams, BuildParams } from '../Types';
+import { PipelineFilters } from '../Filters';
 
 const useStyles = makeStyles({
   branchHeader: {
@@ -125,12 +119,13 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   const [expandedBuilds, setExpandedBuilds] = useState<{
     [key: string]: boolean;
   }>({});
-  const [selectedBranch, setSelectedBranch] = useState<string>('all');
-  const [selectedCreator, setSelectedCreator] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [collapsedBranches, setCollapsedBranches] = useState<{
     [key: string]: boolean;
   }>({});
+
+  const [filteredBuilds, setFilteredBuilds] = useState<BuildParams[]>(
+    pipeline.builds,
+  );
 
   const allExpanded = useMemo(() => {
     return pipeline.builds.every(build => expandedBuilds[build.buildNumber]);
@@ -153,9 +148,6 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     return <Typography>Invalid pipeline data</Typography>;
   }
 
-  const groupedBuilds = groupBuildsByBranch(pipeline.builds);
-  const sortedBranches = sortBranches(groupedBuilds);
-
   const handleTimeClick = () => {
     setIsUTC(!isUTC);
   };
@@ -174,49 +166,6 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     }));
   };
 
-  const filterOptions = useMemo(() => {
-    const builds = pipeline.builds;
-
-    const branchOptions = builds
-      .filter(
-        build =>
-          selectedCreator === 'all' || build.author.name === selectedCreator,
-      )
-      .reduce((acc, build) => {
-        const branch = build.branch;
-        acc[branch] = (acc[branch] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-    const creatorOptions = builds
-      .filter(
-        build => selectedBranch === 'all' || build.branch === selectedBranch,
-      )
-      .reduce((acc, build) => {
-        const creator = build.author.name;
-        acc[creator] = (acc[creator] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-    const statusOptions = builds
-      .filter(
-        build =>
-          (selectedBranch === 'all' || build.branch === selectedBranch) &&
-          (selectedCreator === 'all' || build.author.name === selectedCreator),
-      )
-      .reduce((acc, build) => {
-        const status = build.status;
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-    return {
-      branches: branchOptions,
-      creators: creatorOptions,
-      statuses: statusOptions,
-    };
-  }, [pipeline.builds, selectedBranch, selectedCreator, selectedStatus]);
-
   const renderBuilds = (builds: BuildParams[]) => {
     return builds.map((build, index) => (
       <BuildRow
@@ -233,16 +182,7 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   };
 
   const renderBranchSection = (branch: string, builds: BuildParams[]) => {
-    const filteredBuilds = builds.filter(
-      build =>
-        (selectedCreator === 'all' || build.author.name === selectedCreator) &&
-        (selectedStatus === 'all' || build.status === selectedStatus),
-    );
-
-    if (
-      filteredBuilds.length === 0 ||
-      (selectedBranch !== 'all' && selectedBranch !== branch)
-    ) {
+    if (builds.length === 0) {
       return null;
     }
 
@@ -257,15 +197,25 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
           <Box display="flex" alignItems="center">
             {branch}
             <span className={classes.branchCount}>
-              ({filteredBuilds.length} builds)
+              ({builds.length} builds)
             </span>
           </Box>
           {isCollapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
         </Box>
-        {!isCollapsed && renderBuilds(filteredBuilds)}
+        {!isCollapsed && renderBuilds(builds)}
       </Box>
     );
   };
+
+  console.log('Pipeline data:', {
+    totalBuilds: pipeline.builds.length,
+    builds: pipeline.builds,
+  });
+
+  console.log('Grouped builds:', {
+    main: groupBuildsByBranch(filteredBuilds).main.length,
+    other: Object.keys(groupBuildsByBranch(filteredBuilds).other).length,
+  });
 
   return (
     <Box display="flex" flexDirection="column" gridGap="20px">
@@ -297,96 +247,29 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
 
       <Grid container spacing={3} direction="column">
         <Grid item>
-          <Box display="flex" justifyContent="flex-end">
-            <Box className={classes.filterContainer}>
-              <FormControl
-                variant="outlined"
-                size="small"
-                className={classes.filter}
-              >
-                <InputLabel>Branch</InputLabel>
-                <Select
-                  value={selectedBranch}
-                  onChange={e => setSelectedBranch(e.target.value as string)}
-                  label="Branch"
-                >
-                  <MenuItem value="all">All branches</MenuItem>
-                  {Object.entries(filterOptions.branches)
-                    .sort(([a], [b]) =>
-                      a === 'main' ? -1 : b === 'main' ? 1 : a.localeCompare(b),
-                    )
-                    .map(([branch, count]) => (
-                      <MenuItem key={branch} value={branch}>
-                        {branch} ({count} builds)
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-
-              <FormControl
-                variant="outlined"
-                size="small"
-                className={classes.filter}
-              >
-                <InputLabel>Creator</InputLabel>
-                <Select
-                  value={selectedCreator}
-                  onChange={e => setSelectedCreator(e.target.value as string)}
-                  label="Creator"
-                >
-                  <MenuItem value="all">All creators</MenuItem>
-                  {Object.entries(filterOptions.creators)
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([creator, count]) => (
-                      <MenuItem key={creator} value={creator}>
-                        {creator} ({count} builds)
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-
-              <FormControl
-                variant="outlined"
-                size="small"
-                className={classes.filter}
-              >
-                <InputLabel>State</InputLabel>
-                <Select
-                  value={selectedStatus}
-                  onChange={e => setSelectedStatus(e.target.value as string)}
-                  label="Status"
-                >
-                  <MenuItem value="all">All states</MenuItem>
-                  {Object.entries(filterOptions.statuses)
-                    .sort(([a, _], [b, __]) => a.localeCompare(b))
-                    .map(([status, count]) => (
-                      <MenuItem key={status} value={status}>
-                        {status.charAt(0).toUpperCase() +
-                          status.slice(1).toLowerCase()}{' '}
-                        ({count} builds)
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={toggleAllBuilds}
-                aria-label={allExpanded ? 'Collapse all' : 'Expand all'}
-                className={classes.expandButton}
-              >
-                {allExpanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
-              </Button>
-            </Box>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            className={classes.filterContainer}
+          >
+            <PipelineFilters
+              builds={pipeline.builds}
+              onFilteredBuildsChange={setFilteredBuilds}
+              allExpanded={allExpanded}
+              onToggleAllBuilds={toggleAllBuilds}
+            />
           </Box>
 
           <Paper variant="outlined">
-            {groupedBuilds.main.length > 0 &&
-              renderBranchSection('main', groupedBuilds.main)}
-
-            {sortedBranches.map(branch =>
-              renderBranchSection(branch, groupedBuilds.other[branch]),
+            {renderBranchSection(
+              'main',
+              groupBuildsByBranch(filteredBuilds).main,
+            )}
+            {sortBranches(groupBuildsByBranch(filteredBuilds)).map(branch =>
+              renderBranchSection(
+                branch,
+                groupBuildsByBranch(filteredBuilds).other[branch],
+              ),
             )}
           </Paper>
         </Grid>

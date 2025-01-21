@@ -247,11 +247,7 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
 
       <Grid container spacing={3} direction="column">
         <Grid item>
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            className={classes.filterContainer}
-          >
+          <Box display="flex" justifyContent="flex-end" mb={3}>
             <PipelineFilters
               builds={pipeline.builds}
               onFilteredBuildsChange={setFilteredBuilds}

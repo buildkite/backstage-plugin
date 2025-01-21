@@ -41,7 +41,7 @@ updates:
       prefix: "chore"
       include: "scope"
     reviewers:
-      - "team-maintainers"
+      - "mcncl"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

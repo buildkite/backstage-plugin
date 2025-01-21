@@ -1,0 +1,53 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":enableVulnerabilityAlertsWithLabel(security)",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@backstage/"],
+      "groupName": "backstage packages",
+      "schedule": ["every weekend"]
+    },
+    {
+      "matchPackagePatterns": ["^@material-ui/"],
+      "groupName": "material-ui packages"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePatterns": ["eslint", "prettier", "jest", "test"],
+      "groupName": "dev dependencies",
+      "schedule": ["every weekend"]
+    }
+  ],
+  "pinDigests": true,
+  "dependencyDashboard": true,
+  "semanticCommits": "enabled",
+  "ignorePaths": ["**/node_modules/**"],
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10,
+  "automerge": true,
+  "automergeType": "branch",
+  "automergeStrategy": "auto",
+  "major": {
+    "automerge": false
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@team-maintainers"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"]
+  },
+  "rangeStrategy": "pin",
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "commitMessageAction": "Update",
+  "commitMessageExtra": "to {{newValue}}",
+  "stabilityDays": 3
+}

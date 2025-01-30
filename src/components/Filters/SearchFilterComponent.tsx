@@ -1,9 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { TextField, InputAdornment, IconButton } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
-import { BuildParams } from '../Types';
 
 const useStyles = makeStyles({
   searchField: {
@@ -16,40 +15,20 @@ const useStyles = makeStyles({
 });
 
 interface SearchFilterProps {
-  onSearchChange: (filteredBuilds: BuildParams[]) => void;
-  builds: BuildParams[];
+  onSearchChange: (term: string) => void;
+  builds: Array<any>; // Keep this for consistency with the existing API
+  currentSearchTerm: string;
 }
 
 export const SearchFilter: React.FC<SearchFilterProps> = ({
   onSearchChange,
-  builds,
+  currentSearchTerm,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const classes = useStyles({ showClear: Boolean(searchTerm) });
+  const classes = useStyles({ showClear: Boolean(currentSearchTerm) });
 
-  const handleSearch = useCallback(
-    (term: string) => {
-      setSearchTerm(term);
-
-      if (!term.trim()) {
-        onSearchChange(builds);
-        return;
-      }
-
-      const searchLower = term.toLowerCase();
-      const filtered = builds.filter(
-        build =>
-          build.buildMessage.toLowerCase().includes(searchLower) ||
-          build.buildNumber.toLowerCase().includes(searchLower) ||
-          build.author.name.toLowerCase().includes(searchLower) ||
-          build.branch.toLowerCase().includes(searchLower) ||
-          build.commitId.toLowerCase().includes(searchLower),
-      );
-
-      onSearchChange(filtered);
-    },
-    [builds, onSearchChange],
-  );
+  const handleSearch = (term: string) => {
+    onSearchChange(term);
+  };
 
   const clearSearch = () => {
     handleSearch('');
@@ -61,7 +40,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
       variant="outlined"
       size="small"
       placeholder="Search builds..."
-      value={searchTerm}
+      value={currentSearchTerm}
       onChange={e => handleSearch(e.target.value)}
       InputProps={{
         startAdornment: (

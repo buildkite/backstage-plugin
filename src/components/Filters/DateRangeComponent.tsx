@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   KeyboardDatePicker,
   MuiPickersUtilsProvider,
@@ -39,19 +39,34 @@ type DateRangeType = (typeof DATE_RANGES)[keyof typeof DATE_RANGES];
 
 interface DateRangeFilterProps {
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
+  initialDateRange?: {
+    startDate: Date;
+    endDate: Date;
+  };
 }
 
 export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   onDateRangeChange,
+  initialDateRange,
 }) => {
   const classes = useStyles();
   const [selectedRange, setSelectedRange] = useState<DateRangeType>(
     DATE_RANGES.LAST_7_DAYS,
   );
   const [startDate, setStartDate] = useState<Date>(
-    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    initialDateRange?.startDate ||
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
   );
-  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(
+    initialDateRange?.endDate || new Date(),
+  );
+
+  useEffect(() => {
+    if (initialDateRange) {
+      setStartDate(initialDateRange.startDate);
+      setEndDate(initialDateRange.endDate);
+    }
+  }, [initialDateRange]);
 
   const handlePresetChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as DateRangeType;

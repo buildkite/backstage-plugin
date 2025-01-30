@@ -1,13 +1,29 @@
 import React from 'react';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { EmptyState } from '@backstage/core-components';
-import { PipelinePage } from '../PipelinePage';
+import { makeStyles } from '@material-ui/core';
 import {
   getBuildkiteProjectSlug,
   parseBuildkiteProjectSlug,
 } from '../../utils';
+import { BuildkiteHeader } from '../Header';
+import { PipelinePage } from '../PipelinePage';
+
+const useStyles = makeStyles({
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  content: {
+    flex: 1,
+    overflow: 'auto',
+    padding: '16px',
+  },
+});
 
 export const BuildkiteWrapper = () => {
+  const classes = useStyles();
   const { entity } = useEntity();
 
   try {
@@ -35,7 +51,18 @@ export const BuildkiteWrapper = () => {
       parseBuildkiteProjectSlug(projectSlug);
 
     return (
-      <PipelinePage orgSlug={organizationSlug} pipelineSlug={pipelineSlug} />
+      <div className={classes.wrapper}>
+        <BuildkiteHeader
+          title="Buildkite"
+          subtitle={`${organizationSlug}/${pipelineSlug}`}
+        />
+        <div className={classes.content}>
+          <PipelinePage
+            orgSlug={organizationSlug}
+            pipelineSlug={pipelineSlug}
+          />
+        </div>
+      </div>
     );
   } catch (error) {
     return (

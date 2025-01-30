@@ -5,13 +5,12 @@ import { PipelineParams } from '../components/Types';
 
 export const useBuildkiteApi = (orgSlug: string, pipelineSlug: string) => {
   const api = useApi(buildkiteAPIRef);
-  
-  console.log('useBuildkiteApi called with:', {
-    orgSlug,
-    pipelineSlug,
-  });
 
-  const { value: pipeline, loading, error } = useAsync(async (): Promise<PipelineParams | undefined> => {
+  const {
+    value: pipeline,
+    loading,
+    error,
+  } = useAsync(async (): Promise<PipelineParams | undefined> => {
     if (!orgSlug || !pipelineSlug) {
       console.log('Missing required slugs:', { orgSlug, pipelineSlug });
       return undefined;
@@ -20,12 +19,12 @@ export const useBuildkiteApi = (orgSlug: string, pipelineSlug: string) => {
     try {
       console.log('Fetching pipeline with:', {
         orgSlug,
-        pipelineSlug
+        pipelineSlug,
       });
 
       const pipeline = await api.getPipeline(orgSlug, pipelineSlug);
       console.log('Fetched pipeline:', pipeline);
-      
+
       return pipeline;
     } catch (err) {
       console.error('Error fetching pipeline:', err);
@@ -40,7 +39,11 @@ export const useBuildkiteApi = (orgSlug: string, pipelineSlug: string) => {
   };
 };
 
-export const useBuildkiteBuild = (orgSlug: string, pipelineSlug: string, buildNumber: string) => {
+export const useBuildkiteBuild = (
+  orgSlug: string,
+  pipelineSlug: string,
+  buildNumber: string,
+) => {
   const api = useApi(buildkiteAPIRef);
 
   const { value, loading, error } = useAsync(async () => {

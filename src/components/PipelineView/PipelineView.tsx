@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Breadcrumbs,
@@ -127,6 +127,61 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     pipeline.builds,
   );
 
+  useEffect(() => {
+    const newExpandedState = { ...expandedBuilds };
+    let hasChanges = false;
+
+    pipeline.builds.forEach(build => {
+      if (build.status === 'RUNNING' && !expandedBuilds[build.buildNumber]) {
+        newExpandedState[build.buildNumber] = true;
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      setExpandedBuilds(newExpandedState);
+    }
+  }, [pipeline.builds, expandedBuilds]);
+
+  // Keep filtered builds in sync with pipeline updates while preserving filter state
+  useEffect(() => {
+    setFilteredBuilds(prevFiltered => {
+      // Create a map of existing filtered builds
+      const existingBuilds = new Map(
+        prevFiltered.map(build => [build.buildNumber, build]),
+      );
+
+      // Update or add builds while maintaining their filtered state
+      const updatedBuilds = pipeline.builds.filter(newBuild => {
+        const existingBuild = existingBuilds.get(newBuild.buildNumber);
+
+        // Keep the build if it was previously filtered
+        if (existingBuild) {
+          return true;
+        }
+
+        // For new builds, check if they match any builds we're currently showing
+        // This helps maintain current filter context
+        const isMatchingBranch = prevFiltered.some(
+          filtered => filtered.branch === newBuild.branch,
+        );
+        const isMatchingAuthor = prevFiltered.some(
+          filtered => filtered.author.name === newBuild.author.name,
+        );
+
+        // If we're showing no builds (empty filter result), show all new builds
+        if (prevFiltered.length === 0) {
+          return true;
+        }
+
+        // Otherwise, show new builds that match our current context
+        return isMatchingBranch || isMatchingAuthor;
+      });
+
+      return updatedBuilds;
+    });
+  }, [pipeline.builds]);
+
   const allExpanded = useMemo(() => {
     return pipeline.builds.every(build => expandedBuilds[build.buildNumber]);
   }, [expandedBuilds, pipeline.builds]);
@@ -206,16 +261,6 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
       </Box>
     );
   };
-
-  console.log('Pipeline data:', {
-    totalBuilds: pipeline.builds.length,
-    builds: pipeline.builds,
-  });
-
-  console.log('Grouped builds:', {
-    main: groupBuildsByBranch(filteredBuilds).main.length,
-    other: Object.keys(groupBuildsByBranch(filteredBuilds).other).length,
-  });
 
   return (
     <Box display="flex" flexDirection="column" gridGap="20px">

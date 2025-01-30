@@ -82,6 +82,8 @@ export const BuildRow: React.FC<BuildRowProps> = ({
         pipelineSlug,
         build.buildNumber,
       );
+
+      await buildkiteApi.getPipeline(organizationSlug, pipelineSlug);
     } catch (error) {
       console.error('Failed to rebuild:', error);
     } finally {
@@ -254,9 +256,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           padding="12px"
           boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
         >
-          {steps?.map(step => (
-            <BuildStep key={step.id} step={step} />
-          ))}
+          {steps?.map(step => <BuildStep key={step.id} step={step} />)}
         </Box>
       </Collapse>
     </Box>

@@ -12,6 +12,7 @@ export interface User {
   graphql_id: string;
   id: string;
   name: string;
+  buildkite_avatar_url?: string;
 }
 
 export interface BuildkiteAPI {

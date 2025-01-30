@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
@@ -28,16 +28,11 @@ const useStyles = makeStyles({
   },
 });
 
-interface FilterOptions {
-  branches: Record<string, number>;
-  creators: Record<string, number>;
-  statuses: Record<string, number>;
-}
-
 interface FilterState {
   selectedBranch: string;
   selectedCreator: string;
   selectedStatus: string;
+  searchTerm: string;
   dateRange: {
     startDate: Date;
     endDate: Date;
@@ -58,18 +53,103 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   onToggleAllBuilds,
 }) => {
   const classes = useStyles();
-  const [searchResults, setSearchResults] = useState<BuildParams[]>(builds);
-  const [filters, setFilters] = useState<FilterState>({
+  const previousBuildsRef = useRef<BuildParams[]>([]);
+  const [filterState, setFilterState] = useState<FilterState>({
     selectedBranch: 'all',
     selectedCreator: 'all',
     selectedStatus: 'all',
+    searchTerm: '',
     dateRange: {
       startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       endDate: new Date(),
     },
   });
 
-  const filterOptions = useCallback((): FilterOptions => {
+  const lastFilteredBuildsRef = useRef<BuildParams[]>([]);
+
+  const applyFilters = useCallback(() => {
+    let filteredBuilds = [...builds];
+
+    // Apply branch filter
+    if (filterState.selectedBranch !== 'all') {
+      filteredBuilds = filteredBuilds.filter(
+        build => build.branch === filterState.selectedBranch,
+      );
+    }
+
+    // Apply creator filter
+    if (filterState.selectedCreator !== 'all') {
+      filteredBuilds = filteredBuilds.filter(
+        build => build.author.name === filterState.selectedCreator,
+      );
+    }
+
+    // Apply status filter
+    if (filterState.selectedStatus !== 'all') {
+      filteredBuilds = filteredBuilds.filter(
+        build => build.status === filterState.selectedStatus,
+      );
+    }
+
+    // Apply search filter
+    if (filterState.searchTerm) {
+      const searchLower = filterState.searchTerm.toLowerCase();
+      filteredBuilds = filteredBuilds.filter(
+        build =>
+          build.buildMessage.toLowerCase().includes(searchLower) ||
+          build.buildNumber.toLowerCase().includes(searchLower) ||
+          build.author.name.toLowerCase().includes(searchLower) ||
+          build.branch.toLowerCase().includes(searchLower) ||
+          build.commitId.toLowerCase().includes(searchLower),
+      );
+    }
+
+    // Apply date range filter
+    filteredBuilds = filteredBuilds.filter(build => {
+      const buildDate = new Date(build.createdAt);
+      return (
+        buildDate >= filterState.dateRange.startDate &&
+        buildDate <= filterState.dateRange.endDate
+      );
+    });
+
+    // Only update if the filtered results have actually changed
+    if (
+      JSON.stringify(filteredBuilds) !==
+      JSON.stringify(lastFilteredBuildsRef.current)
+    ) {
+      lastFilteredBuildsRef.current = filteredBuilds;
+      onFilteredBuildsChange(filteredBuilds);
+    }
+  }, [builds, filterState, onFilteredBuildsChange]);
+
+  // Handle builds updates
+  useEffect(() => {
+    const hasBuildsChanged = builds !== previousBuildsRef.current;
+    previousBuildsRef.current = builds;
+
+    if (hasBuildsChanged) {
+      applyFilters();
+    }
+  }, [builds, applyFilters]);
+
+  // Handle filter state changes
+  useEffect(() => {
+    applyFilters();
+  }, [filterState, applyFilters]);
+
+  const handleFilterChange = (
+    filterType: keyof FilterState,
+    value: string | { startDate: Date; endDate: Date },
+  ) => {
+    setFilterState(prev => ({
+      ...prev,
+      [filterType]: value,
+    }));
+  };
+
+  // Calculate filter options based on current builds
+  const getFilterOptions = useCallback(() => {
     return builds.reduce(
       (acc, build) => {
         acc.branches[build.branch] = (acc.branches[build.branch] || 0) + 1;
@@ -78,88 +158,70 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         acc.statuses[build.status] = (acc.statuses[build.status] || 0) + 1;
         return acc;
       },
-      { branches: {}, creators: {}, statuses: {} } as FilterOptions,
+      { branches: {}, creators: {}, statuses: {} } as Record<
+        string,
+        Record<string, number>
+      >,
     );
   }, [builds]);
 
-  const applyFilters = useCallback(() => {
-    let filteredBuilds = [...searchResults];
+  // Update filtered builds whenever builds prop or filter state changes
+  useEffect(() => {
+    // Check if builds array has changed
+    const hasBuildsChanged = builds !== previousBuildsRef.current;
+    previousBuildsRef.current = builds;
 
-    if (filters.selectedBranch !== 'all') {
-      filteredBuilds = filteredBuilds.filter(
-        build => build.branch === filters.selectedBranch,
-      );
+    if (hasBuildsChanged) {
+      console.log('Builds updated, reapplying filters');
+      applyFilters();
     }
+  }, [builds, applyFilters]);
 
-    if (filters.selectedCreator !== 'all') {
-      filteredBuilds = filteredBuilds.filter(
-        build => build.author.name === filters.selectedCreator,
-      );
-    }
+  // Also update when filter state changes
+  useEffect(() => {
+    applyFilters();
+  }, [filterState, applyFilters]);
 
-    if (filters.selectedStatus !== 'all') {
-      filteredBuilds = filteredBuilds.filter(
-        build => build.status === filters.selectedStatus,
-      );
-    }
-
-    filteredBuilds = filteredBuilds.filter(build => {
-      const buildDate = new Date(build.createdAt);
-      return (
-        buildDate >= filters.dateRange.startDate &&
-        buildDate <= filters.dateRange.endDate
-      );
-    });
-
-    onFilteredBuildsChange(filteredBuilds);
-  }, [searchResults, filters, onFilteredBuildsChange]);
-
-  const handleFilterChange = (
-    filterType: 'selectedBranch' | 'selectedCreator' | 'selectedStatus',
-    value: string,
-  ) => {
-    setFilters(prev => ({ ...prev, [filterType]: value }));
-  };
-
-  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
-    setFilters(prev => ({
+  const handleSearchChange = (searchTerm: string) => {
+    setFilterState(prev => ({
       ...prev,
-      dateRange: { startDate, endDate },
+      searchTerm,
     }));
   };
 
-  const handleSearchChange = (filteredBuilds: BuildParams[]) => {
-    setSearchResults(filteredBuilds);
-  };
-
-  React.useEffect(() => {
-    applyFilters();
-  }, [applyFilters, searchResults]);
-
-  const options = filterOptions();
+  const filterOptions = getFilterOptions();
 
   return (
     <Box className={classes.filterContainer}>
-      <SearchFilter builds={builds} onSearchChange={handleSearchChange} />
+      <SearchFilter
+        builds={builds}
+        onSearchChange={term => handleSearchChange(term)}
+        currentSearchTerm={filterState.searchTerm}
+      />
 
-      <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
+      <DateRangeFilter
+        onDateRangeChange={(startDate, endDate) =>
+          handleFilterChange('dateRange', { startDate, endDate })
+        }
+        initialDateRange={filterState.dateRange}
+      />
 
       <BranchFilter
-        value={filters.selectedBranch}
+        value={filterState.selectedBranch}
         onChange={value => handleFilterChange('selectedBranch', value)}
-        branches={options.branches}
+        branches={filterOptions.branches}
       />
 
       <CreatorFilter
-        value={filters.selectedCreator}
+        value={filterState.selectedCreator}
         onChange={value => handleFilterChange('selectedCreator', value)}
-        creators={options.creators}
+        creators={filterOptions.creators}
       />
 
       <StateFilter
-        value={filters.selectedStatus}
+        value={filterState.selectedStatus}
         onChange={value => handleFilterChange('selectedStatus', value)}
-        states={options.statuses}
+        states={filterOptions.statuses}
       />
 
       <Button

@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
-import { Progress, Table, TableColumn, ErrorPanel } from '@backstage/core-components';
+import {
+  Progress,
+  Table,
+  TableColumn,
+  ErrorPanel,
+} from '@backstage/core-components';
 import { User } from '../../api/BuildkiteAPI';
 import { Grid, Typography, makeStyles } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   avatar: {
     width: theme.spacing(7),
     height: theme.spacing(7),
@@ -29,11 +34,12 @@ export const ViewerFetchComponent = () => {
     const fetchUser = async () => {
       try {
         const user = await buildkiteAPI.getUser();
-        console.log('User data:', user);
         setUserData(user);
       } catch (err) {
         console.error('Error fetching user data:', err);
-        setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+        setError(
+          err instanceof Error ? err : new Error('An unknown error occurred'),
+        );
       } finally {
         setLoading(false);
       }
@@ -58,7 +64,10 @@ export const ViewerFetchComponent = () => {
     { field: 'ID', value: userData.id },
     { field: 'Name', value: userData.name },
     { field: 'Email', value: userData.email },
-    { field: 'Created At', value: new Date(userData.created_at).toLocaleString() },
+    {
+      field: 'Created At',
+      value: new Date(userData.created_at).toLocaleString(),
+    },
     { field: 'GraphQL ID', value: userData.graphql_id },
   ];
 
@@ -68,7 +77,11 @@ export const ViewerFetchComponent = () => {
         <Typography variant="h4">Buildkite User Information</Typography>
       </Grid>
       <Grid item container xs={12} alignItems="center">
-        <img src={userData.avatar_url} alt="User Avatar" className={classes.avatar} />
+        <img
+          src={userData.avatar_url}
+          alt="User Avatar"
+          className={classes.avatar}
+        />
         <Typography variant="h6">{userData.name}</Typography>
       </Grid>
       <Grid item xs={12}>

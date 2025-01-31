@@ -59,6 +59,10 @@ export interface BuildkiteApiPipeline {
   };
 }
 
+export interface JobLog {
+  content: string[];
+}
+
 // Type for transforming API data to our component types
 export interface BuildkiteTransforms {
   mapBuildkiteStatus: (status: string) => Status;

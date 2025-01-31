@@ -30,12 +30,10 @@ export const PipelinePage: React.FC<PipelinePageProps> = ({
     if (!isMountedRef.current) return;
 
     try {
-      console.log('Fetching pipeline data...', { orgSlug, pipelineSlug });
       const pipelineData = await buildkiteApi.getPipeline(
         orgSlug,
         pipelineSlug,
       );
-      console.log('Received pipeline data:', pipelineData);
 
       // Only update state if component is still mounted
       if (isMountedRef.current) {
@@ -88,12 +86,10 @@ export const PipelinePage: React.FC<PipelinePageProps> = ({
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        console.log('Tab hidden, pausing polling');
         if (intervalRef.current) {
           window.clearInterval(intervalRef.current);
         }
       } else {
-        console.log('Tab visible, resuming polling');
         // Fetch immediately when becoming visible
         fetchPipelineData();
         // Restart polling

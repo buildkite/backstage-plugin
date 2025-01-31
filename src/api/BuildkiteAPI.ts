@@ -4,6 +4,7 @@ import {
   BuildParams,
   BuildStepParams,
 } from '../components/Types';
+import { JobLog } from './Types';
 
 export interface User {
   avatar_url: string;
@@ -29,6 +30,12 @@ export interface BuildkiteAPI {
     pipelineSlug: string,
     buildNumber: string,
   ): Promise<BuildParams>;
+  getJobLogs(
+    orgSlug: string,
+    pipelineSlug: string,
+    buildNumber: string,
+    jobId: string,
+  ): Promise<JobLog>;
 }
 
 export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({

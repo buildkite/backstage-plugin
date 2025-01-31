@@ -1,44 +1,59 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Chip,
-  IconButton,
   Typography,
+  Chip,
+  Avatar,
+  Link,
+  IconButton,
   Collapse,
   Tooltip,
-  Link,
-  Avatar,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import ReplayIcon from '@material-ui/icons/Replay';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
-import { BuildStep } from '../BuildStepComponent';
+import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
-import { makeStyles } from '@material-ui/core/styles';
-import { BuildParams } from '../Types';
+import { BuildStep } from '../BuildStepComponent';
+import { BuildParams, PipelineParams } from '../Types';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { useApi } from '@backstage/core-plugin-api';
-import { buildkiteAPIRef } from '../../api';
 import {
   getBuildkiteProjectSlug,
   parseBuildkiteProjectSlug,
+  getBuildkiteUrl,
 } from '../../utils';
+import { useApi } from '@backstage/core-plugin-api';
+import { buildkiteAPIRef } from '../../api';
+import { TimeChip } from '../TimeChip';
 
 const useStyles = makeStyles({
+  buildRow: {
+    '&:not(:last-child)': {
+      borderBottom: '1px solid #E5E5E5',
+    },
+  },
   chip: {
     color: '#737373',
     border: 'none',
     borderRadius: '4px',
     margin: 0,
   },
-  buildBox: {
-    '&:not(:last-child)': {
-      borderBottom: '1px solid #E5E5E5',
+  buildLink: {
+    '&:hover': {
+      textDecoration: 'none',
+      '& .MuiTypography-root': {
+        textDecoration: 'underline',
+      },
     },
   },
   actionsContainer: {
     display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: '4px',
     marginLeft: 'auto',
+    flexDirection: 'row',
+    minHeight: '40px',
   },
   retryButton: {
     width: '32px',
@@ -49,17 +64,20 @@ const useStyles = makeStyles({
   },
 });
 
-export interface BuildRowProps {
+type BuildRowProps = {
   build: BuildParams;
+  pipeline: PipelineParams;
   index: number;
   expanded: boolean;
-  onExpandClick: () => void;
+  onExpandClick: (index: number) => void;
   isUTC: boolean;
   onTimeClick: () => void;
-}
+};
 
 export const BuildRow: React.FC<BuildRowProps> = ({
   build,
+  pipeline,
+  index,
   expanded,
   onExpandClick,
   isUTC,
@@ -82,8 +100,6 @@ export const BuildRow: React.FC<BuildRowProps> = ({
         pipelineSlug,
         build.buildNumber,
       );
-
-      await buildkiteApi.getPipeline(organizationSlug, pipelineSlug);
     } catch (error) {
       console.error('Failed to rebuild:', error);
     } finally {
@@ -91,60 +107,38 @@ export const BuildRow: React.FC<BuildRowProps> = ({
     }
   };
 
-  if (!build) {
-    return null;
-  }
+  // Get the organization and pipeline slugs from the entity annotation
+  const projectSlug = getBuildkiteProjectSlug(entity);
+  const { organizationSlug, pipelineSlug } =
+    parseBuildkiteProjectSlug(projectSlug);
 
-  const {
-    status,
-    buildMessage,
-    buildNumber,
-    author,
-    branch,
-    commitId,
-    createdAt,
-    timeElapsed,
-    steps = [],
-  } = build;
-
-  const formatDate = (dateString: string, toUTC: boolean) => {
-    const date = new Date(dateString);
-    if (toUTC) {
-      const day = date.toUTCString().slice(0, 3);
-      const dayOfMonth = date.getUTCDate();
-      const month = date.toUTCString().slice(8, 11);
-      const year = date.getUTCFullYear();
-      const time = date.toUTCString().slice(17, 22);
-      return `Created ${day} ${dayOfMonth}th ${month} ${year} at ${time} UTC`;
-    } else {
-      const now = new Date();
-      const isToday = date.toDateString() === now.toDateString();
-      const time = date.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      });
-      return isToday
-        ? `Created today at ${time}`
-        : `Created on ${date.toLocaleDateString()} at ${time}`;
-    }
-  };
+  // Construct Buildkite URL using the utility function
+  const buildkiteUrl = getBuildkiteUrl(
+    organizationSlug,
+    pipelineSlug,
+    build.buildNumber,
+  );
 
   return (
-    <Box className={classes.buildBox}>
-      <Box display="flex" padding="12px" gridGap="12px">
+    <Box className={classes.buildRow} key={build.buildNumber}>
+      <Box
+        display="flex"
+        padding="12px"
+        gridGap="12px"
+        className={classes.buildRow}
+      >
         <Box
           display="flex"
           flexDirection="column"
           gridGap="6px"
           alignItems="center"
         >
-          <StatusIcon status={status} size="small" />
+          <StatusIcon status={build.status} size="medium" />
           <Typography
             variant="caption"
             style={{ color: '#737373', paddingTop: '1px' }}
           >
-            {timeElapsed}
+            {build.timeElapsed}
           </Typography>
         </Box>
         <Box display="flex" flexDirection="column" gridGap="4px">
@@ -156,25 +150,33 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           >
             <Link
               color="textPrimary"
-              href="#"
-              onClick={e => e.preventDefault()}
+              href={buildkiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes.buildLink}
             >
               <Typography variant="subtitle2">
-                <strong>{buildMessage}</strong>
+                <strong>{build.buildMessage}</strong>
               </Typography>
             </Link>
             <Typography
               variant="caption"
               style={{ color: '#737373', paddingTop: '3px' }}
             >
-              #{buildNumber}
+              #{build.buildNumber}
             </Typography>
           </Box>
-          <Box display="flex" alignItems="center" margin={0} gridGap="3px">
+          <Box
+            display="flex"
+            alignItems="center"
+            margin={0}
+            gridGap="3px"
+            color="#737373"
+          >
             <Chip
               className={classes.chip}
-              avatar={<Avatar src={author?.avatar} />}
-              label={author?.name || 'Unknown'}
+              avatar={<Avatar src={build.author.avatar} />}
+              label={build.author.name}
               variant="outlined"
               size="small"
             />
@@ -184,8 +186,8 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             <Chip
               className={classes.chip}
               style={{ paddingLeft: '4px' }}
-              icon={<BranchIcon />}
-              label={branch}
+              icon={<BranchIcon size="small" />}
+              label={build.branch}
               variant="outlined"
               size="small"
             />
@@ -193,58 +195,46 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             <Chip
               className={classes.chip}
               style={{ paddingLeft: '4px' }}
-              icon={<GithubIcon />}
-              label={commitId}
+              icon={<GithubIcon viewBox="0 0 13 13" />}
+              label={build.commitId}
               variant="outlined"
               size="small"
             />
             <Typography style={{ color: '#111111', fontSize: '12px' }}>
               ·
             </Typography>
-            <Tooltip
-              title="Click to toggle between local and UTC"
-              placement="top"
-            >
-              <Chip
-                className={classes.chip}
-                label={formatDate(createdAt, isUTC)}
-                variant="outlined"
-                size="small"
-                onClick={onTimeClick}
-              />
-            </Tooltip>
+            <TimeChip
+              dateString={build.createdAt}
+              isUTC={isUTC}
+              onTimeClick={onTimeClick}
+            />
           </Box>
         </Box>
-        <IconButton
-          size="small"
-          onClick={onExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-          style={{ marginLeft: 'auto', borderRadius: '4px' }}
-        >
-          <UnfoldMoreIcon fontSize="inherit" />
-        </IconButton>
-      </Box>
-      <Box className={classes.actionsContainer}>
-        <Tooltip title="Retry build">
+        <Box className={classes.actionsContainer}>
           <IconButton
             size="small"
-            onClick={handleRebuild}
-            disabled={isRebuilding}
-            className={classes.retryButton}
+            onClick={() => onExpandClick(index)}
+            aria-expanded={expanded}
+            aria-label="show more"
+            style={{ marginLeft: 'auto', borderRadius: '4px' }}
           >
-            <ReplayIcon fontSize="small" />
+            {expanded ? (
+              <UnfoldLessIcon fontSize="inherit" />
+            ) : (
+              <UnfoldMoreIcon fontSize="inherit" />
+            )}
           </IconButton>
-        </Tooltip>
-        <IconButton
-          size="small"
-          onClick={onExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-          style={{ borderRadius: '4px' }}
-        >
-          <UnfoldMoreIcon fontSize="inherit" />
-        </IconButton>
+          <Tooltip title="Retry build">
+            <IconButton
+              size="small"
+              onClick={handleRebuild}
+              disabled={isRebuilding}
+              className={classes.retryButton}
+            >
+              <ReplayIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <Box
@@ -256,7 +246,13 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           padding="12px"
           boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
         >
-          {steps?.map(step => <BuildStep key={step.id} step={step} />)}
+          {build.steps.map(step => (
+            <BuildStep
+              key={step.id}
+              step={step}
+              buildNumber={build.buildNumber}
+            />
+          ))}
         </Box>
       </Collapse>
     </Box>

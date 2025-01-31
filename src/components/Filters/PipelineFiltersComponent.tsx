@@ -172,7 +172,6 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     previousBuildsRef.current = builds;
 
     if (hasBuildsChanged) {
-      console.log('Builds updated, reapplying filters');
       applyFilters();
     }
   }, [builds, applyFilters]);

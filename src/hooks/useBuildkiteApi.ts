@@ -12,18 +12,11 @@ export const useBuildkiteApi = (orgSlug: string, pipelineSlug: string) => {
     error,
   } = useAsync(async (): Promise<PipelineParams | undefined> => {
     if (!orgSlug || !pipelineSlug) {
-      console.log('Missing required slugs:', { orgSlug, pipelineSlug });
       return undefined;
     }
 
     try {
-      console.log('Fetching pipeline with:', {
-        orgSlug,
-        pipelineSlug,
-      });
-
       const pipeline = await api.getPipeline(orgSlug, pipelineSlug);
-      console.log('Fetched pipeline:', pipeline);
 
       return pipeline;
     } catch (err) {

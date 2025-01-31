@@ -6,6 +6,7 @@ import {
   Status,
 } from '../components/Types';
 import { BuildkiteAPI, User } from './BuildkiteAPI';
+import { JobLog } from './Types';
 import { BuildkitePluginConfig } from '../plugin';
 import {
   BuildkiteApiBuild,
@@ -119,6 +120,37 @@ export class BuildkiteClient implements BuildkiteAPI {
         slug: pipelineSlug,
       }),
     };
+  }
+
+  async getJobLogs(
+    orgSlug: string,
+    pipelineSlug: string,
+    buildNumber: string,
+    jobId: string,
+  ): Promise<JobLog> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`;
+
+      const response = await this.fetchAPI.fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch job logs: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Extract and process the log content
+      const logContent = data.content
+        .split('\n')
+        .filter((line: string) => line.trim() !== '');
+
+      return {
+        content: logContent,
+      };
+    } catch (error) {
+      console.error('Error fetching job logs:', error);
+      throw error;
+    }
   }
 
   private calculateBuildDuration(build: BuildkiteApiBuild): string {

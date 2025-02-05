@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
@@ -53,7 +53,6 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   onToggleAllBuilds,
 }) => {
   const classes = useStyles();
-  const previousBuildsRef = useRef<BuildParams[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
     selectedBranch: 'all',
     selectedCreator: 'all',
@@ -64,8 +63,6 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       endDate: new Date(),
     },
   });
-
-  const lastFilteredBuildsRef = useRef<BuildParams[]>([]);
 
   const applyFilters = useCallback(() => {
     let filteredBuilds = [...builds];
@@ -113,48 +110,24 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       );
     });
 
-    // Only update if the filtered results have actually changed
-    if (
-      JSON.stringify(filteredBuilds) !==
-      JSON.stringify(lastFilteredBuildsRef.current)
-    ) {
-      lastFilteredBuildsRef.current = filteredBuilds;
-      onFilteredBuildsChange(filteredBuilds);
-    }
+    onFilteredBuildsChange(filteredBuilds);
   }, [builds, filterState, onFilteredBuildsChange]);
 
-  // Handle builds updates
-  useEffect(() => {
-    const hasBuildsChanged = builds !== previousBuildsRef.current;
-    previousBuildsRef.current = builds;
-
-    if (hasBuildsChanged) {
-      applyFilters();
-    }
-  }, [builds, applyFilters]);
-
-  // Handle filter state changes
+  // Apply filters whenever filterState changes
   useEffect(() => {
     applyFilters();
   }, [filterState, applyFilters]);
-
-  const handleFilterChange = (
-    filterType: keyof FilterState,
-    value: string | { startDate: Date; endDate: Date },
-  ) => {
-    setFilterState(prev => ({
-      ...prev,
-      [filterType]: value,
-    }));
-  };
 
   // Calculate filter options based on current builds
   const getFilterOptions = useCallback(() => {
     return builds.reduce(
       (acc, build) => {
+        // Count occurrences for branches
         acc.branches[build.branch] = (acc.branches[build.branch] || 0) + 1;
+        // Count occurrences for creators
         acc.creators[build.author.name] =
           (acc.creators[build.author.name] || 0) + 1;
+        // Count occurrences for statuses
         acc.statuses[build.status] = (acc.statuses[build.status] || 0) + 1;
         return acc;
       },
@@ -165,61 +138,49 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     );
   }, [builds]);
 
-  // Update filtered builds whenever builds prop or filter state changes
-  useEffect(() => {
-    // Check if builds array has changed
-    const hasBuildsChanged = builds !== previousBuildsRef.current;
-    previousBuildsRef.current = builds;
-
-    if (hasBuildsChanged) {
-      applyFilters();
-    }
-  }, [builds, applyFilters]);
-
-  // Also update when filter state changes
-  useEffect(() => {
-    applyFilters();
-  }, [filterState, applyFilters]);
-
-  const handleSearchChange = (searchTerm: string) => {
-    setFilterState(prev => ({
-      ...prev,
-      searchTerm,
-    }));
-  };
-
   const filterOptions = getFilterOptions();
 
   return (
     <Box className={classes.filterContainer}>
       <SearchFilter
         builds={builds}
-        onSearchChange={term => handleSearchChange(term)}
+        onSearchChange={term =>
+          setFilterState(prev => ({ ...prev, searchTerm: term }))
+        }
         currentSearchTerm={filterState.searchTerm}
       />
 
       <DateRangeFilter
         onDateRangeChange={(startDate, endDate) =>
-          handleFilterChange('dateRange', { startDate, endDate })
+          setFilterState(prev => ({
+            ...prev,
+            dateRange: { startDate, endDate },
+          }))
         }
         initialDateRange={filterState.dateRange}
       />
 
       <BranchFilter
         value={filterState.selectedBranch}
-        onChange={value => handleFilterChange('selectedBranch', value)}
+        onChange={value =>
+          setFilterState(prev => ({ ...prev, selectedBranch: value }))
+        }
         branches={filterOptions.branches}
       />
 
       <CreatorFilter
         value={filterState.selectedCreator}
-        onChange={value => handleFilterChange('selectedCreator', value)}
+        onChange={value =>
+          setFilterState(prev => ({ ...prev, selectedCreator: value }))
+        }
         creators={filterOptions.creators}
       />
 
       <StateFilter
         value={filterState.selectedStatus}
-        onChange={value => handleFilterChange('selectedStatus', value)}
+        onChange={value =>
+          setFilterState(prev => ({ ...prev, selectedStatus: value }))
+        }
         states={filterOptions.statuses}
       />
 

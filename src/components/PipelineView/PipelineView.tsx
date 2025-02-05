@@ -122,73 +122,29 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   const [collapsedBranches, setCollapsedBranches] = useState<{
     [key: string]: boolean;
   }>({});
-
   const [filteredBuilds, setFilteredBuilds] = useState<BuildParams[]>(
     pipeline.builds,
   );
 
-  useEffect(() => {
-    const newExpandedState = { ...expandedBuilds };
-    let hasChanges = false;
-
+  // Auto-expand running builds
+  useMemo(() => {
     pipeline.builds.forEach(build => {
       if (build.status === 'RUNNING' && !expandedBuilds[build.buildNumber]) {
-        newExpandedState[build.buildNumber] = true;
-        hasChanges = true;
+        setExpandedBuilds(prev => ({
+          ...prev,
+          [build.buildNumber]: true,
+        }));
       }
     });
-
-    if (hasChanges) {
-      setExpandedBuilds(newExpandedState);
-    }
   }, [pipeline.builds, expandedBuilds]);
 
-  // Keep filtered builds in sync with pipeline updates while preserving filter state
-  useEffect(() => {
-    setFilteredBuilds(prevFiltered => {
-      // Create a map of existing filtered builds
-      const existingBuilds = new Map(
-        prevFiltered.map(build => [build.buildNumber, build]),
-      );
-
-      // Update or add builds while maintaining their filtered state
-      const updatedBuilds = pipeline.builds.filter(newBuild => {
-        const existingBuild = existingBuilds.get(newBuild.buildNumber);
-
-        // Keep the build if it was previously filtered
-        if (existingBuild) {
-          return true;
-        }
-
-        // For new builds, check if they match any builds we're currently showing
-        // This helps maintain current filter context
-        const isMatchingBranch = prevFiltered.some(
-          filtered => filtered.branch === newBuild.branch,
-        );
-        const isMatchingAuthor = prevFiltered.some(
-          filtered => filtered.author.name === newBuild.author.name,
-        );
-
-        // If we're showing no builds (empty filter result), show all new builds
-        if (prevFiltered.length === 0) {
-          return true;
-        }
-
-        // Otherwise, show new builds that match our current context
-        return isMatchingBranch || isMatchingAuthor;
-      });
-
-      return updatedBuilds;
-    });
-  }, [pipeline.builds]);
-
   const allExpanded = useMemo(() => {
-    return pipeline.builds.every(build => expandedBuilds[build.buildNumber]);
-  }, [expandedBuilds, pipeline.builds]);
+    return filteredBuilds.every(build => expandedBuilds[build.buildNumber]);
+  }, [expandedBuilds, filteredBuilds]);
 
   const toggleAllBuilds = () => {
     const newExpandedState = !allExpanded;
-    const updatedExpanded = pipeline.builds.reduce(
+    const updatedExpanded = filteredBuilds.reduce(
       (acc, build) => ({
         ...acc,
         [build.buildNumber]: newExpandedState,
@@ -262,6 +218,10 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     );
   };
 
+  // Get groups for filtered builds
+  const groupedFilteredBuilds = groupBuildsByBranch(filteredBuilds);
+  const sortedFilteredBranches = sortBranches(groupedFilteredBuilds);
+
   return (
     <Box display="flex" flexDirection="column" gridGap="20px">
       <Breadcrumbs aria-label="breadcrumb">
@@ -302,15 +262,9 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
           </Box>
 
           <Paper variant="outlined">
-            {renderBranchSection(
-              'main',
-              groupBuildsByBranch(filteredBuilds).main,
-            )}
-            {sortBranches(groupBuildsByBranch(filteredBuilds)).map(branch =>
-              renderBranchSection(
-                branch,
-                groupBuildsByBranch(filteredBuilds).other[branch],
-              ),
+            {renderBranchSection('main', groupedFilteredBuilds.main)}
+            {sortedFilteredBranches.map(branch =>
+              renderBranchSection(branch, groupedFilteredBuilds.other[branch]),
             )}
           </Paper>
         </Grid>

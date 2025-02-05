@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Breadcrumbs,
@@ -126,17 +126,53 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     pipeline.builds,
   );
 
+  // Keep track of the latest pipeline builds reference
+  const latestPipelineBuildsRef = useRef(pipeline.builds);
+
+  // Keep track of the most recent filter operation
+  const lastFilterOperationRef =
+    useRef<(builds: BuildParams[]) => BuildParams[]>();
+
+  // Update filtered builds when pipeline changes while preserving filters
+  useEffect(() => {
+    if (pipeline.builds !== latestPipelineBuildsRef.current) {
+      latestPipelineBuildsRef.current = pipeline.builds;
+
+      if (lastFilterOperationRef.current) {
+        const newFilteredBuilds = lastFilterOperationRef.current(
+          pipeline.builds,
+        );
+        setFilteredBuilds(newFilteredBuilds);
+      } else {
+        setFilteredBuilds(pipeline.builds);
+      }
+    }
+  }, [pipeline.builds]);
+
   // Auto-expand running builds
-  useMemo(() => {
+  useEffect(() => {
+    const newExpandedState = { ...expandedBuilds };
+    let hasChanges = false;
+
     pipeline.builds.forEach(build => {
       if (build.status === 'RUNNING' && !expandedBuilds[build.buildNumber]) {
-        setExpandedBuilds(prev => ({
-          ...prev,
-          [build.buildNumber]: true,
-        }));
+        newExpandedState[build.buildNumber] = true;
+        hasChanges = true;
       }
     });
+
+    if (hasChanges) {
+      setExpandedBuilds(newExpandedState);
+    }
   }, [pipeline.builds, expandedBuilds]);
+
+  const handleFilteredBuildsChange = (
+    newFilteredBuilds: BuildParams[],
+    filterOperation: (builds: BuildParams[]) => BuildParams[],
+  ) => {
+    setFilteredBuilds(newFilteredBuilds);
+    lastFilterOperationRef.current = filterOperation;
+  };
 
   const allExpanded = useMemo(() => {
     return filteredBuilds.every(build => expandedBuilds[build.buildNumber]);
@@ -218,10 +254,6 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     );
   };
 
-  // Get groups for filtered builds
-  const groupedFilteredBuilds = groupBuildsByBranch(filteredBuilds);
-  const sortedFilteredBranches = sortBranches(groupedFilteredBuilds);
-
   return (
     <Box display="flex" flexDirection="column" gridGap="20px">
       <Breadcrumbs aria-label="breadcrumb">
@@ -255,17 +287,24 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
           <Box display="flex" justifyContent="flex-end" mb={3}>
             <PipelineFilters
               builds={pipeline.builds}
-              onFilteredBuildsChange={setFilteredBuilds}
+              onFilteredBuildsChange={handleFilteredBuildsChange}
               allExpanded={allExpanded}
               onToggleAllBuilds={toggleAllBuilds}
             />
           </Box>
 
           <Paper variant="outlined">
-            {renderBranchSection('main', groupedFilteredBuilds.main)}
-            {sortedFilteredBranches.map(branch =>
-              renderBranchSection(branch, groupedFilteredBuilds.other[branch]),
-            )}
+            {(() => {
+              const groupedBuilds = groupBuildsByBranch(filteredBuilds);
+              return (
+                <>
+                  {renderBranchSection('main', groupedBuilds.main)}
+                  {sortBranches(groupedBuilds).map(branch =>
+                    renderBranchSection(branch, groupedBuilds.other[branch]),
+                  )}
+                </>
+              );
+            })()}
           </Paper>
         </Grid>
       </Grid>

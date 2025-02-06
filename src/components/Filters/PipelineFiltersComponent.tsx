@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
@@ -41,7 +41,10 @@ interface FilterState {
 
 interface PipelineFiltersProps {
   builds: BuildParams[];
-  onFilteredBuildsChange: (builds: BuildParams[]) => void;
+  onFilteredBuildsChange: (
+    builds: BuildParams[],
+    filterOperation: (builds: BuildParams[]) => BuildParams[],
+  ) => void;
   allExpanded: boolean;
   onToggleAllBuilds: () => void;
 }
@@ -53,7 +56,6 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   onToggleAllBuilds,
 }) => {
   const classes = useStyles();
-  const previousBuildsRef = useRef<BuildParams[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
     selectedBranch: 'all',
     selectedCreator: 'all',
@@ -65,88 +67,46 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     },
   });
 
-  const lastFilteredBuildsRef = useRef<BuildParams[]>([]);
+  const createFilterOperation =
+    (state: FilterState) => (inputBuilds: BuildParams[]) => {
+      let result = [...inputBuilds];
 
-  const applyFilters = useCallback(() => {
-    let filteredBuilds = [...builds];
+      if (state.selectedBranch !== 'all') {
+        result = result.filter(build => build.branch === state.selectedBranch);
+      }
 
-    // Apply branch filter
-    if (filterState.selectedBranch !== 'all') {
-      filteredBuilds = filteredBuilds.filter(
-        build => build.branch === filterState.selectedBranch,
-      );
-    }
+      if (state.selectedCreator !== 'all') {
+        result = result.filter(
+          build => build.author.name === state.selectedCreator,
+        );
+      }
 
-    // Apply creator filter
-    if (filterState.selectedCreator !== 'all') {
-      filteredBuilds = filteredBuilds.filter(
-        build => build.author.name === filterState.selectedCreator,
-      );
-    }
+      if (state.selectedStatus !== 'all') {
+        result = result.filter(build => build.status === state.selectedStatus);
+      }
 
-    // Apply status filter
-    if (filterState.selectedStatus !== 'all') {
-      filteredBuilds = filteredBuilds.filter(
-        build => build.status === filterState.selectedStatus,
-      );
-    }
+      if (state.searchTerm) {
+        const searchLower = state.searchTerm.toLowerCase();
+        result = result.filter(
+          build =>
+            build.buildMessage.toLowerCase().includes(searchLower) ||
+            build.buildNumber.toLowerCase().includes(searchLower) ||
+            build.author.name.toLowerCase().includes(searchLower) ||
+            build.branch.toLowerCase().includes(searchLower) ||
+            build.commitId.toLowerCase().includes(searchLower),
+        );
+      }
 
-    // Apply search filter
-    if (filterState.searchTerm) {
-      const searchLower = filterState.searchTerm.toLowerCase();
-      filteredBuilds = filteredBuilds.filter(
-        build =>
-          build.buildMessage.toLowerCase().includes(searchLower) ||
-          build.buildNumber.toLowerCase().includes(searchLower) ||
-          build.author.name.toLowerCase().includes(searchLower) ||
-          build.branch.toLowerCase().includes(searchLower) ||
-          build.commitId.toLowerCase().includes(searchLower),
-      );
-    }
+      result = result.filter(build => {
+        const buildDate = new Date(build.createdAt);
+        return (
+          buildDate >= state.dateRange.startDate &&
+          buildDate <= state.dateRange.endDate
+        );
+      });
 
-    // Apply date range filter
-    filteredBuilds = filteredBuilds.filter(build => {
-      const buildDate = new Date(build.createdAt);
-      return (
-        buildDate >= filterState.dateRange.startDate &&
-        buildDate <= filterState.dateRange.endDate
-      );
-    });
-
-    // Only update if the filtered results have actually changed
-    if (
-      JSON.stringify(filteredBuilds) !==
-      JSON.stringify(lastFilteredBuildsRef.current)
-    ) {
-      lastFilteredBuildsRef.current = filteredBuilds;
-      onFilteredBuildsChange(filteredBuilds);
-    }
-  }, [builds, filterState, onFilteredBuildsChange]);
-
-  // Handle builds updates
-  useEffect(() => {
-    const hasBuildsChanged = builds !== previousBuildsRef.current;
-    previousBuildsRef.current = builds;
-
-    if (hasBuildsChanged) {
-      applyFilters();
-    }
-  }, [builds, applyFilters]);
-
-  // Handle filter state changes
-  useEffect(() => {
-    applyFilters();
-  }, [filterState, applyFilters]);
-
-  const handleFilterChange = (
-    filterType: keyof FilterState,
-    value: string | { startDate: Date; endDate: Date },
-  ) => {
-    setFilterState(prev => ({
-      ...prev,
-      [filterType]: value,
-    }));
-  };
+      return result;
+    };
 
   // Calculate filter options based on current builds
   const getFilterOptions = useCallback(() => {
@@ -165,27 +125,12 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     );
   }, [builds]);
 
-  // Update filtered builds whenever builds prop or filter state changes
-  useEffect(() => {
-    // Check if builds array has changed
-    const hasBuildsChanged = builds !== previousBuildsRef.current;
-    previousBuildsRef.current = builds;
-
-    if (hasBuildsChanged) {
-      applyFilters();
-    }
-  }, [builds, applyFilters]);
-
-  // Also update when filter state changes
-  useEffect(() => {
-    applyFilters();
-  }, [filterState, applyFilters]);
-
-  const handleSearchChange = (searchTerm: string) => {
-    setFilterState(prev => ({
-      ...prev,
-      searchTerm,
-    }));
+  const handleFilterChange = (key: keyof FilterState, value: any) => {
+    const newFilterState = { ...filterState, [key]: value };
+    setFilterState(newFilterState);
+    const filterOperation = createFilterOperation(newFilterState);
+    const filteredBuilds = filterOperation(builds);
+    onFilteredBuildsChange(filteredBuilds, filterOperation);
   };
 
   const filterOptions = getFilterOptions();
@@ -194,7 +139,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     <Box className={classes.filterContainer}>
       <SearchFilter
         builds={builds}
-        onSearchChange={term => handleSearchChange(term)}
+        onSearchChange={term => handleFilterChange('searchTerm', term)}
         currentSearchTerm={filterState.searchTerm}
       />
 

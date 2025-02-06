@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Breadcrumbs,
@@ -122,11 +122,34 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
   const [collapsedBranches, setCollapsedBranches] = useState<{
     [key: string]: boolean;
   }>({});
-
   const [filteredBuilds, setFilteredBuilds] = useState<BuildParams[]>(
     pipeline.builds,
   );
 
+  // Keep track of the latest pipeline builds reference
+  const latestPipelineBuildsRef = useRef(pipeline.builds);
+
+  // Keep track of the most recent filter operation
+  const lastFilterOperationRef =
+    useRef<(builds: BuildParams[]) => BuildParams[]>();
+
+  // Update filtered builds when pipeline changes while preserving filters
+  useEffect(() => {
+    if (pipeline.builds !== latestPipelineBuildsRef.current) {
+      latestPipelineBuildsRef.current = pipeline.builds;
+
+      if (lastFilterOperationRef.current) {
+        const newFilteredBuilds = lastFilterOperationRef.current(
+          pipeline.builds,
+        );
+        setFilteredBuilds(newFilteredBuilds);
+      } else {
+        setFilteredBuilds(pipeline.builds);
+      }
+    }
+  }, [pipeline.builds]);
+
+  // Auto-expand running builds
   useEffect(() => {
     const newExpandedState = { ...expandedBuilds };
     let hasChanges = false;
@@ -143,52 +166,21 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
     }
   }, [pipeline.builds, expandedBuilds]);
 
-  // Keep filtered builds in sync with pipeline updates while preserving filter state
-  useEffect(() => {
-    setFilteredBuilds(prevFiltered => {
-      // Create a map of existing filtered builds
-      const existingBuilds = new Map(
-        prevFiltered.map(build => [build.buildNumber, build]),
-      );
-
-      // Update or add builds while maintaining their filtered state
-      const updatedBuilds = pipeline.builds.filter(newBuild => {
-        const existingBuild = existingBuilds.get(newBuild.buildNumber);
-
-        // Keep the build if it was previously filtered
-        if (existingBuild) {
-          return true;
-        }
-
-        // For new builds, check if they match any builds we're currently showing
-        // This helps maintain current filter context
-        const isMatchingBranch = prevFiltered.some(
-          filtered => filtered.branch === newBuild.branch,
-        );
-        const isMatchingAuthor = prevFiltered.some(
-          filtered => filtered.author.name === newBuild.author.name,
-        );
-
-        // If we're showing no builds (empty filter result), show all new builds
-        if (prevFiltered.length === 0) {
-          return true;
-        }
-
-        // Otherwise, show new builds that match our current context
-        return isMatchingBranch || isMatchingAuthor;
-      });
-
-      return updatedBuilds;
-    });
-  }, [pipeline.builds]);
+  const handleFilteredBuildsChange = (
+    newFilteredBuilds: BuildParams[],
+    filterOperation: (builds: BuildParams[]) => BuildParams[],
+  ) => {
+    setFilteredBuilds(newFilteredBuilds);
+    lastFilterOperationRef.current = filterOperation;
+  };
 
   const allExpanded = useMemo(() => {
-    return pipeline.builds.every(build => expandedBuilds[build.buildNumber]);
-  }, [expandedBuilds, pipeline.builds]);
+    return filteredBuilds.every(build => expandedBuilds[build.buildNumber]);
+  }, [expandedBuilds, filteredBuilds]);
 
   const toggleAllBuilds = () => {
     const newExpandedState = !allExpanded;
-    const updatedExpanded = pipeline.builds.reduce(
+    const updatedExpanded = filteredBuilds.reduce(
       (acc, build) => ({
         ...acc,
         [build.buildNumber]: newExpandedState,
@@ -295,23 +287,24 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
           <Box display="flex" justifyContent="flex-end" mb={3}>
             <PipelineFilters
               builds={pipeline.builds}
-              onFilteredBuildsChange={setFilteredBuilds}
+              onFilteredBuildsChange={handleFilteredBuildsChange}
               allExpanded={allExpanded}
               onToggleAllBuilds={toggleAllBuilds}
             />
           </Box>
 
           <Paper variant="outlined">
-            {renderBranchSection(
-              'main',
-              groupBuildsByBranch(filteredBuilds).main,
-            )}
-            {sortBranches(groupBuildsByBranch(filteredBuilds)).map(branch =>
-              renderBranchSection(
-                branch,
-                groupBuildsByBranch(filteredBuilds).other[branch],
-              ),
-            )}
+            {(() => {
+              const groupedBuilds = groupBuildsByBranch(filteredBuilds);
+              return (
+                <>
+                  {renderBranchSection('main', groupedBuilds.main)}
+                  {sortBranches(groupedBuilds).map(branch =>
+                    renderBranchSection(branch, groupedBuilds.other[branch]),
+                  )}
+                </>
+              );
+            })()}
           </Paper>
         </Grid>
       </Grid>

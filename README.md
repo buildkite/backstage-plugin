@@ -1,58 +1,60 @@
 # Buildkite Backstage Plugin
 
-A Buildkite plugin for Backstage.
+A Buildkite plugin for Backstage that provides deep integration with your Buildkite CI/CD pipelines.
 
 ## ✨ Features
 
-🔍 **Pipeline Visibility**
-- View Buildkite pipelines directly within Backstage
-- Real-time build status monitoring
-- Branch-based organization of builds
+🔍 **Enhanced Pipeline Visibility**
+- Real-time build status monitoring with automatic updates
+- Hierarchical branch-based organization of builds
+- Detailed step-by-step build progress tracking
+- Comprehensive build logs with syntax highlighting
 
-⚡️ **Advanced Filtering**
-- Quick search across builds, authors, branches and commits
-- Filter by branch, creator, and build status
-- Date range filtering with preset options
-- Group builds by branch
+⚡️ **Powerful Filtering & Search**
+- Full-text search across builds, messages, authors, branches, and commit IDs
+- Smart date range filtering with preset options (Today, Yesterday, Last 7 days, Last 30 days)
+- Multi-criteria filtering by branch, creator, and build status
+- Automatic status-based grouping and organization
 
-📊 **Build Information**
-- Detailed build status and progress
-- Step-by-step build visibility
-- Build timing and creation details
+📊 **Rich Build Information**
+- Detailed build status with step-by-step progress
+- Build timing and duration tracking
+- Commit and branch context
+- Author information with avatars
+- Build trigger information
 
-🛠️ **Build Management**
-- Rebuild functionality for builds
-- Expandable build details
-- Build author and commit information
+🛠️ **Interactive Build Management**
+- One-click rebuild functionality
+- Expandable/collapsible build details
+- Interactive build step inspection
+- Direct links to Buildkite
 
-⚙️ **Customization**
-- UTC/Local time toggle
-- Collapse/expand build views
-- Custom pipeline styling
+⚙️ **Advanced Customization**
+- UTC/Local time toggle with persistent preferences
+- Branch-level collapsing
+- Automatic expansion of running builds
+- Custom pipeline styling with avatars
 
 ## Prerequisites
+
 - Buildkite account with API access
 - Required API token permissions:
   - `read_pipelines`
   - `read_builds` 
   - `read_user`
-  - `write_builds` (optional, for rebuild functionality)
+  - `write_builds` (for rebuild functionality)
 
 ## Installation
 
 ### Plugin Installation
 
-Clone down this repo using your preferred method.
-
-Run the following to create a local instance of Backstage, you'll be prompted for a `name`.
-
-```sh
-npx @backstage/create-app@latest
+```bash
+yarn add @internal/plugin-buildkite
 ```
 
-### Basic Configuration
+### Configuration
 
-Adjust the `app-config.yaml` to include the following, you'll need to ensure a value for `BUILDKITE_API_TOKEN` is present in your environment:
+1. Add the proxy configuration to your `app-config.yaml`:
 
 ```yaml
 proxy:
@@ -60,56 +62,47 @@ proxy:
     '/buildkite/api':
       target: https://api.buildkite.com/v2
       headers:
-        Accept: application/json
         Authorization: Bearer ${BUILDKITE_API_TOKEN}
+        Accept: application/json
       allowedHeaders: ['Authorization']
 
-catalog:
-  locations:
-    - type: url
-      target: https://github.com/organisation/repository/blob/main/path/to/catalog-info.yaml
-      rules:
-        - allow: [Component, System, API, Resource, Location, Group]
+buildkite:
+  apiToken: ${BUILDKITE_API_TOKEN}
 ```
 
-### API Configuration
+2. Register the plugin in your `packages/app/src/plugins.ts`:
 
-Add the following to your `packages/app/src/apis.ts`:
+```typescript
+export { plugin as BuildkitePlugin } from '@internal/plugin-buildkite';
+```
 
-```ts
-import { buildkiteApiRef, BuildkiteClient } from '@internal/plugin-buildkite';
+3. Add the API factory in `packages/app/src/apis.ts`:
+
+```typescript
+import { buildkiteAPIRef, BuildkiteClient } from '@internal/plugin-buildkite';
 
 export const apis: AnyApiFactory[] = [
-  // Other APIs
   createApiFactory({
     api: buildkiteAPIRef,
-    deps: {
-      discoveryApi: discoveryApiRef,
-      fetchApi: fetchApiRef,
-      configApi: configApiRef,
-    },
+    deps: { discoveryApi: discoveryApiRef, fetchApi: fetchApiRef, configApi: configApiRef },
     factory: ({ discoveryApi, fetchApi, configApi }) => {
-      const config = configApi.getOptionalConfig('buildkite')?.get() ?? {};
       return new BuildkiteClient({
         discoveryAPI: discoveryApi,
         fetchAPI: fetchApi,
-        config: config,
+        config: configApi.getOptionalConfig('buildkite')?.get() ?? {},
       });
     },
   }),
 ];
 ```
 
-### Route Configuration
+4. Add routes in `packages/app/src/App.tsx`:
 
-Add the following to your `packages/app/src/App.tsx`:
-
-```ts
-import {PipelinePage, BuildPage} from '@internal/plugin-buildkite';
+```typescript
+import { PipelinePage, BuildPage } from '@internal/plugin-buildkite';
 
 const routes = (
   <FlatRoutes>
-    // Other routes
     <Route path="/buildkite" element={<PipelinePage />} />
     <Route path="/buildkite/build/:pipelineSlug/:buildNumber" element={<BuildPage />} />
     <Route path="/buildkite/pipeline/:orgSlug/:pipelineSlug" element={<PipelinePage />} />
@@ -117,15 +110,12 @@ const routes = (
 );
 ```
 
-### Entity Integration
+5. Add to your Entity Page in `packages/app/src/components/catalog/EntityPage.tsx`:
 
-In your `packages/app/components/catalog/EntityPage.tsx` add the following:
+```typescript
+import { isBuildkiteAvailable, BuildkiteWrapper } from '@internal/plugin-buildkite';
 
-```ts
-import { isBuildkiteAvailable } from '@internal/plugin-buildkite';
-import { BuildkiteWrapper } from '@internal/plugin-buildkite';
-
-export const cicdContent = (
+const cicdContent = (
   <EntitySwitch>
     <EntitySwitch.Case if={isBuildkiteAvailable}>
       <BuildkiteWrapper />
@@ -134,52 +124,38 @@ export const cicdContent = (
       <EmptyState
         title="No CI/CD available for this entity"
         missing="info"
-        description={
-          <>
-            <p>You need to add an annotation to your component if you want to enable CI/CD for it.</p>
-          </>
-        }
+        description="Add a Buildkite annotation to enable CI/CD visualization"
       />
     </EntitySwitch.Case>
   </EntitySwitch>
 );
 
 const defaultEntityPage = (
-  <EntityLayoutWrapper>
-    // Other routes
+  <EntityLayout>
     <EntityLayout.Route path="/buildkite" title="Buildkite">
       {cicdContent}
     </EntityLayout.Route>
-  </EntityLayoutWrapper>
+  </EntityLayout>
 );
 ```
 
 ### Component Configuration
-Add the following annotation to your component's catalog-info.yaml:
+
+Add the Buildkite annotation to your component's `catalog-info.yaml`:
+
 ```yaml
 metadata:
   annotations:
     buildkite.com/pipeline-slug: organization-slug/pipeline-slug
-```    
-
-### Final Setup
-
-Copy (`cp`) this cloned repo into your Backstage instance and run the instance in `dev` mode:
-
-```sh
-cp ./backstage-plugin/* ../<backstage instance name>/plugins/buildkite
-
-yarn dev
 ```
 
 ## Development
 
-### Local Development
-```sh
+```bash
 # Install dependencies
 yarn install
 
-# Start plugin in development
+# Start plugin in development mode
 yarn start
 
 # Run tests
@@ -192,17 +168,28 @@ yarn build
 ## Troubleshooting
 
 ### Common Issues
-1. **Missing Buildkite Information**
-   - Ensure your component has the correct Buildkite annotation
-   - Verify API token permissions
-   - Check that the pipeline slug format matches `organization-slug/pipeline-slug`
 
-2. **Builds Not Showing**
-   - Verify API token has required permissions
-   - Check pipeline slug format
-   - Ensure builds exist in the specified date range
+1. **Authentication Errors**
+   - Verify `BUILDKITE_API_TOKEN` is set in your environment
+   - Check API token has required permissions
+   - Confirm proxy configuration in `app-config.yaml`
 
-3. **API Access Issues**
-   - Confirm `BUILDKITE_API_TOKEN` is set in your environment
-   - Verify proxy configuration in `app-config.yaml`
-   - Check API token permissions match requirements
+2. **Missing Build Data**
+   - Verify pipeline slug format: `organization-slug/pipeline-slug`
+   - Check organization and pipeline names are correct
+   - Ensure builds exist within selected date range
+   - Confirm all filters are set correctly
+
+3. **Real-time Updates Not Working**
+   - Check browser tab is active (updates pause in background)
+   - Verify network connectivity
+   - Ensure API token hasn't expired
+
+4. **Build Logs Not Loading**
+   - Confirm API token has `read_builds` permission
+   - Check build exists and is accessible
+   - Verify proxy configuration can handle log requests
+
+## Contributing
+
+Please read our [Contributing Guide](docs/CONTRIBUTING.md) before submitting a Pull Request.

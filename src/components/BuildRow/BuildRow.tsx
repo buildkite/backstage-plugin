@@ -14,8 +14,7 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
-import { BuildStep } from '../BuildStepComponent';
-import { BuildParams, PipelineParams } from '../Types';
+import { BuildStep, BuildParams, TimeChip, PipelineParams } from '..';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   getBuildkiteProjectSlug,
@@ -24,7 +23,6 @@ import {
 } from '../../utils';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
-import { TimeChip } from '../TimeChip';
 
 const useStyles = makeStyles({
   buildRow: {

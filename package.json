@@ -2,7 +2,7 @@
   "name": "@internal/plugin-buildkite",
   "exports": {
     ".": "./src/index.ts",
-    "./components": "./src/components.ts",
+    "./components": "./src/components/index.ts",
     "./package.json": "./package.json"
   },
   "typesVersions": {

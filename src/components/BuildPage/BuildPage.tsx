@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Avatar,
   Box,
@@ -13,17 +13,14 @@ import {
   Typography,
   makeStyles,
   Theme,
-} from "@material-ui/core";
-import { useParams } from "react-router-dom";
-import { useRouteRef } from "@backstage/core-plugin-api";
-import { useBuilds } from "../../state/useBuilds";
-import AutorenewIcon from "@material-ui/icons/Autorenew";
-import { Navatar } from "../Navatar";
-import { buildkitePipelineRouteRef } from "../../routes";
-import { Job } from "../JobComponent";
-import { BranchIcon, GithubIcon, StatusIcon } from "../Icons";
-import { BuildStep } from "../BuildStepComponent";
-import { TimeChip } from "../TimeChip";
+} from '@material-ui/core';
+import { useParams } from 'react-router-dom';
+import { useRouteRef } from '@backstage/core-plugin-api';
+import { useBuilds } from '../../state/useBuilds';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import { Navatar, Job, BuildStep, TimeChip } from '..';
+import { buildkitePipelineRouteRef } from '../../routes';
+import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
 
 interface BuildStateColors {
   main: string;
@@ -32,20 +29,20 @@ interface BuildStateColors {
 
 const buildStateColors: Record<string, BuildStateColors> = {
   PASSED: {
-    main: "#55BB3B",
-    subtle: "#FBFDFA",
+    main: '#55BB3B',
+    subtle: '#FBFDFA',
   },
   FAILED: {
-    main: "#F83F23",
-    subtle: "#FDF5F5",
+    main: '#F83F23',
+    subtle: '#FDF5F5',
   },
   RUNNING: {
-    main: "#F5BD44",
-    subtle: "#FEF8E9",
+    main: '#F5BD44',
+    subtle: '#FEF8E9',
   },
   DEFAULT: {
-    main: "#000000",
-    subtle: "#FFFFFF",
+    main: '#000000',
+    subtle: '#FFFFFF',
   },
 };
 
@@ -54,50 +51,50 @@ const getBuildStateColors = (state: string): BuildStateColors =>
 
 const useStyles = makeStyles((theme: Theme) => ({
   tabs: {
-    border: "1px solid #e8e8e8",
-    borderRadius: "4px",
-    width: "fit-content",
-    padding: "2px",
+    border: '1px solid #e8e8e8',
+    borderRadius: '4px',
+    width: 'fit-content',
+    padding: '2px',
   },
   indicator: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
   },
   tab: {
-    fontSize: "13px",
-    width: "fit-content",
-    minWidth: "fit-content",
-    borderRadius: "2px",
-    padding: "4px 8px",
-    color: "#333333",
+    fontSize: '13px',
+    width: 'fit-content',
+    minWidth: 'fit-content',
+    borderRadius: '2px',
+    padding: '4px 8px',
+    color: '#333333',
     opacity: 1,
-    "&$selected": {
-      color: "#4B19D5",
-      backgroundColor: "#F1EFFF",
+    '&$selected': {
+      color: '#4B19D5',
+      backgroundColor: '#F1EFFF',
       fontWeight: theme.typography.fontWeightMedium,
-      "&:focus": {
-        color: "#4B19D5",
-        backgroundColor: "#F1EFFF",
+      '&:focus': {
+        color: '#4B19D5',
+        backgroundColor: '#F1EFFF',
       },
-      "&:active": {
-        color: "#4B19D5",
-        backgroundColor: "#F1EFFF",
+      '&:active': {
+        color: '#4B19D5',
+        backgroundColor: '#F1EFFF',
       },
-      "&:hover": {
-        color: "#4B19D5",
-        backgroundColor: "#F1EFFF",
+      '&:hover': {
+        color: '#4B19D5',
+        backgroundColor: '#F1EFFF',
       },
     },
-    "&:focus": {
-      color: "inherit",
-      backgroundColor: "inherit",
+    '&:focus': {
+      color: 'inherit',
+      backgroundColor: 'inherit',
     },
-    "&:active": {
-      color: "inherit",
-      backgroundColor: "inherit",
+    '&:active': {
+      color: 'inherit',
+      backgroundColor: 'inherit',
     },
-    "&:hover": {
-      color: "inherit",
-      backgroundColor: "inherit",
+    '&:hover': {
+      color: 'inherit',
+      backgroundColor: 'inherit',
     },
   },
   selected: Object,
@@ -112,7 +109,7 @@ export const BuildPage = () => {
   const getPipelinePath = useRouteRef(buildkitePipelineRouteRef);
   const { pipeline, build, steps, loading } = useBuilds(
     pipelineSlug!,
-    buildNumber!
+    buildNumber!,
   );
 
   const [isUTC, setIsUTC] = useState(false);
@@ -122,7 +119,10 @@ export const BuildPage = () => {
     setIsUTC(!isUTC);
   };
 
-  const handleTabChange = (event: React.ChangeEvent<object>, newValue: number) => {
+  const handleTabChange = (
+    event: React.ChangeEvent<object>,
+    newValue: number,
+  ) => {
     setSelectedTab(newValue);
   };
 
@@ -130,10 +130,10 @@ export const BuildPage = () => {
     selectedTab === 0
       ? steps
       : steps.filter(
-          (step) =>
-            step.status === "FAILED" ||
-            step.status === "SKIPPED" ||
-            step.status === "CANCELED"
+          step =>
+            step.status === 'FAILED' ||
+            step.status === 'SKIPPED' ||
+            step.status === 'CANCELED',
         );
 
   const classes = useStyles();
@@ -162,7 +162,7 @@ export const BuildPage = () => {
         <Link color="inherit" href="/">
           <Typography
             variant="h5"
-            style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+            style={{ fontSize: '13px', fontWeight: 500, margin: 0 }}
           >
             Home
           </Typography>
@@ -180,14 +180,14 @@ export const BuildPage = () => {
           <Link color="inherit" href={getPipelinePath({ pipelineSlug })}>
             <Typography
               variant="h5"
-              style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+              style={{ fontSize: '13px', fontWeight: 500, margin: 0 }}
             >
               {pipeline.name}
             </Typography>
           </Link>
         </Box>
         <Typography
-          style={{ fontSize: "13px", fontWeight: 500, margin: 0 }}
+          style={{ fontSize: '13px', fontWeight: 500, margin: 0 }}
           color="textPrimary"
         >
           #{buildNumber}
@@ -213,7 +213,7 @@ export const BuildPage = () => {
               <Box display="flex" flexDirection="column" gridGap="4px">
                 <Typography
                   variant="h6"
-                  style={{ margin: 0, fontSize: "16px", fontWeight: 500 }}
+                  style={{ margin: 0, fontSize: '16px', fontWeight: 500 }}
                 >
                   {build.buildMessage}
                 </Typography>
@@ -226,9 +226,9 @@ export const BuildPage = () => {
                 >
                   <Chip
                     style={{
-                      color: "#4F4F4F",
-                      border: "none",
-                      borderRadius: "4px",
+                      color: '#4F4F4F',
+                      border: 'none',
+                      borderRadius: '4px',
                       margin: 0,
                     }}
                     label={`Build #${build.buildNumber}`}
@@ -236,16 +236,16 @@ export const BuildPage = () => {
                     size="small"
                   />
 
-                  <Typography style={{ color: "#111111", fontSize: "12px" }}>
+                  <Typography style={{ color: '#111111', fontSize: '12px' }}>
                     ·
                   </Typography>
                   <Chip
                     style={{
-                      color: "#4F4F4F",
-                      border: "none",
-                      borderRadius: "4px",
+                      color: '#4F4F4F',
+                      border: 'none',
+                      borderRadius: '4px',
                       margin: 0,
-                      paddingLeft: "4px",
+                      paddingLeft: '4px',
                     }}
                     icon={<BranchIcon size="small" />}
                     label={build.branch}
@@ -255,11 +255,11 @@ export const BuildPage = () => {
                   <Typography variant="caption">/</Typography>
                   <Chip
                     style={{
-                      color: "#4F4F4F",
-                      border: "none",
-                      borderRadius: "4px",
+                      color: '#4F4F4F',
+                      border: 'none',
+                      borderRadius: '4px',
                       margin: 0,
-                      paddingLeft: "4px",
+                      paddingLeft: '4px',
                     }}
                     icon={<GithubIcon viewBox="0 0 13 13" />}
                     label={build.commitId}
@@ -287,7 +287,7 @@ export const BuildPage = () => {
               paddingX="20px"
               paddingY="12px"
             >
-              {build.steps.map((step) => (
+              {build.steps.map(step => (
                 <BuildStep key={step.id} step={step} />
               ))}
             </Box>
@@ -310,9 +310,9 @@ export const BuildPage = () => {
               >
                 <Chip
                   style={{
-                    color: "#4F4F4F",
-                    border: "none",
-                    borderRadius: "4px",
+                    color: '#4F4F4F',
+                    border: 'none',
+                    borderRadius: '4px',
                     margin: 0,
                   }}
                   avatar={<Avatar src={build.author.avatar} />}
@@ -320,7 +320,7 @@ export const BuildPage = () => {
                   variant="outlined"
                   size="small"
                 />
-                <Typography style={{ color: "#111111", fontSize: "12px" }}>
+                <Typography style={{ color: '#111111', fontSize: '12px' }}>
                   ·
                 </Typography>
                 <TimeChip
@@ -328,7 +328,7 @@ export const BuildPage = () => {
                     dateString: build.createdAt,
                     isUTC,
                     onTimeClick,
-                    triggerType: "Webhook",
+                    triggerType: 'Webhook',
                   }}
                 />
               </Box>
@@ -343,29 +343,29 @@ export const BuildPage = () => {
                   color="default"
                   size="small"
                   style={{
-                    backgroundColor: "white",
-                    textTransform: "none",
+                    backgroundColor: 'white',
+                    textTransform: 'none',
                   }}
                   startIcon={
                     <AutorenewIcon
                       fontSize="small"
                       style={{
-                        rotate: "45deg",
+                        rotate: '45deg',
                       }}
                     />
                   }
                 >
                   Rebuild
                 </Button>
-                {build.status === "RUNNING" && (
+                {build.status === 'RUNNING' && (
                   <Button
                     variant="contained"
                     color="default"
                     size="small"
                     style={{
-                      textTransform: "none",
-                      backgroundColor: "white",
-                      color: "#F83F23",
+                      textTransform: 'none',
+                      backgroundColor: 'white',
+                      color: '#F83F23',
                     }}
                   >
                     Cancel
@@ -393,7 +393,7 @@ export const BuildPage = () => {
             />
           </Tabs>
           <Box display="flex" flexDirection="column" gridGap="8px" mt="12px">
-            {filteredSteps.map((step) => (
+            {filteredSteps.map(step => (
               <Job key={step.id} {...{ step }} />
             ))}
           </Box>

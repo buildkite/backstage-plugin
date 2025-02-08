@@ -1,1 +1,0 @@
-export { ComponentPage } from "./Component";

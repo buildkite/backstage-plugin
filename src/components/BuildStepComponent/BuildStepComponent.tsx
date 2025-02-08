@@ -6,9 +6,8 @@ import {
   getBuildkiteProjectSlug,
   parseBuildkiteProjectSlug,
 } from '../../utils';
-import { Job } from '../JobComponent';
 import { makeStyles } from '@material-ui/core/styles';
-import { BuildStepParams } from '../Types';
+import { Job, BuildStepParams } from '..';
 import { StatusIcon } from '../Icons';
 import { Box, Chip } from '@material-ui/core';
 

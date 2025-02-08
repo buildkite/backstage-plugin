@@ -8,7 +8,7 @@ import { SearchFilter } from './SearchFilterComponent';
 import { StateFilter } from './StateFilterComponent';
 import { BranchFilter } from './BranchFilterComponent';
 import { CreatorFilter } from './CreatorFilterComponent';
-import { BuildParams } from '../Types';
+import { BuildParams } from '..';
 
 const useStyles = makeStyles({
   filterContainer: {

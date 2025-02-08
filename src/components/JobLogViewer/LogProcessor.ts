@@ -1,5 +1,3 @@
-// logProcessor.ts
-
 interface ProcessedLogLine {
   content: string;
   type: 'command' | 'output' | 'info' | 'warning' | 'error' | 'success';

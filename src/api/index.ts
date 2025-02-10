@@ -1,2 +1,3 @@
-export { buildkiteAPIRef } from "./BuildkiteAPI";
-export { BuildkiteClient } from "./BuildkiteClient";
+export * from './BuildkiteAPI';
+export * from './BuildkiteClient';
+export * from './Types';

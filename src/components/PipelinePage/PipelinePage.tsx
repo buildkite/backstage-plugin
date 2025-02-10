@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
 import { Progress, ResponseErrorPanel } from '@backstage/core-components';
-import { PipelineView } from '../PipelineView';
-import { PipelineParams } from '../Types';
+import { PipelineParams, PipelineView } from '..';
 
 const POLL_INTERVAL = 1000; // Poll every second
 

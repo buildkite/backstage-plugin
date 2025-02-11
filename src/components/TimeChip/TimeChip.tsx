@@ -1,15 +1,15 @@
-import React from "react";
-import { Chip, Tooltip } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import { Chip, Tooltip } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   chip: {
-    color: "inherit",
-    border: "none",
-    borderRadius: "4px",
+    color: theme.palette.text.secondary,
+    border: 'none',
+    borderRadius: '4px',
     margin: 0,
   },
-});
+}));
 
 type TimeChipProps = {
   dateString: string;
@@ -18,25 +18,30 @@ type TimeChipProps = {
   triggerType?: string; // Optional triggerType prop
 };
 
-export const TimeChip: React.FC<TimeChipProps> = ({ dateString, isUTC, onTimeClick, triggerType }) => {
+export const TimeChip: React.FC<TimeChipProps> = ({
+  dateString,
+  isUTC,
+  onTimeClick,
+  triggerType,
+}) => {
   const classes = useStyles();
 
   const formatDate = (
     dateString: string,
     toUTC: boolean,
-    triggerType?: string
+    triggerType?: string,
   ) => {
     const date = new Date(dateString);
     const now = new Date();
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
 
-    const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" });
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
     const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
     const time = date.toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "numeric",
+      hour: 'numeric',
+      minute: 'numeric',
       hour12: true,
     });
 

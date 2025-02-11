@@ -9,12 +9,13 @@ import {
   Collapse,
   Tooltip,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { darken, lighten, makeStyles } from '@material-ui/core/styles';
 import ReplayIcon from '@material-ui/icons/Replay';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
-import { BuildStep, BuildParams, TimeChip, PipelineParams } from '..';
+import { BuildStep } from '../BuildStepComponent';
+import { BuildParams, PipelineParams } from '../Types';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   getBuildkiteProjectSlug,
@@ -23,15 +24,17 @@ import {
 } from '../../utils';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
+import { TimeChip } from '../TimeChip';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   buildRow: {
+    backgroundColor: theme.palette.background.paper,
     '&:not(:last-child)': {
-      borderBottom: '1px solid #E5E5E5',
+      borderBottom: `1px solid ${theme.palette.divider}`,
     },
   },
   chip: {
-    color: '#737373',
+    color: theme.palette.text.secondary,
     border: 'none',
     borderRadius: '4px',
     margin: 0,
@@ -53,6 +56,14 @@ const useStyles = makeStyles({
     flexDirection: 'row',
     minHeight: '40px',
   },
+  collapseContainer: {
+    display: 'flex',
+    gridGap: '4px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    backgroundColor: theme.palette.background.default,
+    padding: '12px',
+  },
   retryButton: {
     width: '32px',
     height: '32px',
@@ -60,7 +71,7 @@ const useStyles = makeStyles({
       opacity: 0.5,
     },
   },
-});
+}));
 
 type BuildRowProps = {
   build: BuildParams;
@@ -134,7 +145,8 @@ export const BuildRow: React.FC<BuildRowProps> = ({
           <StatusIcon status={build.status} size="medium" />
           <Typography
             variant="caption"
-            style={{ color: '#737373', paddingTop: '1px' }}
+            color="textSecondary"
+            style={{ paddingTop: '1px' }}
           >
             {build.timeElapsed}
           </Typography>
@@ -159,7 +171,8 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             </Link>
             <Typography
               variant="caption"
-              style={{ color: '#737373', paddingTop: '3px' }}
+              color="textSecondary"
+              style={{ paddingTop: '3px' }}
             >
               #{build.buildNumber}
             </Typography>
@@ -169,7 +182,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
             alignItems="center"
             margin={0}
             gridGap="3px"
-            color="#737373"
+            color="textSecondary"
           >
             <Chip
               className={classes.chip}
@@ -178,7 +191,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
               variant="outlined"
               size="small"
             />
-            <Typography style={{ color: '#111111', fontSize: '12px' }}>
+            <Typography color="textSecondary" style={{ fontSize: '12px' }}>
               ·
             </Typography>
             <Chip
@@ -198,7 +211,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
               variant="outlined"
               size="small"
             />
-            <Typography style={{ color: '#111111', fontSize: '12px' }}>
+            <Typography color="textSecondary" style={{ fontSize: '12px' }}>
               ·
             </Typography>
             <TimeChip
@@ -235,15 +248,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
         </Box>
       </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Box
-          display="flex"
-          gridGap="4px"
-          alignItems="center"
-          flexWrap="wrap"
-          bgcolor="#f8f8f8"
-          padding="12px"
-          boxShadow="inset 0px 1px 4px rgba(0, 0, 0, 0.1)"
-        >
+        <Box className={classes.collapseContainer}>
           {build.steps.map(step => (
             <BuildStep
               key={step.id}
@@ -251,6 +256,79 @@ export const BuildRow: React.FC<BuildRowProps> = ({
               buildNumber={build.buildNumber}
             />
           ))}
+
+          <BuildStep
+            step={{
+              id: 'test-running',
+              status: 'RUNNING',
+              title: ':metal: Running Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-failed',
+              status: 'FAILED',
+              title: ':metal: Failed Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-failing',
+              status: 'FAILING',
+              title: ':metal: Failing Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-blocked',
+              status: 'BLOCKED',
+              title: ':metal: Blocked Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-assigned',
+              status: 'ASSIGNED',
+              title: ':metal: Assigned Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-accepted',
+              status: 'ACCEPTED',
+              title: ':metal: Accepted Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-skipped',
+              status: 'SKIPPED',
+              title: ':metal: Skipped Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-canceling',
+              status: 'CANCELING',
+              title: ':metal: Canceling Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
+          <BuildStep
+            step={{
+              id: 'test-wait',
+              status: 'WAIT',
+              title: ':metal: Waiting Step',
+            }}
+            buildNumber={build.buildNumber}
+          />
         </Box>
       </Collapse>
     </Box>

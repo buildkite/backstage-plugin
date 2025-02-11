@@ -6,31 +6,28 @@ import {
   Link,
   Paper,
   Typography,
+  lighten,
   makeStyles,
 } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import { BuildRow } from '../BuildRow';
+import { Navatar } from '../Navatar';
+import { PipelineParams, BuildParams } from '../Types';
+import { PipelineFilters } from '../Filters';
 
-import {
-  BuildRow,
-  Navatar,
-  PipelineFilters,
-  PipelineParams,
-  BuildParams,
-} from '..';
-
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   branchHeader: {
     padding: '8px 12px',
-    backgroundColor: '#f8f8f8',
-    borderBottom: '1px solid #E5E5E5',
+    backgroundColor: theme.palette.background.paper,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     fontWeight: 500,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     cursor: 'pointer',
     '&:hover': {
-      backgroundColor: '#f0f0f0',
+      backgroundColor: lighten(theme.palette.background.default, 0.1),
     },
   },
   branchSection: {
@@ -53,7 +50,7 @@ const useStyles = makeStyles({
   },
   branchCount: {
     fontSize: '12px',
-    color: '#666',
+    color: theme.palette.text.secondary,
     marginLeft: '8px',
   },
   expandButton: {
@@ -65,7 +62,7 @@ const useStyles = makeStyles({
       margin: 0,
     },
   },
-});
+}));
 
 interface GroupedBuilds {
   main: BuildParams[];

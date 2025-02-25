@@ -1,9 +1,7 @@
 steps:
-  - label: ':docker: Build and Test'
+  - label: '💀 Test'
     command: |
-      echo "Building and testing..."
-      sleep 5
-      echo "GOTEM"
+      yarn test ./src/utils/
     plugins:
       - docker-compose#v5.4.0:
           run: app

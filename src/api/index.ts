@@ -1,3 +1,3 @@
-export * from './BuildkiteAPI';
-export * from './BuildkiteClient';
-export * from './Types';
+export * from './buildkiteApiRef';
+export * from './buildkiteClient';
+export * from './types';

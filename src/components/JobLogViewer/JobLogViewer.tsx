@@ -16,7 +16,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { StatusIcon } from '../Icons';
 import { Status } from '..';
-import { processLogs } from './LogProcessor';
+import { processLogs } from './logProcessor';
 
 const useStyles = makeStyles(theme => ({
   root: {

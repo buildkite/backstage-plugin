@@ -4,16 +4,16 @@ import {
   BuildStepParams,
   PipelineParams,
   Status,
-} from '../components/Types';
-import { BuildkiteAPI, User } from './BuildkiteAPI';
-import { JobLog } from './Types';
+} from '../components';
+import { BuildkiteAPI, User } from './buildkiteApiRef';
 import { BuildkitePluginConfig } from '../plugin';
 import {
   BuildkiteApiBuild,
   BuildkiteApiJob,
   BuildkiteApiPipeline,
   BuildkiteTransforms,
-} from './Types';
+  JobLog,
+} from './types';
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;

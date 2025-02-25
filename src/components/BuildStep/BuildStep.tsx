@@ -6,12 +6,12 @@ import {
   getBuildkiteProjectSlug,
   parseBuildkiteProjectSlug,
 } from '../../utils';
-import { Job } from '../JobComponent';
+import { Job } from '../Job';
 import { alpha, darken, lighten, makeStyles } from '@material-ui/core/styles';
-import { BuildStepParams } from '../Types';
+import { BuildStepParams } from '..';
 import { StatusIcon } from '../Icons';
 import { Box, Chip } from '@material-ui/core';
-import { useEmoji } from '../../lib/emoji/useEmoji';
+import { useEmoji } from '../../hooks/useEmoji';
 
 interface BuildStepProps {
   step: BuildStepParams;

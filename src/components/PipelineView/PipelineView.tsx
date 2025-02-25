@@ -11,9 +11,7 @@ import {
 } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { BuildRow } from '../BuildRow';
-import { Navatar } from '../Navatar';
-import { PipelineParams, BuildParams } from '../Types';
+import { PipelineParams, BuildParams, Navatar, BuildRow } from '..';
 import { PipelineFilters } from '../Filters';
 
 const useStyles = makeStyles(theme => ({

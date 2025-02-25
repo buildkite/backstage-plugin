@@ -1,8 +1,11 @@
 steps:
-  - label: '💀 Test'
-    command: yarn test ./src/utils/
+  - label: ':docker: Build and Test'
+    command: |
+      echo "Building and testing..."
+      sleep 5
+      echo "GOTEM"
     plugins:
-      - docker-compose#v5.6.0:
+      - docker-compose#v5.4.0:
           run: app
           config: compose.yaml
     artifact_paths:

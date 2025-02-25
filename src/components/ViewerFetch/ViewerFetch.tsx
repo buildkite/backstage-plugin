@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '@backstage/core-plugin-api';
-import { buildkiteAPIRef } from '../../api';
+import { buildkiteAPIRef, User } from '../../api';
 import {
   Progress,
   Table,
   TableColumn,
   ErrorPanel,
 } from '@backstage/core-components';
-import { User } from '../../api/BuildkiteAPI';
 import { Grid, Typography, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
@@ -23,7 +22,7 @@ const columns: TableColumn[] = [
   { title: 'Value', field: 'value' },
 ];
 
-export const ViewerFetchComponent = () => {
+export const ViewerFetch = () => {
   const classes = useStyles();
   const buildkiteAPI = useApi(buildkiteAPIRef);
   const [userData, setUserData] = useState<User | null>(null);

@@ -14,8 +14,8 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
-import { BuildStep } from '../BuildStepComponent';
-import { BuildParams, PipelineParams } from '../Types';
+import { BuildStep } from '../BuildStep';
+import { BuildParams, PipelineParams } from '..';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   getBuildkiteProjectSlug,
@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-type BuildRowProps = {
+export type BuildRowProps = {
   build: BuildParams;
   pipeline: PipelineParams;
   index: number;
@@ -85,7 +85,6 @@ type BuildRowProps = {
 
 export const BuildRow: React.FC<BuildRowProps> = ({
   build,
-  pipeline,
   index,
   expanded,
   onExpandClick,

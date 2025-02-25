@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { BuildStep } from '..';
-import { BuildStepParams } from '../Types';
+import { BuildStepParams } from '..';
 
 describe('BuildStep Component', () => {
   const stepPassed: BuildStepParams = {

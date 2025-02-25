@@ -8,13 +8,13 @@ const useStyles = makeStyles({
   },
 });
 
-interface StateFilterProps {
+interface StatusFilterProps {
   value: string;
   onChange: (value: string) => void;
   states: Record<string, number>;
 }
 
-export const StateFilter: React.FC<StateFilterProps> = ({
+export const StatusFilter: React.FC<StatusFilterProps> = ({
   value,
   onChange,
   states,

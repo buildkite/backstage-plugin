@@ -1,1 +1,0 @@
-export { ViewerFetchComponent } from "./ViewerFetchComponent";

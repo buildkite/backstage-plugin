@@ -16,7 +16,7 @@ import {
 } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { useRouteRef } from '@backstage/core-plugin-api';
-import { useBuilds } from '../../state/useBuilds';
+import { useBuilds } from '../../hooks/useBuilds';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import { Navatar, Job, BuildStep, TimeChip } from '..';
 import { buildkitePipelineRouteRef } from '../../routes';

@@ -3,12 +3,12 @@ import { Box, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
-import { DateRangeFilter } from './DateRangeComponent';
-import { SearchFilter } from './SearchFilterComponent';
-import { StateFilter } from './StateFilterComponent';
-import { BranchFilter } from './BranchFilterComponent';
-import { CreatorFilter } from './CreatorFilterComponent';
-import { BuildParams } from '..';
+import { DateRangeFilter } from '../DataRangeFilter/DateRangeFilter';
+import { SearchFilter } from '../SearchFilter/SearchFilter';
+import { StatusFilter } from '../StatusFilter/StatusFilter';
+import { BranchFilter } from '../BranchFilter/BranchFilter';
+import { CreatorFilter } from '../CreatorFilter/CreatorFilter';
+import { BuildParams } from '../..';
 
 const useStyles = makeStyles({
   filterContainer: {
@@ -162,7 +162,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         creators={filterOptions.creators}
       />
 
-      <StateFilter
+      <StatusFilter
         value={filterState.selectedStatus}
         onChange={value => handleFilterChange('selectedStatus', value)}
         states={filterOptions.statuses}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import parseEmoji, { EMOJI_CATALOGUES } from './parse-emoji';
+import parseEmoji, { EMOJI_CATALOGUES } from '../lib/emoji/parse-emoji';
 
 export const useEmoji = () => {
   const [isLoaded, setIsLoaded] = useState(EMOJI_CATALOGUES.length > 0);

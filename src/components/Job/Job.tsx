@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { BuildStepParams } from '../Types';
-import { JobLogViewer } from '..';
+import { BuildStepParams, JobLogViewer } from '..';
 
 interface JobProps {
   step: BuildStepParams;

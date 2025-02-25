@@ -1,7 +1,7 @@
 import { useApi } from '@backstage/core-plugin-api';
 import { useAsync } from 'react-use';
 import { buildkiteAPIRef } from '../api';
-import { PipelineParams } from '../components/Types';
+import { PipelineParams } from '../components';
 
 export const useBuildkiteApi = (orgSlug: string, pipelineSlug: string) => {
   const api = useApi(buildkiteAPIRef);

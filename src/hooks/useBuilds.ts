@@ -1,10 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { mockPipelines } from "../mockData";
-import {
-  BuildParams,
-  BuildStepParams,
-  PipelineParams,
-} from "../components/Types";
+import { useState, useEffect, useCallback } from 'react';
+import { mockPipelines } from '../mockData';
+import { BuildParams, BuildStepParams, PipelineParams } from '../components';
 
 export const useBuilds = (pipelineSlug: string, buildNumber: string) => {
   const [pipeline, setPipeline] = useState<PipelineParams | null>(null);
@@ -14,10 +10,10 @@ export const useBuilds = (pipelineSlug: string, buildNumber: string) => {
 
   const fetchBuild = useCallback(() => {
     setLoading(true);
-    const foundPipeline = mockPipelines.find((p) => p.name === pipelineSlug);
+    const foundPipeline = mockPipelines.find(p => p.name === pipelineSlug);
     if (foundPipeline) {
       const foundBuild = foundPipeline.builds.find(
-        (b) => b.buildNumber === buildNumber
+        b => b.buildNumber === buildNumber,
       );
       setPipeline(foundPipeline);
       setBuild(foundBuild || null);

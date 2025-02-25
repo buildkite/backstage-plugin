@@ -5,6 +5,7 @@ import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   getBuildkiteProjectSlug,
   parseBuildkiteProjectSlug,
+  isClickableStatus,
 } from '../../utils';
 import { Job } from '../Job';
 import { alpha, darken, lighten, makeStyles } from '@material-ui/core/styles';
@@ -198,10 +199,6 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step, buildNumber }) => {
     }
   };
 
-  const isClickable = (status: BuildStepParams['status']) => {
-    return ['PASSED', 'FAILED', 'CANCELED'].includes(status);
-  };
-
   if (!step.title) {
     return <StatusIcon status={step.status} size="small" />;
   }
@@ -214,7 +211,7 @@ export const BuildStep: React.FC<BuildStepProps> = ({ step, buildNumber }) => {
       renderStep={({ onClick }) => (
         <Chip
           className={`${classes.buildStep} ${getStatusClass(step.status)} ${
-            !isClickable(step.status) ? classes.notClickable : ''
+            !isClickableStatus(step.status) ? classes.notClickable : ''
           }`}
           onClick={onClick}
           icon={

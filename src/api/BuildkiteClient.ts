@@ -1,10 +1,5 @@
 import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
-import {
-  BuildParams,
-  BuildStepParams,
-  PipelineParams,
-  Status,
-} from '../components';
+import { BuildParams, BuildStepParams, PipelineParams } from '../components';
 import { BuildkiteAPI, User } from './buildkiteApiRef';
 import { BuildkitePluginConfig } from '../plugin';
 import {
@@ -14,6 +9,16 @@ import {
   BuildkiteTransforms,
   JobLog,
 } from './types';
+import {
+  calculateBuildDuration,
+  isRunning,
+  mapBuildkiteStatus,
+  getBuildkiteApiBaseUrl,
+  getBuildkiteJobLogsApiUrl,
+  getBuildkitePipelineApiUrl,
+  getBuildkiteBuildsApiUrl,
+  formatCommitId,
+} from '../utils';
 
 export class BuildkiteClient implements BuildkiteAPI {
   private readonly discoveryAPI: DiscoveryApi;
@@ -29,57 +34,7 @@ export class BuildkiteClient implements BuildkiteAPI {
     this.fetchAPI = options.fetchAPI;
 
     this.transforms = {
-      mapBuildkiteStatus: (status: string): Status => {
-        switch (status?.toLowerCase()) {
-          case 'passed':
-            return 'PASSED';
-          case 'failed':
-            return 'FAILED';
-          case 'running':
-            return 'RUNNING';
-          case 'scheduled':
-            return 'SCHEDULED';
-          case 'canceled':
-            return 'CANCELED';
-          case 'canceling':
-            return 'CANCELING';
-          case 'skipped':
-            return 'SKIPPED';
-          case 'not_run':
-            return 'NOT_RUN';
-          case 'waiting':
-            return 'WAITING';
-          case 'waiting_failed':
-            return 'WAITING_FAILED';
-          case 'blocked':
-            return 'BLOCKED';
-          case 'unblocked':
-            return 'UNBLOCKED';
-          case 'creating':
-            return 'CREATING';
-          case 'failing':
-            return 'FAILING';
-          case 'timing_out':
-            return 'TIMING_OUT';
-          case 'assigned':
-            return 'ASSIGNED';
-          case 'accepted':
-            return 'ACCEPTED';
-          case 'limited':
-            return 'LIMITED';
-          case 'limiting':
-            return 'LIMITING';
-          case 'paused':
-            return 'PAUSED';
-          case 'wait':
-            return 'WAIT';
-          case 'waiter':
-            return 'WAITER';
-          default:
-            console.warn(`Unhandled Buildkite status: ${status}`);
-            return 'NOT_RUN';
-        }
-      },
+      mapBuildkiteStatus,
       toBuildParams: (build: BuildkiteApiBuild): BuildParams => ({
         buildNumber: build.number?.toString() || '',
         status: this.transforms.mapBuildkiteStatus(build.state),
@@ -89,7 +44,7 @@ export class BuildkiteClient implements BuildkiteAPI {
           avatar: build.creator?.avatar_url || '',
         },
         branch: build.branch || 'main',
-        commitId: build.commit?.substring(0, 7) || '',
+        commitId: formatCommitId(build.commit || ''),
         createdAt: build.created_at || new Date().toISOString(),
         timeElapsed: this.calculateBuildDuration(build),
         steps: (build.jobs || []).map(this.transforms.toBuildStepParams),
@@ -130,7 +85,13 @@ export class BuildkiteClient implements BuildkiteAPI {
   ): Promise<JobLog> {
     try {
       const baseUrl = await this.getBaseURL();
-      const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`;
+      const url = getBuildkiteJobLogsApiUrl(
+        baseUrl,
+        orgSlug,
+        pipelineSlug,
+        buildNumber,
+        jobId,
+      );
 
       const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {
@@ -154,41 +115,16 @@ export class BuildkiteClient implements BuildkiteAPI {
   }
 
   private calculateBuildDuration(build: BuildkiteApiBuild): string {
-    if (this.isRunning(build.state) && build.started_at) {
-      const startedAt = new Date(build.started_at);
-      const now = new Date();
-      return this.formatDuration(
-        Math.floor((now.getTime() - startedAt.getTime()) / 1000),
-      );
-    }
-
-    if (build.started_at && build.finished_at) {
-      const startedAt = new Date(build.started_at);
-      const finishedAt = new Date(build.finished_at);
-      return this.formatDuration(
-        Math.floor((finishedAt.getTime() - startedAt.getTime()) / 1000),
-      );
-    }
-
-    return '0s';
-  }
-
-  private isRunning(state: string): boolean {
-    return state?.toLowerCase() === 'running';
-  }
-
-  private formatDuration(seconds: number): string {
-    if (seconds < 60) return `${seconds}s`;
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    return calculateBuildDuration(
+      build.started_at,
+      build.finished_at,
+      isRunning(build.state),
+    );
   }
 
   private async getBaseURL(): Promise<string> {
     const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
-    const baseURL = `${proxyURL}/buildkite/api`;
-    return baseURL;
+    return getBuildkiteApiBaseUrl(proxyURL);
   }
 
   async getUser(): Promise<User> {
@@ -229,7 +165,7 @@ export class BuildkiteClient implements BuildkiteAPI {
   ): Promise<PipelineParams> {
     try {
       const baseUrl = await this.getBaseURL();
-      const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}`;
+      const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
 
       const pipelineResponse = await this.fetchAPI.fetch(url);
       if (!pipelineResponse.ok) {
@@ -240,7 +176,11 @@ export class BuildkiteClient implements BuildkiteAPI {
 
       const pipelineData: BuildkiteApiPipeline = await pipelineResponse.json();
 
-      const buildsUrl = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
+      const buildsUrl = getBuildkiteBuildsApiUrl(
+        baseUrl,
+        orgSlug,
+        pipelineSlug,
+      );
       const buildsResponse = await this.fetchAPI.fetch(buildsUrl);
       if (!buildsResponse.ok) {
         throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
@@ -266,7 +206,7 @@ export class BuildkiteClient implements BuildkiteAPI {
   ): Promise<BuildParams[]> {
     try {
       const baseUrl = await this.getBaseURL();
-      const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds`;
+      const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
 
       const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { SvgIcon, SvgIconProps } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Status } from '../Types';
+import { Status } from '../types/buildkiteTypes';
 
 const useStyles = makeStyles({
   '@keyframes spin': {
@@ -261,8 +261,8 @@ export const StatusIcon: React.FC<StatusIconProps> = ({
         isWaitingIcon
           ? `${classes.minuteHand} ${classes.hourHand}`
           : animate
-          ? classes.animationSpinSlow
-          : undefined
+            ? classes.animationSpinSlow
+            : undefined
       }
     />
   );

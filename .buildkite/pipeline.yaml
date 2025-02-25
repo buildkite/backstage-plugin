@@ -1,9 +1,8 @@
 steps:
   - label: '💀 Test'
-    command: |
-      yarn test ./src/utils/
+    command: yarn test ./src/utils/
     plugins:
-      - docker-compose#v5.4.0:
+      - docker-compose#v5.6.0:
           run: app
           config: compose.yaml
     artifact_paths:

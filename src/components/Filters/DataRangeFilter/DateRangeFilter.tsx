@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  KeyboardDatePicker,
-  MuiPickersUtilsProvider,
-} from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
-import {
   Box,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
+  TextField,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -115,60 +111,81 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     setSelectedRange(DATE_RANGES.CUSTOM);
   };
 
+  // Format date as YYYY-MM-DD for HTML input
+  const formatDateForInput = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(event.target.value);
+    setStartDate(newDate);
+    onDateRangeChange(newDate, endDate);
+    setSelectedRange(DATE_RANGES.CUSTOM);
+  };
+
+  const handleEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(event.target.value);
+    setEndDate(newDate);
+    onDateRangeChange(startDate, newDate);
+    setSelectedRange(DATE_RANGES.CUSTOM);
+  };
+
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <Box className={classes.filterContainer}>
-        <FormControl
-          variant="outlined"
-          size="small"
-          className={classes.dateRangePreset}
+    <Box className={classes.filterContainer}>
+      <FormControl
+        variant="outlined"
+        size="small"
+        className={classes.dateRangePreset}
+      >
+        <InputLabel>Date Range</InputLabel>
+        <Select
+          value={selectedRange}
+          onChange={handlePresetChange}
+          label="Date Range"
         >
-          <InputLabel>Date Range</InputLabel>
-          <Select
-            value={selectedRange}
-            onChange={handlePresetChange}
-            label="Date Range"
-          >
-            <MenuItem value={DATE_RANGES.TODAY}>Today</MenuItem>
-            <MenuItem value={DATE_RANGES.YESTERDAY}>Yesterday</MenuItem>
-            <MenuItem value={DATE_RANGES.LAST_7_DAYS}>Last 7 days</MenuItem>
-            <MenuItem value={DATE_RANGES.LAST_30_DAYS}>Last 30 days</MenuItem>
-          </Select>
-        </FormControl>
+          <MenuItem value={DATE_RANGES.TODAY}>Today</MenuItem>
+          <MenuItem value={DATE_RANGES.YESTERDAY}>Yesterday</MenuItem>
+          <MenuItem value={DATE_RANGES.LAST_7_DAYS}>Last 7 days</MenuItem>
+          <MenuItem value={DATE_RANGES.LAST_30_DAYS}>Last 30 days</MenuItem>
+        </Select>
+      </FormControl>
 
-        <KeyboardDatePicker
-          disableToolbar
-          variant="inline"
-          inputVariant="outlined"
-          format="MM/dd/yyyy"
-          margin="none"
-          size="small"
-          label="Start Date"
-          value={startDate}
-          onChange={date => handleDateChange(true, date)}
-          className={classes.datePicker}
-          autoOk
-          disableFuture
-          maxDate={endDate}
-        />
+      <TextField
+        label="Start Date"
+        type="date"
+        variant="outlined"
+        size="small"
+        className={classes.datePicker}
+        value={formatDateForInput(startDate)}
+        onChange={handleStartDateChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        inputProps={{
+          max: formatDateForInput(endDate),
+        }}
+      />
 
-        <KeyboardDatePicker
-          disableToolbar
-          variant="inline"
-          inputVariant="outlined"
-          format="MM/dd/yyyy"
-          margin="none"
-          size="small"
-          label="End Date"
-          value={endDate}
-          onChange={date => handleDateChange(false, date)}
-          className={classes.datePicker}
-          autoOk
-          disableFuture
-          minDate={startDate}
-        />
-      </Box>
-    </MuiPickersUtilsProvider>
+      <TextField
+        label="End Date"
+        type="date"
+        variant="outlined"
+        size="small"
+        className={classes.datePicker}
+        value={formatDateForInput(endDate)}
+        onChange={handleEndDateChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        inputProps={{
+          min: formatDateForInput(startDate),
+          max: formatDateForInput(new Date()),
+        }}
+      />
+    </Box>
   );
 };
 

@@ -1,9 +1,13 @@
 import { useApi } from '@backstage/core-plugin-api';
 import { useAsync } from 'react-use';
-import { buildkiteAPIRef } from '../api';
+import { buildkiteAPIRef, BuildkiteAPI } from '../api';
 import { PipelineParams } from '../components';
 
-export const useBuildkiteApi = (orgSlug: string, pipelineSlug: string) => {
+export const useBuildkiteApi = () => {
+  return useApi(buildkiteAPIRef);
+};
+
+export const useBuildkitePipeline = (orgSlug: string, pipelineSlug: string) => {
   const api = useApi(buildkiteAPIRef);
 
   const {
@@ -63,6 +67,36 @@ export const useBuildkiteBuild = (
     pipeline: value?.pipeline || null,
     build: value?.build || null,
     steps: value?.steps || [],
+    loading,
+    error,
+  };
+};
+
+export const usePipelineConfig = (
+  orgSlug: string,
+  pipelineSlug: string,
+) => {
+  const api = useApi(buildkiteAPIRef);
+
+  const { 
+    value: config, 
+    loading, 
+    error 
+  } = useAsync(async () => {
+    if (!orgSlug || !pipelineSlug) {
+      return undefined;
+    }
+
+    try {
+      return await api.getPipelineConfig(orgSlug, pipelineSlug);
+    } catch (err) {
+      console.error('Error fetching pipeline config:', err);
+      throw err;
+    }
+  }, [orgSlug, pipelineSlug]);
+
+  return {
+    config,
     loading,
     error,
   };

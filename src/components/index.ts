@@ -16,6 +16,7 @@ export { PipelinePage } from './PipelinePage';
 export { Job } from './Job';
 export { JobLogViewer } from './JobLogViewer';
 export { ViewerFetch } from './ViewerFetch';
+export { PipelineConfigEditor } from './PipelineConfigEditor';
 
 // Filter Components
 export * from './Filters';

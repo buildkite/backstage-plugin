@@ -13,6 +13,7 @@ import {
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import { PipelineParams, BuildParams, Navatar, BuildRow, TriggerBuildButton } from '..';
+import { PipelineConfigEditor } from '../PipelineConfigEditor';
 import { PipelineFilters } from '../Filters';
 
 const useStyles = makeStyles(theme => ({
@@ -324,6 +325,22 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline, onRefresh 
             </Box>
           </Paper>
         </Grid>
+        
+      <PipelineConfigEditor 
+        orgSlug={pipeline.orgSlug} 
+        pipelineSlug={pipeline.slug} 
+      />
+
+      <Grid container spacing={3} direction="column">
+        <Grid item>
+          <Box display="flex" justifyContent="flex-end" mb={3}>
+            <PipelineFilters
+              builds={pipeline.builds}
+              onFilteredBuildsChange={handleFilteredBuildsChange}
+              allExpanded={allExpanded}
+              onToggleAllBuilds={toggleAllBuilds}
+            />
+          </Box>
 
         {/* Right column - Builds list */}
         <Grid item xs={12} sm={12} md={9} lg={10}>

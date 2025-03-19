@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Breadcrumbs,
+  Button,
   Grid,
   Link,
   Paper,
@@ -11,7 +12,7 @@ import {
 } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { PipelineParams, BuildParams, Navatar, BuildRow } from '..';
+import { PipelineParams, BuildParams, Navatar, BuildRow, TriggerBuildButton } from '..';
 import { PipelineConfigEditor } from '../PipelineConfigEditor';
 import { PipelineFilters } from '../Filters';
 
@@ -105,9 +106,10 @@ const sortBranches = (groupedBuilds: GroupedBuilds): string[] => {
 
 interface PipelineViewProps {
   pipeline: PipelineParams;
+  onRefresh?: () => void;
 }
 
-export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
+export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline, onRefresh }) => {
   const {
     name = 'Pipeline',
     navatarColor = '#D1FAFF',
@@ -282,6 +284,48 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
         </Box>
       </Breadcrumbs>
 
+      {/* Two-column layout for filters and builds */}
+      <Grid container spacing={3}>
+        {/* Left column - Filters and actions */}
+        <Grid item xs={12} sm={12} md={3} lg={2}>
+          {/* Action button in filters column */}
+          <Paper variant="outlined" style={{ padding: '12px', marginBottom: '16px' }}>
+            <Typography variant="subtitle2" gutterBottom>Actions</Typography>
+            <Box>
+              <TriggerBuildButton 
+                defaultBranch="main"
+                variant="contained"
+                size="small"
+                text="New Build"
+                onBuildTriggered={() => {
+                  // Refresh the pipeline data when a build is triggered
+                  if (onRefresh) {
+                    onRefresh();
+                  }
+                }}
+              />
+            </Box>
+          </Paper>
+          
+          {/* Filters panel */}
+          <Paper variant="outlined" style={{ padding: '12px', marginBottom: '16px' }}>
+            <Typography variant="subtitle2" gutterBottom>Filters</Typography>
+            <Box 
+              display="flex" 
+              flexDirection="column" 
+              alignItems="stretch"
+              style={{ gap: '8px' }}
+            >
+              <PipelineFilters
+                builds={pipeline.builds}
+                onFilteredBuildsChange={handleFilteredBuildsChange}
+                allExpanded={allExpanded}
+                onToggleAllBuilds={toggleAllBuilds}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+        
       <PipelineConfigEditor 
         orgSlug={pipeline.orgSlug} 
         pipelineSlug={pipeline.slug} 
@@ -298,6 +342,23 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline }) => {
             />
           </Box>
 
+        {/* Right column - Builds list */}
+        <Grid item xs={12} sm={12} md={9} lg={10}>
+          {/* Builds header with Expand/Collapse button */}
+          <Paper variant="outlined" style={{ padding: '12px', marginBottom: '16px' }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Typography variant="subtitle2">Builds</Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={allExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                onClick={toggleAllBuilds}
+              >
+                {allExpanded ? 'Collapse All' : 'Expand All'}
+              </Button>
+            </Box>
+          </Paper>
+          
           <Paper variant="outlined">
             {(() => {
               const groupedBuilds = groupBuildsByBranch(filteredBuilds);

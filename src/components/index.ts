@@ -6,6 +6,7 @@ export { Navatar } from './Navatar';
 export { PipelineView } from './PipelineView';
 export { TimeChip } from './TimeChip';
 export { BuildkiteHeader } from './BuildkiteHeader';
+export { TriggerBuildButton } from './TriggerBuildButton';
 
 // Page Components
 export { BuildPage } from './BuildPage';

@@ -272,6 +272,42 @@ export class BuildkiteClient implements BuildkiteAPI {
     }
   }
 
+  async triggerBuild(
+    orgSlug: string,
+    pipelineSlug: string,
+    options: BuildTriggerOptions,
+  ): Promise<BuildParams> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      // Use the existing URL utility for consistent URL construction
+      const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
+
+      const response = await this.fetchAPI.fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(options),
+      });
+
+      if (!response.ok) {
+        let errorText;
+        try {
+          // Try to parse as JSON first for more details
+          const errorJson = await response.json();
+          errorText = JSON.stringify(errorJson);
+        } catch (e) {
+          // If JSON parsing fails, get the text
+          errorText = await response.text();
+        }
+        throw new Error(`Failed to trigger build (${response.status}): ${errorText}`);
+      }
+
+      const data: BuildkiteApiBuild = await response.json();
+      return this.transforms.toBuildParams(data);
+    } catch (error) {
+      console.error('Error triggering build:', error);
+      
   async getPipelineConfig(
     orgSlug: string,
     pipelineSlug: string,

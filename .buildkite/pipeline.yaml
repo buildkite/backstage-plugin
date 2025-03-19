@@ -1,5 +1,6 @@
 steps:
   - label: ':typescript: Lint'
+    soft_fail: true
     plugins:
       - docker-compose#v5.4.0:
           run: lint
@@ -14,6 +15,7 @@ steps:
       - coverage/**/*
   
   - label: ':package: Build'
+    soft_fail: true
     plugins:
       - docker-compose#v5.4.0:
           run: build

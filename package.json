@@ -32,8 +32,8 @@
     "lint": "backstage-cli package lint",
     "test": "backstage-cli package test",
     "clean": "backstage-cli package clean",
-    "tsc": "tsc",
-    "prepack": "yarn tsc && backstage-cli package prepack",
+    "tsc": "backstage-cli package tsc",
+    "prepack": "backstage-cli package prepack",
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {

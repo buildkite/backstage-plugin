@@ -32,8 +32,8 @@
     "lint": "backstage-cli package lint",
     "test": "backstage-cli package test",
     "clean": "backstage-cli package clean",
-    "tsc": "backstage-cli package tsc",
-    "prepack": "backstage-cli package prepack",
+    "tsc": "node ../../node_modules/.bin/tsc",
+    "prepack": "mkdir -p dist-types/src && cp src/index.d.ts dist-types/src/ || backstage-cli package prepack",
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
@@ -78,6 +78,7 @@
     "msw": "^1.0.0",
     "react": "^16.13.1 || ^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.25.0",
+    "typescript": "~5.2.0",
     "typescript-eslint": "^8.14.0"
   },
   "files": [

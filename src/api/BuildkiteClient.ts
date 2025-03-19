@@ -271,4 +271,60 @@ export class BuildkiteClient implements BuildkiteAPI {
       throw error;
     }
   }
+
+  async getPipelineConfig(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<string> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
+      
+      const response = await this.fetchAPI.fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch pipeline configuration: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      // Return the configuration field if it exists, otherwise format the entire response
+      if (data.configuration) {
+        return data.configuration;
+      }
+      return JSON.stringify(data, null, 2);
+    } catch (error) {
+      console.error('Error fetching pipeline configuration:', error);
+      throw error;
+    }
+  }
+
+  async updatePipelineConfig(
+    orgSlug: string,
+    pipelineSlug: string,
+    config: string,
+  ): Promise<void> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
+      
+      const payload = {
+        configuration: config
+      };
+      
+      const response = await this.fetchAPI.fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update pipeline configuration: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error updating pipeline configuration:', error);
+      throw error;
+    }
+  }
 }

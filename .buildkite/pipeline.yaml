@@ -1,15 +1,35 @@
 steps:
-  - label: ':docker: Build and Test'
+  - label: ':typescript: Lint and Type Check'
     command: |
-      echo "Building and testing..."
-      sleep 5
-      echo "GOTEM"
+      yarn install --frozen-lockfile
+      yarn lint
+      yarn tsc
+    plugins:
+      - docker-compose#v5.4.0:
+          run: app
+          config: compose.yaml
+
+  - label: ':jest: Unit Tests'
+    command: |
+      yarn install --frozen-lockfile
+      yarn test --coverage
     plugins:
       - docker-compose#v5.4.0:
           run: app
           config: compose.yaml
     artifact_paths:
       - coverage/**/*
+  
+  - label: ':package: Build'
+    command: |
+      yarn install --frozen-lockfile
+      yarn build
+    plugins:
+      - docker-compose#v5.4.0:
+          run: app
+          config: compose.yaml
+    artifact_paths:
       - dist/**/*
+
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

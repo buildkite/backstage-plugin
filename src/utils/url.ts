@@ -53,7 +53,7 @@ export function getBuildkitePipelineUrl(
  * @returns Full URL to the Buildkite API through the proxy
  */
 export function getBuildkiteApiBaseUrl(proxyPath: string): string {
-  return `${proxyPath}/buildkite/api`.replace(/([^:]\/)\/+/g, '$1');
+  return proxyPath ? `${proxyPath}/buildkite/api`.replace(/([^:]\/)\/+/g, '$1') : '';
 }
 
 /**

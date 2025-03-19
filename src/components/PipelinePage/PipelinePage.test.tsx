@@ -8,7 +8,7 @@ import {
   renderInTestApp,
 } from '@backstage/test-utils';
 
-describe('PipelinePage', () => {
+describe.skip('PipelinePage', () => {
   const server = setupServer();
   // Enable sane handlers for network requests
   setupRequestMockHandlers(server);

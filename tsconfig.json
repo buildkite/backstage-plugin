@@ -10,5 +10,7 @@
   "compilerOptions": {
     "outDir": "dist-types",
     "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true
   },
 }

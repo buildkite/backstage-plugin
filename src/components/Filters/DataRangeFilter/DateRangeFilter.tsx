@@ -9,19 +9,24 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   filterContainer: {
     display: 'flex',
-    gap: '16px',
-    alignItems: 'center',
+    flexDirection: 'column',
+    gap: theme.spacing(1),
   },
   dateRangePreset: {
-    minWidth: '150px',
+    width: '100%',
   },
   datePicker: {
-    width: '150px',
+    width: '100%',
   },
-});
+  datePickersRow: {
+    display: 'flex',
+    gap: theme.spacing(1),
+    width: '100%',
+  },
+}));
 
 const DATE_RANGES = {
   TODAY: 'today',
@@ -153,38 +158,40 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </Select>
       </FormControl>
 
-      <TextField
-        label="Start Date"
-        type="date"
-        variant="outlined"
-        size="small"
-        className={classes.datePicker}
-        value={formatDateForInput(startDate)}
-        onChange={handleStartDateChange}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        inputProps={{
-          max: formatDateForInput(endDate),
-        }}
-      />
+      <Box className={classes.datePickersRow}>
+        <TextField
+          label="Start Date"
+          type="date"
+          variant="outlined"
+          size="small"
+          className={classes.datePicker}
+          value={formatDateForInput(startDate)}
+          onChange={handleStartDateChange}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          inputProps={{
+            max: formatDateForInput(endDate),
+          }}
+        />
 
-      <TextField
-        label="End Date"
-        type="date"
-        variant="outlined"
-        size="small"
-        className={classes.datePicker}
-        value={formatDateForInput(endDate)}
-        onChange={handleEndDateChange}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        inputProps={{
-          min: formatDateForInput(startDate),
-          max: formatDateForInput(new Date()),
-        }}
-      />
+        <TextField
+          label="End Date"
+          type="date"
+          variant="outlined"
+          size="small"
+          className={classes.datePicker}
+          value={formatDateForInput(endDate)}
+          onChange={handleEndDateChange}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          inputProps={{
+            min: formatDateForInput(startDate),
+            max: formatDateForInput(new Date()),
+          }}
+        />
+      </Box>
     </Box>
   );
 };

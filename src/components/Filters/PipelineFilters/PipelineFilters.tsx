@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
-import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { DateRangeFilter } from '../DataRangeFilter/DateRangeFilter';
 import { SearchFilter } from '../SearchFilter/SearchFilter';
 import { StatusFilter } from '../StatusFilter/StatusFilter';
@@ -10,23 +8,16 @@ import { BranchFilter } from '../BranchFilter/BranchFilter';
 import { CreatorFilter } from '../CreatorFilter/CreatorFilter';
 import { BuildParams } from '../..';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   filterContainer: {
     display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
   },
-  expandButton: {
-    textTransform: 'none',
-    minWidth: '40px',
-    width: '40px',
-    height: '40px',
-    '& .MuiButton-startIcon': {
-      margin: 0,
-    },
+  filterItem: {
+    width: '100%',
   },
-});
+}));
 
 interface FilterState {
   selectedBranch: string;
@@ -137,46 +128,46 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
   return (
     <Box className={classes.filterContainer}>
-      <SearchFilter
-        builds={builds}
-        onSearchChange={term => handleFilterChange('searchTerm', term)}
-        currentSearchTerm={filterState.searchTerm}
-      />
+      <Box className={classes.filterItem} mb={1}>
+        <SearchFilter
+          builds={builds}
+          onSearchChange={term => handleFilterChange('searchTerm', term)}
+          currentSearchTerm={filterState.searchTerm}
+        />
+      </Box>
 
-      <DateRangeFilter
-        onDateRangeChange={(startDate, endDate) =>
-          handleFilterChange('dateRange', { startDate, endDate })
-        }
-        initialDateRange={filterState.dateRange}
-      />
+      <Box className={classes.filterItem} mb={1}>
+        <DateRangeFilter
+          onDateRangeChange={(startDate, endDate) =>
+            handleFilterChange('dateRange', { startDate, endDate })
+          }
+          initialDateRange={filterState.dateRange}
+        />
+      </Box>
 
-      <BranchFilter
-        value={filterState.selectedBranch}
-        onChange={value => handleFilterChange('selectedBranch', value)}
-        branches={filterOptions.branches}
-      />
+      <Box className={classes.filterItem} mb={1}>
+        <BranchFilter
+          value={filterState.selectedBranch}
+          onChange={value => handleFilterChange('selectedBranch', value)}
+          branches={filterOptions.branches}
+        />
+      </Box>
 
-      <CreatorFilter
-        value={filterState.selectedCreator}
-        onChange={value => handleFilterChange('selectedCreator', value)}
-        creators={filterOptions.creators}
-      />
+      <Box className={classes.filterItem} mb={1}>
+        <CreatorFilter
+          value={filterState.selectedCreator}
+          onChange={value => handleFilterChange('selectedCreator', value)}
+          creators={filterOptions.creators}
+        />
+      </Box>
 
-      <StatusFilter
-        value={filterState.selectedStatus}
-        onChange={value => handleFilterChange('selectedStatus', value)}
-        states={filterOptions.statuses}
-      />
-
-      <Button
-        variant="outlined"
-        size="small"
-        onClick={onToggleAllBuilds}
-        aria-label={allExpanded ? 'Collapse all' : 'Expand all'}
-        className={classes.expandButton}
-      >
-        {allExpanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
-      </Button>
+      <Box className={classes.filterItem}>
+        <StatusFilter
+          value={filterState.selectedStatus}
+          onChange={value => handleFilterChange('selectedStatus', value)}
+          states={filterOptions.statuses}
+        />
+      </Box>
     </Box>
   );
 };

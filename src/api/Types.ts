@@ -63,6 +63,18 @@ export interface JobLog {
   content: string[];
 }
 
+export interface BuildTriggerOptions {
+  commit?: string;
+  branch?: string;
+  message?: string;
+  author?: {
+    name: string;
+    email: string;
+  };
+  env?: Record<string, string>;
+  meta_data?: Record<string, any>;
+}
+
 // Type for transforming API data to our component types
 export interface BuildkiteTransforms {
   mapBuildkiteStatus: (status: string) => Status;

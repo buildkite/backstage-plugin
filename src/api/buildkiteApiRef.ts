@@ -32,6 +32,11 @@ export interface BuildkiteAPI {
     buildNumber: string,
     jobId: string,
   ): Promise<JobLog>;
+  triggerBuild(
+    orgSlug: string,
+    pipelineSlug: string,
+    options: BuildTriggerOptions,
+  ): Promise<BuildParams>;
 }
 
 export const buildkiteAPIRef = createApiRef<BuildkiteAPI>({

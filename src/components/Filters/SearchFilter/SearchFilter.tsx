@@ -6,7 +6,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 
 const useStyles = makeStyles({
   searchField: {
-    minWidth: '300px',
+    width: '100%',
   },
   endAdornment: {
     visibility: (props: { showClear: boolean }) =>

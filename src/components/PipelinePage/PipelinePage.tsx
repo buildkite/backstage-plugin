@@ -117,5 +117,5 @@ export const PipelinePage: React.FC<PipelinePageProps> = ({
     );
   }
 
-  return <PipelineView pipeline={pipeline} />;
+  return <PipelineView pipeline={pipeline} onRefresh={fetchPipelineData} />;
 };

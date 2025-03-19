@@ -1,33 +1,22 @@
 steps:
-  - label: ':typescript: Lint and Type Check'
-    command: |
-      yarn install --frozen-lockfile
-      yarn lint
-      yarn tsc
+  - label: ':typescript: Lint'
     plugins:
       - docker-compose#v5.4.0:
-          run: app
+          run: lint
           config: compose.yaml
 
   - label: ':jest: Unit Tests'
-    command: |
-      yarn install --frozen-lockfile
-      yarn test --coverage
     plugins:
       - docker-compose#v5.4.0:
-          run: app
+          run: test
           config: compose.yaml
     artifact_paths:
       - coverage/**/*
   
   - label: ':package: Build'
-    command: |
-      yarn tsc
-      yarn install --frozen-lockfile
-      yarn build
     plugins:
       - docker-compose#v5.4.0:
-          run: app
+          run: build
           config: compose.yaml
     artifact_paths:
       - dist/**/*

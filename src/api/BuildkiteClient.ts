@@ -307,7 +307,10 @@ export class BuildkiteClient implements BuildkiteAPI {
       return this.transforms.toBuildParams(data);
     } catch (error) {
       console.error('Error triggering build:', error);
-      
+      throw error;
+    }
+  }
+
   async getPipelineConfig(
     orgSlug: string,
     pipelineSlug: string,

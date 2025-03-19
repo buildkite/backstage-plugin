@@ -121,23 +121,22 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
 
   return (
     <div className={classes.root}>
-      <div className={classes.buttonWrapper}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={handleOpen}
-          startIcon={<EditIcon />}
-          className={classes.editButton}
-        >
-          Edit Pipeline Configuration
-        </Button>
-      </div>
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={handleOpen}
+        startIcon={<EditIcon />}
+        size="small"
+        fullWidth
+      >
+        Edit Pipeline Steps
+      </Button>
 
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>
           <div className={classes.title}>
             <Typography variant="h6">
-              Edit Pipeline Configuration
+              Edit Pipeline Steps
             </Typography>
             <IconButton aria-label="close" onClick={handleClose}>
               <CloseIcon />
@@ -153,7 +152,7 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
           {error && <Alert severity="error" style={{ marginBottom: '16px' }}>{error}</Alert>}
           <div className={classes.editorContainer}>
             <TextField
-              label="Pipeline Configuration (YAML)"
+              label="Pipeline Steps (YAML)"
               value={config}
               onChange={handleChange}
               multiline
@@ -163,7 +162,7 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
               InputProps={{ style: { fontFamily: 'monospace' } }}
               disabled={loading}
               error={!!error}
-              placeholder="Loading pipeline configuration..."
+              placeholder="Loading pipeline steps..."
             />
           </div>
         </DialogContent>

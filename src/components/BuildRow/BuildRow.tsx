@@ -39,6 +39,13 @@ const useStyles = makeStyles(theme => ({
     borderRadius: '4px',
     margin: 0,
   },
+  branchChip: {
+    color: theme.palette.text.primary,
+    border: 'none',
+    borderRadius: '4px',
+    margin: 0,
+    fontWeight: 500,
+  },
   buildLink: {
     '&:hover': {
       textDecoration: 'none',
@@ -194,9 +201,14 @@ export const BuildRow: React.FC<BuildRowProps> = ({
               ·
             </Typography>
             <Chip
-              className={classes.chip}
-              style={{ paddingLeft: '4px' }}
-              icon={<BranchIcon size="small" />}
+              className={classes.branchChip}
+              style={{ 
+                paddingLeft: '4px', 
+                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+              }}
+              icon={build.branch.startsWith('gh-') ? 
+                <GithubIcon viewBox="0 0 13 13" /> : 
+                <BranchIcon size="small" />}
               label={build.branch}
               variant="outlined"
               size="small"

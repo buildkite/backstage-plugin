@@ -15,13 +15,14 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import { PipelineParams, BuildParams, Navatar, BuildRow, TriggerBuildButton } from '..';
 import { PipelineConfigEditor } from '../PipelineConfigEditor';
 import { PipelineFilters } from '../Filters';
+import { BranchIcon, GithubIcon } from '../Icons';
 
 const useStyles = makeStyles(theme => ({
   branchHeader: {
     padding: '8px 12px',
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: lighten(theme.palette.background.default, 0.3),
     borderBottom: `1px solid ${theme.palette.divider}`,
-    fontWeight: 500,
+    fontWeight: 600,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -52,6 +53,7 @@ const useStyles = makeStyles(theme => ({
     fontSize: '12px',
     color: theme.palette.text.secondary,
     marginLeft: '8px',
+    opacity: 0.75,
   },
   expandButton: {
     textTransform: 'none',
@@ -244,7 +246,22 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline, onRefresh 
           onClick={() => toggleBranchCollapse(branch)}
         >
           <Box display="flex" alignItems="center">
-            {branch}
+            {branch === 'main' || branch === 'master' ? (
+              <Box display="flex" alignItems="center" style={{ gap: '8px' }}>
+                <BranchIcon style={{ fontSize: '16px' }} />
+                <Typography style={{ fontWeight: 600 }}>{branch}</Typography>
+              </Box>
+            ) : branch.startsWith('gh-') ? (
+              <Box display="flex" alignItems="center" style={{ gap: '8px' }}>
+                <GithubIcon style={{ fontSize: '14px' }} />
+                <Typography style={{ fontWeight: 600 }}>{branch}</Typography>
+              </Box>
+            ) : (
+              <Box display="flex" alignItems="center" style={{ gap: '8px' }}>
+                <BranchIcon style={{ fontSize: '16px' }} />
+                <Typography style={{ fontWeight: 600 }}>{branch}</Typography>
+              </Box>
+            )}
             <span className={classes.branchCount}>
               ({builds.length} builds)
             </span>

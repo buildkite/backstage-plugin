@@ -8,6 +8,8 @@ import {
   renderInTestApp,
 } from '@backstage/test-utils';
 
+// We skip this because it needs a Backstage instance to run it
+// TODO: Add a mock Backstage instance
 describe.skip('PipelinePage', () => {
   const server = setupServer();
   // Enable sane handlers for network requests

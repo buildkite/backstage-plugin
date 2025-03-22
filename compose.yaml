@@ -1,9 +1,43 @@
 services:
   app:
-    image: node:20
-    working_dir: /app
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - NODE_ENV=test
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    command: yarn test --coverage --watchAll=false
+
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    command: yarn lint
+    
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
+      - CI=true
+    command: yarn tsc && yarn build

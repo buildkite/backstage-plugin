@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 
 interface FilterState {
   selectedBranch: string;
-  selectedCreator: string;
+  selectedCreator: string[];
   selectedStatus: string;
   searchTerm: string;
   dateRange: {
@@ -49,7 +49,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   const classes = useStyles();
   const [filterState, setFilterState] = useState<FilterState>({
     selectedBranch: 'all',
-    selectedCreator: 'all',
+    selectedCreator: [],
     selectedStatus: 'all',
     searchTerm: '',
     dateRange: {
@@ -66,9 +66,9 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         result = result.filter(build => build.branch === state.selectedBranch);
       }
 
-      if (state.selectedCreator !== 'all') {
+      if (state.selectedCreator.length > 0) {
         result = result.filter(
-          build => build.author.name === state.selectedCreator,
+          build => state.selectedCreator.includes(build.author.name),
         );
       }
 

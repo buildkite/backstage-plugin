@@ -158,7 +158,7 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </Select>
       </FormControl>
 
-      <Box className={classes.datePickersRow}>
+      <Box className={classes.filterContainer}>
         <TextField
           label="Start Date"
           type="date"

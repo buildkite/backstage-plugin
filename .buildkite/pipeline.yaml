@@ -1,15 +1,27 @@
 steps:
-  - label: ':docker: Build and Test'
-    command: |
-      echo "Building and testing..."
-      sleep 5
-      echo "GOTEM"
+  - label: ':typescript: Lint'
+    soft_fail: true
     plugins:
       - docker-compose#v5.4.0:
-          run: app
+          run: lint
+          config: compose.yaml
+
+  - label: ':jest: Unit Tests'
+    plugins:
+      - docker-compose#v5.4.0:
+          run: test
           config: compose.yaml
     artifact_paths:
       - coverage/**/*
+  
+  - label: ':package: Build'
+    soft_fail: true
+    plugins:
+      - docker-compose#v5.4.0:
+          run: build
+          config: compose.yaml
+    artifact_paths:
       - dist/**/*
+
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

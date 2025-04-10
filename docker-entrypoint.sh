@@ -7,9 +7,8 @@ if [ ! -d "node_modules" ] && [ -f "package.json" ]; then
   yarn install --frozen-lockfile
 fi
 
-# Declaration files are now created in the Dockerfile
-# This ensures they exist for all CI phases (lint, test, build)
-# No need for runtime creation since we pre-create them in the Docker image
+# Generate TypeScript declaration files
+/app/scripts/generate-types.sh
 
 # Execute the command passed to the script
 exec "$@"

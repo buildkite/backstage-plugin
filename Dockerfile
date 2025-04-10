@@ -8,50 +8,12 @@ RUN npm install -g typescript@5.1.6 eslint-plugin-react-hooks@4.6.0 @backstage/c
 # Copy package.json and tsconfig.json first to leverage Docker caching
 COPY package.json tsconfig.json ./
 
-# Create necessary directories
+# Create directory for TypeScript declarations
 RUN mkdir -p /app/dist-types/src/components
 
-# For CI builds, we need to create TypeScript declaration files
-# Create a basic "shim" type declarations that satisfies the error in CI
-COPY src/components/index.ts /app/src/components/index.ts
-RUN mkdir -p /app/dist-types/src/components
-
-# Create index.d.ts file
-RUN cat > /app/dist-types/src/index.d.ts << 'EOL'
-/**
- * A Backstage plugin that integrates with Buildkite
- *
- * @packageDocumentation
- */
-
-export * from "../src/plugin";
-export * from "../src/api";
-export * from "../src/components";
-export * from "../src/hooks";
-export * from "../src/routes";
-EOL
-
-# Create components/index.d.ts file
-RUN cat > /app/dist-types/src/components/index.d.ts << 'EOL'
-/**
- * Buildkite plugin components
- */
-export * from "../../src/components/BuildRow";
-export * from "../../src/components/BuildStep";
-export * from "../../src/components/BuildkiteWrapper";
-export * from "../../src/components/Navatar";
-export * from "../../src/components/PipelineView";
-export * from "../../src/components/TimeChip";
-export * from "../../src/components/BuildkiteHeader";
-export * from "../../src/components/TriggerBuildButton";
-export * from "../../src/components/PipelinePage";
-export * from "../../src/components/Job";
-export * from "../../src/components/JobLogViewer";
-export * from "../../src/components/ViewerFetch";
-export * from "../../src/components/PipelineConfigEditor";
-export * from "../../src/components/Filters";
-export * from "../../src/components/types/buildkiteTypes";
-EOL
+# Copy scripts
+COPY scripts/ /app/scripts/
+RUN chmod +x /app/scripts/generate-types.sh
 
 # Copy entrypoint script and make it executable
 COPY docker-entrypoint.sh /usr/local/bin/

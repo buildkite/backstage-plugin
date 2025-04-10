@@ -3,7 +3,7 @@ FROM node:20
 WORKDIR /app
 
 # Install global dependencies
-RUN npm install -g typescript@5.1.6 eslint-plugin-react-hooks@4.6.0 @backstage/cli
+RUN npm install -g typescript@5.1.6 eslint-plugin-react-hooks@4.6.0
 
 # Copy package.json and tsconfig.json first to leverage Docker caching
 COPY package.json tsconfig.json ./

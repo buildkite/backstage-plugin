@@ -1,12 +1,13 @@
 steps:
   - label: ':typescript: Lint'
-    soft_fail: true
+    key: lint
     plugins:
       - docker-compose#v5.4.0:
           run: lint
           config: compose.yaml
 
   - label: ':jest: Unit Tests'
+    key: unit_tests
     plugins:
       - docker-compose#v5.4.0:
           run: test
@@ -15,7 +16,7 @@ steps:
       - coverage/**/*
   
   - label: ':package: Build'
-    soft_fail: true
+    key: build
     plugins:
       - docker-compose#v5.4.0:
           run: build
@@ -25,7 +26,8 @@ steps:
 
   - label: ':npm: Version Input'
     if: build.branch == 'main'
-    key: version-input
+    depends_on: [lint, unit_tests, build]
+    key: version_input
     input: |
       What kind of version bump would you like to make?
     fields:
@@ -42,10 +44,10 @@ steps:
 
   - label: ':npm: Publish Package'
     if: build.branch == 'main'
-    depends_on: version-input
+    depends_on: version_input
     command: |
       # Extract the version type from the previous step
-      VERSION_TYPE=$(buildkite-agent meta-data get version-type)
+      VERSION_TYPE=$(buildkite-agent meta-data get version_type)
       echo "Performing $VERSION_TYPE version bump"
       
       # Setup npm credentials

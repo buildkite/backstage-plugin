@@ -1,6 +1,6 @@
 # Contributing to the Buildkite Plugin for Backstage
 
-First off, thanks for taking the time to contribute! 🎉 
+First off, thanks for taking the time to contribute! 🎉
 
 This document provides guidelines and best practices for contributing to the Buildkite plugin for Backstage. Following these guidelines helps communicate that you respect the time of the developers managing and developing this project.
 
@@ -125,7 +125,6 @@ src/
   ├── plugin.test.ts       # Plugin tests
   ├── routes.ts            # Route definitions
   ├── utils.ts             # Utility functions
-  ├── mockData.tsx         # Test mock data
   ├── setupTests.ts        # Test configuration
   └── index.ts            # Public plugin exports
 ```

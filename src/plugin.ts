@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   createApiFactory,
   createPlugin,
@@ -76,7 +77,10 @@ export const PipelinePage = buildkitePlugin.provide(
 export const BuildPage = buildkitePlugin.provide(
   createRoutableExtension({
     name: 'BuildPage',
-    component: () => import('./components/BuildPage').then(m => m.BuildPage),
+    component: () => Promise.resolve(function BuildPageComponent(props: any): JSX.Element {
+      // This is a temporary implementation until we create a proper BuildPage component
+      return React.createElement('div', { id: 'build-page-placeholder' }, `Build Page Placeholder (Props: ${JSON.stringify(props)})`);
+    }),
     mountPoint: buildkiteRouteRef,
   }),
 );

@@ -103,19 +103,6 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     onDateRangeChange(newStartDate, newEndDate);
   };
 
-  const handleDateChange = (isStart: boolean, date: Date | null) => {
-    if (!date) return;
-
-    if (isStart) {
-      setStartDate(date);
-      onDateRangeChange(date, endDate);
-    } else {
-      setEndDate(date);
-      onDateRangeChange(startDate, date);
-    }
-    setSelectedRange(DATE_RANGES.CUSTOM);
-  };
-
   // Format date as YYYY-MM-DD for HTML input
   const formatDateForInput = (date: Date): string => {
     const year = date.getFullYear();
@@ -124,7 +111,9 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStartDateChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const newDate = new Date(event.target.value);
     setStartDate(newDate);
     onDateRangeChange(newDate, endDate);

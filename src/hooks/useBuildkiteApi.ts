@@ -1,6 +1,6 @@
 import { useApi } from '@backstage/core-plugin-api';
 import { useAsync } from 'react-use';
-import { buildkiteAPIRef, BuildkiteAPI } from '../api';
+import { buildkiteAPIRef } from '../api';
 import { PipelineParams } from '../components';
 
 export const useBuildkiteApi = () => {
@@ -72,16 +72,13 @@ export const useBuildkiteBuild = (
   };
 };
 
-export const usePipelineConfig = (
-  orgSlug: string,
-  pipelineSlug: string,
-) => {
+export const usePipelineConfig = (orgSlug: string, pipelineSlug: string) => {
   const api = useApi(buildkiteAPIRef);
 
-  const { 
-    value: config, 
-    loading, 
-    error 
+  const {
+    value: config,
+    loading,
+    error,
   } = useAsync(async () => {
     if (!orgSlug || !pipelineSlug) {
       return undefined;

@@ -14,8 +14,8 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import { BranchIcon, GithubIcon, StatusIcon } from '../Icons';
-import { BuildStep } from '../BuildStep';
-import { BuildParams, PipelineParams } from '..';
+import { BuildStep } from '../BuildStep/BuildStep';
+import { BuildParams, PipelineParams } from '../types/buildkiteTypes';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   getBuildkiteProjectSlug,

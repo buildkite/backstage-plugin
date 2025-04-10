@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-buildkite",
+  "name": "@buildkite/plugin-buildkite",
   "exports": {
     ".": "./src/index.ts",
     "./components": "./src/components/index.ts",
@@ -25,7 +25,7 @@
   "backstage": {
     "role": "frontend-plugin"
   },
-  "sideEffects": "false",
+  "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",

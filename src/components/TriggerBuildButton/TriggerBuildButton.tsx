@@ -22,10 +22,8 @@ import AddIcon from '@material-ui/icons/Add';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { BuildTriggerOptions } from '../../api';
-import { useEntity } from '@backstage/plugin-catalog-react';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
-import { getBuildkiteProjectSlug, parseBuildkiteProjectSlug } from '../../utils';
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -110,7 +108,6 @@ export const TriggerBuildButton = ({
   onBuildTriggered,
 }: TriggerBuildButtonProps) => {
   const classes = useStyles();
-  const { entity } = useEntity();
   const buildkiteApi = useApi(buildkiteAPIRef);
 
   // Form state
@@ -125,10 +122,6 @@ export const TriggerBuildButton = ({
   const [envParams, setEnvParams] = useState<EnvParam[]>([]);
   const [metadataParams, setMetadataParams] = useState<MetadataParam[]>([]);
 
-  // Parse project slug from entity annotations
-  const projectSlug = getBuildkiteProjectSlug(entity);
-  const { organizationSlug, pipelineSlug } = parseBuildkiteProjectSlug(projectSlug);
-
   const handleOpen = () => {
     setOpen(true);
   };
@@ -141,7 +134,11 @@ export const TriggerBuildButton = ({
     setEnvParams([...envParams, { key: '', value: '' }]);
   };
 
-  const updateEnvParam = (index: number, field: 'key' | 'value', value: string) => {
+  const updateEnvParam = (
+    index: number,
+    field: 'key' | 'value',
+    value: string,
+  ) => {
     const newParams = [...envParams];
     newParams[index][field] = value;
     setEnvParams(newParams);
@@ -229,12 +226,6 @@ export const TriggerBuildButton = ({
         });
         options.meta_data = metadata;
       }
-      // Trigger the build
-      const result = await buildkiteApi.triggerBuild(
-        organizationSlug,
-        pipelineSlug,
-        options,
-      );
 
       // Close dialog and call callback if provided
       handleClose();
@@ -243,7 +234,11 @@ export const TriggerBuildButton = ({
       }
     } catch (error) {
       console.error('Error triggering build:', error);
-      alert(`Failed to trigger build: ${error instanceof Error ? error.message : String(error)}`);
+      alert(
+        `Failed to trigger build: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     } finally {
       setLoading(false);
     }
@@ -310,7 +305,9 @@ export const TriggerBuildButton = ({
                             </MenuItem>
                           ))
                         ) : (
-                          <MenuItem value={defaultBranch}>{defaultBranch}</MenuItem>
+                          <MenuItem value={defaultBranch}>
+                            {defaultBranch}
+                          </MenuItem>
                         )}
                       </Select>
                     </FormControl>
@@ -396,7 +393,9 @@ export const TriggerBuildButton = ({
                         label="Variable Name"
                         variant="outlined"
                         value={param.key}
-                        onChange={e => updateEnvParam(index, 'key', e.target.value)}
+                        onChange={e =>
+                          updateEnvParam(index, 'key', e.target.value)
+                        }
                         required
                       />
                       <TextField

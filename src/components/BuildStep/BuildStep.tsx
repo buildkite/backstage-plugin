@@ -7,9 +7,9 @@ import {
   parseBuildkiteProjectSlug,
   isClickableStatus,
 } from '../../utils';
-import { Job } from '../Job';
+import { Job } from '../Job/Job';
 import { alpha, darken, lighten, makeStyles } from '@material-ui/core/styles';
-import { BuildStepParams } from '..';
+import { BuildStepParams } from '../types/buildkiteTypes';
 import { StatusIcon } from '../Icons';
 import { Box, Chip } from '@material-ui/core';
 import { useEmoji } from '../../hooks/useEmoji';

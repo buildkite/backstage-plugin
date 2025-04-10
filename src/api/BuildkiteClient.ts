@@ -7,6 +7,7 @@ import {
   BuildkiteApiJob,
   BuildkiteApiPipeline,
   BuildkiteTransforms,
+  BuildTriggerOptions,
   JobLog,
 } from './types';
 import {

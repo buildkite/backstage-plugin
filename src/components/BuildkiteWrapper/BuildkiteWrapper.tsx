@@ -64,7 +64,7 @@ export const BuildkiteWrapper = () => {
         </div>
       </div>
     );
-  } catch (error) {
+  } catch {
     return (
       <EmptyState
         title="Invalid Buildkite Configuration"

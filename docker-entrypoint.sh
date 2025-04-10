@@ -7,22 +7,14 @@ if [ ! -d "node_modules" ] && [ -f "package.json" ]; then
   yarn install --frozen-lockfile
 fi
 
-# Ensure TypeScript declarations directory exists
-mkdir -p dist-types/src
-
-# Create a basic index.d.ts file if it doesn't exist
-if [ ! -f dist-types/src/index.d.ts ]; then
-  echo '/**
- * A Backstage plugin that integrates with Buildkite
- *
- * @packageDocumentation
- */
-
-export * from "../src/plugin";
-export * from "../src/api";
-export * from "../src/components";
-export * from "../src/hooks";
-export * from "../src/routes";' > dist-types/src/index.d.ts
+# Generate TypeScript declaration files using the compiler
+echo "Generating TypeScript declaration files..."
+if [ -f "tsconfig.json" ]; then
+  tsc --project tsconfig.json
+else
+  echo "Warning: tsconfig.json not found. TypeScript declarations may not be generated correctly."
+  # Ensure TypeScript declarations directory exists as a fallback
+  mkdir -p dist-types/src
 fi
 
 # Execute the command passed to the script

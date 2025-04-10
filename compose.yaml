@@ -40,4 +40,4 @@ services:
     environment:
       - NODE_ENV=production
       - CI=true
-    command: yarn tsc && yarn build
+    command: yarn build

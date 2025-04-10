@@ -1,6 +1,6 @@
 import { createApiRef } from '@backstage/core-plugin-api';
 import { PipelineParams, BuildParams, BuildStepParams } from '../components/';
-import { JobLog } from './types';
+import { JobLog, BuildTriggerOptions } from './types';
 
 export interface User {
   avatar_url: string;

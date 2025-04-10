@@ -12,7 +12,10 @@ import {
 } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { PipelineParams, BuildParams, Navatar, BuildRow, TriggerBuildButton } from '..';
+import { PipelineParams, BuildParams } from '../types/buildkiteTypes';
+import { Navatar } from '../Navatar/Navatar';
+import { BuildRow } from '../BuildRow/BuildRow';
+import { TriggerBuildButton } from '../TriggerBuildButton/TriggerBuildButton';
 import { PipelineConfigEditor } from '../PipelineConfigEditor';
 import { PipelineFilters } from '../Filters';
 import { BranchIcon, GithubIcon } from '../Icons';
@@ -314,6 +317,8 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline, onRefresh 
                 variant="contained"
                 size="small"
                 text="New Build"
+                orgSlug={pipeline.orgSlug || ''}
+                pipelineSlug={pipeline.slug || ''}
                 onBuildTriggered={() => {
                   // Refresh the pipeline data when a build is triggered
                   if (onRefresh) {

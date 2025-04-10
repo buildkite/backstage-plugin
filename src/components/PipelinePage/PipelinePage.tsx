@@ -2,22 +2,31 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
 import { Progress, ResponseErrorPanel } from '@backstage/core-components';
-import { PipelineParams, PipelineView } from '..';
+import { PipelineParams } from '../types/buildkiteTypes';
+import { PipelineView } from '../PipelineView/PipelineView';
+import { useParams } from 'react-router-dom';
 
 const POLL_INTERVAL = 1000; // Poll every second
 
-interface PipelinePageProps {
-  orgSlug: string;
-  pipelineSlug: string;
+export interface PipelinePageProps {
+  orgSlug?: string;
+  pipelineSlug?: string;
 }
 
-export const PipelinePage: React.FC<PipelinePageProps> = ({
-  orgSlug,
-  pipelineSlug,
-}) => {
+export const PipelinePage = ({
+  orgSlug: propOrgSlug,
+  pipelineSlug: propPipelineSlug,
+}: PipelinePageProps): JSX.Element => {
+  // Get org and pipeline from route params if not passed as props
+  const params = useParams<{ orgSlug?: string; pipelineSlug?: string }>();
+  
+  // Use props if provided, otherwise fall back to route params
+  const orgSlug = propOrgSlug || params.orgSlug || "default-org";
+  const pipelineSlug = propPipelineSlug || params.pipelineSlug || "default-pipeline";
+
   const buildkiteApi = useApi(buildkiteAPIRef);
   const [pipeline, setPipeline] = useState<PipelineParams | undefined>();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | undefined>();
   const [loading, setLoading] = useState(true);
 
   // Use refs to keep track of the latest interval ID and mounted state

@@ -30,7 +30,7 @@ describe.skip('BuildStep Component', () => {
   };
 
   test('renders passed step correctly', () => {
-    render(<BuildStep step={stepPassed} />);
+    render(<BuildStep step={stepPassed} buildNumber="123" />);
     expect(screen.getByText('Step Passed')).toBeInTheDocument();
     expect(screen.getByRole('img')).toHaveAttribute('src', stepPassed.icon);
     expect(screen.getByRole('img')).toHaveAttribute('alt', stepPassed.title);
@@ -38,20 +38,20 @@ describe.skip('BuildStep Component', () => {
   });
 
   test('renders failed step correctly', () => {
-    render(<BuildStep step={stepFailed} />);
+    render(<BuildStep step={stepFailed} buildNumber="123" />);
     expect(screen.getByText('Step Failed')).toBeInTheDocument();
     expect(screen.getByTestId('CloseIcon')).toBeInTheDocument();
   });
 
   test('renders running step correctly', () => {
-    render(<BuildStep step={stepRunning} />);
+    render(<BuildStep step={stepRunning} buildNumber="123" />);
     expect(screen.getByText('Step Running')).toBeInTheDocument();
     expect(screen.getByTestId('AutorenewIcon')).toBeInTheDocument();
   });
 
   test('handles click event', () => {
     console.info = jest.fn();
-    render(<BuildStep step={stepPassed} />);
+    render(<BuildStep step={stepPassed} buildNumber="123" />);
     fireEvent.click(screen.getByRole('button'));
     expect(console.info).toHaveBeenCalledWith('You clicked the Chip.');
   });

@@ -13,8 +13,7 @@ describe('BuildkiteClient', () => {
   };
 
   const mockConfig: BuildkitePluginConfig = {
-    orgSlug: 'test-org',
-    pipelineSlug: 'test-pipeline',
+    organization: 'test-org',
   };
 
   let client: BuildkiteClient;
@@ -68,8 +67,10 @@ describe('BuildkiteClient', () => {
         text: jest.fn().mockResolvedValue('Unauthorized access'),
       } as any);
 
-      await expect(client.getUser()).rejects.toThrow('Buildkite API request failed: Unauthorized');
-      
+      await expect(client.getUser()).rejects.toThrow(
+        'Buildkite API request failed: Unauthorized',
+      );
+
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledWith(
         expect.any(String),
@@ -81,7 +82,7 @@ describe('BuildkiteClient', () => {
   describe('getPipeline', () => {
     const orgSlug = 'test-org';
     const pipelineSlug = 'test-pipeline';
-    
+
     it('should fetch pipeline and its builds successfully', async () => {
       const mockPipeline: BuildkiteApiPipeline = {
         id: 'pipeline-id',
@@ -92,7 +93,7 @@ describe('BuildkiteClient', () => {
           },
         },
       };
-      
+
       const mockBuilds: BuildkiteApiBuild[] = [
         {
           id: 'build-id',
@@ -119,24 +120,24 @@ describe('BuildkiteClient', () => {
           ],
         },
       ];
-      
+
       // Mock pipeline request
       mockFetchApi.fetch.mockResolvedValueOnce({
         ok: true,
         json: jest.fn().mockResolvedValue(mockPipeline),
       } as any);
-      
+
       // Mock builds request
       mockFetchApi.fetch.mockResolvedValueOnce({
         ok: true,
         json: jest.fn().mockResolvedValue(mockBuilds),
       } as any);
-      
+
       const result = await client.getPipeline(orgSlug, pipelineSlug);
-      
+
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledTimes(2);
-      
+
       // Validate the result structure
       expect(result).toEqual({
         id: 'pipeline-id',
@@ -171,21 +172,21 @@ describe('BuildkiteClient', () => {
         slug: 'test-pipeline',
       });
     });
-    
+
     it('should handle pipeline fetch error', async () => {
       mockFetchApi.fetch.mockResolvedValueOnce({
         ok: false,
         statusText: 'Not Found',
       } as any);
-      
+
       await expect(client.getPipeline(orgSlug, pipelineSlug)).rejects.toThrow(
         'Failed to fetch pipeline: Not Found',
       );
-      
+
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledTimes(1);
     });
-    
+
     it('should handle builds fetch error', async () => {
       // Mock successful pipeline request
       mockFetchApi.fetch.mockResolvedValueOnce({
@@ -195,17 +196,17 @@ describe('BuildkiteClient', () => {
           name: 'Test Pipeline',
         }),
       } as any);
-      
+
       // Mock failed builds request
       mockFetchApi.fetch.mockResolvedValueOnce({
         ok: false,
         statusText: 'Internal Server Error',
       } as any);
-      
+
       await expect(client.getPipeline(orgSlug, pipelineSlug)).rejects.toThrow(
         'Failed to fetch builds: Internal Server Error',
       );
-      
+
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledTimes(2);
     });
@@ -216,39 +217,46 @@ describe('BuildkiteClient', () => {
     const pipelineSlug = 'test-pipeline';
     const buildNumber = '123';
     const jobId = 'job-id';
-    
+
     it('should fetch job logs successfully', async () => {
       const mockLogResponse = {
         content: 'line 1\nline 2\nline 3',
       };
-      
+
       mockFetchApi.fetch.mockResolvedValue({
         ok: true,
         json: jest.fn().mockResolvedValue(mockLogResponse),
       } as any);
-      
-      const result = await client.getJobLogs(orgSlug, pipelineSlug, buildNumber, jobId);
-      
+
+      const result = await client.getJobLogs(
+        orgSlug,
+        pipelineSlug,
+        buildNumber,
+        jobId,
+      );
+
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledWith(
-        expect.stringContaining(`/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`),
+        expect.stringContaining(
+          `/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`,
+        ),
       );
-      
+
       expect(result).toEqual({
         content: ['line 1', 'line 2', 'line 3'],
       });
     });
-    
+
     it('should handle error responses', async () => {
       mockFetchApi.fetch.mockResolvedValue({
         ok: false,
         statusText: 'Not Found',
       } as any);
-      
-      await expect(client.getJobLogs(orgSlug, pipelineSlug, buildNumber, jobId)).rejects.toThrow(
-        'Failed to fetch job logs: Not Found',
-      );
-      
+
+      await expect(
+        client.getJobLogs(orgSlug, pipelineSlug, buildNumber, jobId),
+      ).rejects.toThrow('Failed to fetch job logs: Not Found');
+
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledTimes(1);
     });

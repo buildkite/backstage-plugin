@@ -23,12 +23,16 @@ describe.skip('PipelinePage', () => {
   });
 
   it('should render', async () => {
-    await renderInTestApp(<PipelinePage />);
+    await renderInTestApp(
+      <PipelinePage orgSlug="test-org" pipelineSlug="test-pipeline" />,
+    );
     expect(screen.getByText('Welcome to buildkite!')).toBeInTheDocument();
   });
 
   it('renders multiple pipelines with builds', async () => {
-    await renderInTestApp(<PipelinePage />);
+    await renderInTestApp(
+      <PipelinePage orgSlug="test-org" pipelineSlug="test-pipeline" />,
+    );
 
     // Check for the first pipeline
     expect(await screen.findByText('ads-promo-client')).toBeInTheDocument();

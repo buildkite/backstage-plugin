@@ -40,7 +40,7 @@ A Buildkite plugin for Backstage that provides deep integration with your Buildk
 - Buildkite account with API access
 - Required API token permissions:
   - `read_pipelines`
-  - `read_builds` 
+  - `read_builds`
   - `read_user`
   - `write_builds` (for rebuild functionality)
 
@@ -51,13 +51,13 @@ A Buildkite plugin for Backstage that provides deep integration with your Buildk
 If the plugin is in your project's plugins directory:
 
 ```bash
-yarn workspace app add @internal/plugin-buildkite
+yarn workspace app add @buildkite/plugin-buildkite
 ```
 
 If you're installing from an external package:
 
 ```bash
-yarn workspace app add @backstage/plugin-buildkite
+yarn workspace app add @buildkite/plugin-buildkite
 ```
 
 ### Configuration
@@ -83,7 +83,7 @@ buildkite:
 
 ```typescript
 // Import plugins that you want to be included in your app
-export { buildkitePlugin } from '@internal/plugin-buildkite';
+export { buildkitePlugin } from '@buildkite/plugin-buildkite';
 ```
 
 3. Make sure to import the plugins file in your `packages/app/src/App.tsx`:
@@ -96,7 +96,7 @@ import './plugins';
 4. Add the API factory in `packages/app/src/apis.ts`:
 
 ```typescript
-import { buildkiteAPIRef, BuildkiteClient } from '@internal/plugin-buildkite';
+import { buildkiteAPIRef, BuildkiteClient } from '@buildkite/plugin-buildkite';
 
 export const apis: AnyApiFactory[] = [
   createApiFactory({
@@ -121,12 +121,12 @@ export const apis: AnyApiFactory[] = [
 5. Add routes in `packages/app/src/App.tsx`:
 
 ```typescript
-import { PipelinePage, BuildPage } from '@internal/plugin-buildkite';
+import { PipelinePage } from '@buildkite/plugin-buildkite';
 
 const routes = (
   <FlatRoutes>
     {/* Other routes... */}
-    
+
     {/* Buildkite Plugin Routes */}
     <Route path="/buildkite" element={<PipelinePage />} />
     <Route path="/buildkite/build/:pipelineSlug/:buildNumber" element={<BuildPage />} />
@@ -138,7 +138,7 @@ const routes = (
 6. Add to your Entity Page in `packages/app/src/components/catalog/EntityPage.tsx`:
 
 ```typescript
-import { isBuildkiteAvailable, BuildkiteWrapper } from '@internal/plugin-buildkite';
+import { isBuildkiteAvailable, BuildkiteWrapper } from '@buildkite/plugin-buildkite';
 
 const cicdContent = (
   <EntitySwitch>
@@ -158,7 +158,7 @@ const cicdContent = (
 const defaultEntityPage = (
   <EntityLayout>
     {/* Other routes... */}
-    
+
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
       {cicdContent}
     </EntityLayout.Route>

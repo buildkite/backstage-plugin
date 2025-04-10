@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-buildkite",
+  "name": "@buildkite/plugin-buildkite",
   "exports": {
     ".": "./src/index.ts",
     "./components": "./src/components/index.ts",
@@ -8,7 +8,7 @@
   "typesVersions": {
     "*": {
       "components": [
-        "src/components.ts"
+        "src/components/index.ts"
       ],
       "package.json": [
         "package.json"
@@ -23,9 +23,13 @@
     "access": "public"
   },
   "backstage": {
-    "role": "frontend-plugin"
+    "role": "frontend-plugin",
+    "pluginId": "buildkite",
+    "pluginPackages": [
+      "@buildkite/plugin-buildkite"
+    ]
   },
-  "sideEffects": "false",
+  "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",

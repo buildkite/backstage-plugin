@@ -6,7 +6,8 @@ import {
   getBuildkiteProjectSlug,
   parseBuildkiteProjectSlug,
 } from '../../utils';
-import { BuildkiteHeader, PipelinePage } from '..';
+import { BuildkiteHeader } from '../BuildkiteHeader/BuildkiteHeader';
+import { PipelinePage } from '../PipelinePage/PipelinePage';
 
 const useStyles = makeStyles({
   wrapper: {

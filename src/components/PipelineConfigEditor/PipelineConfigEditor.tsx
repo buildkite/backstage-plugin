@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   CircularProgress,
@@ -15,7 +15,7 @@ import {
 import { Alert } from '@material-ui/lab';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
-import { useBuildkiteApi, usePipelineConfig } from '../../hooks/useBuildkiteApi';
+import { useBuildkiteApi } from '../../hooks/useBuildkiteApi';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -85,7 +85,11 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
       setConfig(pipelineConfig);
       setOriginalConfig(pipelineConfig);
     } catch (err) {
-      setError(`Failed to load pipeline configuration: ${err instanceof Error ? err.message : String(err)}`);
+      setError(
+        `Failed to load pipeline configuration: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     } finally {
       setLoading(false);
     }
@@ -107,7 +111,11 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
       setOriginalConfig(config);
       setOpen(false);
     } catch (err) {
-      setError(`Failed to update pipeline configuration: ${err instanceof Error ? err.message : String(err)}`);
+      setError(
+        `Failed to update pipeline configuration: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     } finally {
       setLoading(false);
     }
@@ -135,9 +143,7 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>
           <div className={classes.title}>
-            <Typography variant="h6">
-              Edit Pipeline Steps
-            </Typography>
+            <Typography variant="h6">Edit Pipeline Steps</Typography>
             <IconButton aria-label="close" onClick={handleClose}>
               <CloseIcon />
             </IconButton>
@@ -149,7 +155,11 @@ export const PipelineConfigEditor: React.FC<PipelineConfigEditorProps> = ({
               <CircularProgress />
             </div>
           )}
-          {error && <Alert severity="error" style={{ marginBottom: '16px' }}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" style={{ marginBottom: '16px' }}>
+              {error}
+            </Alert>
+          )}
           <div className={classes.editorContainer}>
             <TextField
               label="Pipeline Steps (YAML)"

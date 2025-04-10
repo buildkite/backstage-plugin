@@ -9,7 +9,6 @@ export { BuildkiteHeader } from './BuildkiteHeader';
 export { TriggerBuildButton } from './TriggerBuildButton';
 
 // Page Components
-export { BuildPage } from './BuildPage';
 export { PipelinePage } from './PipelinePage';
 
 // Feature Components

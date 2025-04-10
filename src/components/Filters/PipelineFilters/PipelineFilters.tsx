@@ -43,8 +43,6 @@ interface PipelineFiltersProps {
 export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   builds,
   onFilteredBuildsChange,
-  allExpanded,
-  onToggleAllBuilds,
 }) => {
   const classes = useStyles();
   const [filterState, setFilterState] = useState<FilterState>({
@@ -67,8 +65,8 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       }
 
       if (state.selectedCreator.length > 0) {
-        result = result.filter(
-          build => state.selectedCreator.includes(build.author.name),
+        result = result.filter(build =>
+          state.selectedCreator.includes(build.author.name),
         );
       }
 

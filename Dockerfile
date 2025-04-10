@@ -3,7 +3,7 @@ FROM node:20
 WORKDIR /app
 
 # Install global dependencies
-RUN npm install -g typescript@5.1.6 eslint-plugin-react-hooks@4.6.0
+RUN npm install -g typescript@5.1.6 eslint-plugin-react-hooks@4.6.0 @backstage/cli
 
 # Prepare directory for TypeScript declaration files
 RUN mkdir -p /app/dist-types/src

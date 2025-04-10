@@ -3,7 +3,7 @@ import {
   BuildStepParams,
   PipelineParams,
   Status,
-} from '../components';
+} from '../components/types/buildkiteTypes';
 
 export interface BuildkiteApiJob {
   id: string;

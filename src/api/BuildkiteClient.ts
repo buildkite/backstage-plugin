@@ -297,7 +297,7 @@ export class BuildkiteClient implements BuildkiteAPI {
           // Try to parse as JSON first for more details
           const errorJson = await response.json();
           errorText = JSON.stringify(errorJson);
-        } catch (e) {
+        } catch {
           // If JSON parsing fails, get the text
           errorText = await response.text();
         }

@@ -7,22 +7,13 @@ if [ ! -d "node_modules" ] && [ -f "package.json" ]; then
   yarn install --frozen-lockfile
 fi
 
-# Ensure TypeScript declarations directory exists
-mkdir -p dist-types/src
+# Generate TypeScript declaration files
+/app/scripts/generate-types.sh
 
-# Create a basic index.d.ts file if it doesn't exist
-if [ ! -f dist-types/src/index.d.ts ]; then
-  echo '/**
- * A Backstage plugin that integrates with Buildkite
- *
- * @packageDocumentation
- */
-
-export * from "../src/plugin";
-export * from "../src/api";
-export * from "../src/components";
-export * from "../src/hooks";
-export * from "../src/routes";' > dist-types/src/index.d.ts
+# Make sure backstage CLI is available locally (not globally)
+if ! command -v "$(npm bin)/backstage-cli" &> /dev/null; then
+  echo "Installing @backstage/cli locally if needed..."
+  yarn add --dev @backstage/cli
 fi
 
 # Execute the command passed to the script

@@ -8,7 +8,7 @@
   "typesVersions": {
     "*": {
       "components": [
-        "src/components.ts"
+        "src/components/index.ts"
       ],
       "package.json": [
         "package.json"
@@ -23,7 +23,11 @@
     "access": "public"
   },
   "backstage": {
-    "role": "frontend-plugin"
+    "role": "frontend-plugin",
+    "pluginId": "buildkite",
+    "pluginPackages": [
+      "@buildkite/plugin-buildkite"
+    ]
   },
   "sideEffects": false,
   "scripts": {

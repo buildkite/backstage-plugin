@@ -317,6 +317,8 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline, onRefresh 
                 variant="contained"
                 size="small"
                 text="New Build"
+                orgSlug={pipeline.orgSlug || ''}
+                pipelineSlug={pipeline.slug || ''}
                 onBuildTriggered={() => {
                   // Refresh the pipeline data when a build is triggered
                   if (onRefresh) {

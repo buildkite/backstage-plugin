@@ -95,6 +95,10 @@ interface TriggerBuildButtonProps {
   includeCurrentUser?: boolean;
   /** Callback for after a build is triggered */
   onBuildTriggered?: () => void;
+  /** Organization slug */
+  orgSlug: string;
+  /** Pipeline slug */
+  pipelineSlug: string;
 }
 
 export const TriggerBuildButton = ({
@@ -106,6 +110,8 @@ export const TriggerBuildButton = ({
   showText = true,
   includeCurrentUser = true,
   onBuildTriggered,
+  orgSlug,
+  pipelineSlug,
 }: TriggerBuildButtonProps) => {
   const classes = useStyles();
   const buildkiteApi = useApi(buildkiteAPIRef);
@@ -226,6 +232,9 @@ export const TriggerBuildButton = ({
         });
         options.meta_data = metadata;
       }
+
+      // Trigger the build via the API using the provided org and pipeline slugs
+      await buildkiteApi.triggerBuild(orgSlug, pipelineSlug, options);
 
       // Close dialog and call callback if provided
       handleClose();

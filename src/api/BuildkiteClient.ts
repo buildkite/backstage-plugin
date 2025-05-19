@@ -124,8 +124,22 @@ export class BuildkiteClient implements BuildkiteAPI {
   }
 
   private async getBaseURL(): Promise<string> {
-    const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
-    return getBuildkiteApiBaseUrl(proxyURL);
+    try {
+      const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
+      const baseUrl = getBuildkiteApiBaseUrl(proxyURL);
+      
+      if (!baseUrl) {
+        throw new Error('Failed to construct Buildkite API base URL');
+      }
+      
+      // Log the constructed URL for debugging purposes
+      console.debug(`Buildkite API base URL: ${baseUrl}`);
+      
+      return baseUrl;
+    } catch (error) {
+      console.error('Error constructing Buildkite API base URL:', error);
+      throw error;
+    }
   }
 
   async getUser(): Promise<User> {

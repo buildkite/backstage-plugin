@@ -4,6 +4,16 @@ import { BuildkitePluginConfig } from '../plugin';
 import { BuildkiteApiBuild, BuildkiteApiPipeline } from './types';
 
 describe('BuildkiteClient', () => {
+  // Mock console methods to prevent test output pollution
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation();
+    jest.spyOn(console, 'debug').mockImplementation();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   const mockDiscoveryApi: jest.Mocked<DiscoveryApi> = {
     getBaseUrl: jest.fn().mockResolvedValue('http://backstage/api/proxy'),
   };
@@ -19,7 +29,9 @@ describe('BuildkiteClient', () => {
   let client: BuildkiteClient;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    // Ensure the discovery API returns a valid URL for each test
+    mockDiscoveryApi.getBaseUrl.mockResolvedValue('http://backstage/api/proxy');
     client = new BuildkiteClient({
       discoveryAPI: mockDiscoveryApi,
       fetchAPI: mockFetchApi,
@@ -262,5 +274,48 @@ describe('BuildkiteClient', () => {
     });
   });
 
-  // Add more test cases for other methods as needed
+  // Test the getBaseURL method and URL construction
+  describe('getBaseURL', () => {
+    it('should construct the base URL correctly', async () => {
+      // Use a spy to access the private method
+      const getBaseURLSpy = jest.spyOn(
+        // @ts-ignore - accessing private method for testing
+        client as any,
+        'getBaseURL',
+      );
+
+      // Call a public method that uses getBaseURL internally
+      try {
+        await client.getUser();
+      } catch (error) {
+        // Ignore any errors, we just need to trigger getBaseURL
+      }
+
+      // Verify getBaseURL was called
+      expect(getBaseURLSpy).toHaveBeenCalled();
+      
+      // Verify the discovery API was called with the correct parameter
+      expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
+    });
+
+    it('should handle discovery API errors', async () => {
+      // Mock the discovery API to throw an error
+      mockDiscoveryApi.getBaseUrl.mockRejectedValueOnce(
+        new Error('Discovery API error'),
+      );
+
+      // Call a method that uses getBaseURL
+      await expect(client.getUser()).rejects.toThrow('Discovery API error');
+    });
+
+    it('should handle empty proxy URL', async () => {
+      // Mock the discovery API to return an empty string
+      mockDiscoveryApi.getBaseUrl.mockResolvedValueOnce('');
+
+      // Call a method that uses getBaseURL
+      await expect(client.getUser()).rejects.toThrow(
+        'Failed to construct Buildkite API base URL',
+      );
+    });
+  });
 });

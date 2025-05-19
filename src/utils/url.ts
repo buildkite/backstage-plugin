@@ -53,7 +53,26 @@ export function getBuildkitePipelineUrl(
  * @returns Full URL to the Buildkite API through the proxy
  */
 export function getBuildkiteApiBaseUrl(proxyPath: string): string {
-  return proxyPath ? `${proxyPath}/buildkite/api`.replace(/([^:]\/)\/+/g, '$1') : '';
+  if (!proxyPath) {
+    console.error('No proxy path provided to getBuildkiteApiBaseUrl');
+    return '';
+  }
+  
+  // Ensure we have a clean base URL without trailing slashes
+  const cleanProxyPath = proxyPath.endsWith('/') 
+    ? proxyPath.slice(0, -1) 
+    : proxyPath;
+    
+  // Construct the API URL to match the proxy configuration
+  // The proxy config typically has a pathRewrite like '^/api/proxy/buildkite/api' : ''
+  // So we need to ensure our URL matches this pattern
+  // 
+  // The proxy configuration expects the URL to be in the format:
+  // /api/proxy/buildkite/api/<endpoint>
+  // And it will rewrite this to:
+  // <target>/<endpoint>
+  // Where <target> is the base URL specified in the proxy config (e.g., https://api.buildkite.com/v2)
+  return `${cleanProxyPath}/buildkite/api`;
 }
 
 /**

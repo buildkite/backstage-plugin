@@ -97,6 +97,26 @@ describe('getBuildkiteApiBaseUrl', () => {
     const url = getBuildkiteApiBaseUrl('http://localhost:7000/proxy?param=value');
     expect(url).toBe('http://localhost:7000/proxy?param=value/buildkite/api');
   });
+  
+  it('handles URLs that already end with /buildkite/api', () => {
+    const url = getBuildkiteApiBaseUrl('http://localhost:7000/proxy/buildkite/api');
+    expect(url).toBe('http://localhost:7000/proxy/buildkite/api');
+  });
+  
+  it('handles URLs with /api/proxy pattern', () => {
+    const url = getBuildkiteApiBaseUrl('http://localhost:7000/api/proxy');
+    expect(url).toBe('http://localhost:7000/api/proxy/buildkite/api');
+  });
+  
+  it('handles URLs with /idp/api/proxy pattern', () => {
+    const url = getBuildkiteApiBaseUrl('https://internal-host/idp/api/proxy');
+    expect(url).toBe('https://internal-host/idp/api/proxy/buildkite/api');
+  });
+  
+  it('handles complex URLs with /api/proxy in the middle', () => {
+    const url = getBuildkiteApiBaseUrl('https://internal-host/idp/api/proxy/extra/path');
+    expect(url).toBe('https://internal-host/idp/api/proxy/buildkite/api');
+  });
 });
 
 describe('getBuildkitePipelineApiUrl', () => {

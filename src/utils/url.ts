@@ -63,15 +63,22 @@ export function getBuildkiteApiBaseUrl(proxyPath: string): string {
     ? proxyPath.slice(0, -1) 
     : proxyPath;
     
-  // Construct the API URL to match the proxy configuration
-  // The proxy config typically has a pathRewrite like '^/api/proxy/buildkite/api' : ''
-  // So we need to ensure our URL matches this pattern
-  // 
-  // The proxy configuration expects the URL to be in the format:
-  // /api/proxy/buildkite/api/<endpoint>
-  // And it will rewrite this to:
-  // <target>/<endpoint>
-  // Where <target> is the base URL specified in the proxy config (e.g., https://api.buildkite.com/v2)
+  // Check if the path already ends with /buildkite/api
+  if (cleanProxyPath.endsWith('/buildkite/api')) {
+    return cleanProxyPath;
+  }
+  
+  // Check if the path contains /api/proxy or similar pattern
+  // This handles both /api/proxy and /idp/api/proxy cases
+  if (cleanProxyPath.includes('/api/proxy')) {
+    // Extract the base part up to and including /api/proxy
+    const basePart = cleanProxyPath.match(/(.+\/api\/proxy)/);
+    if (basePart && basePart[1]) {
+      return `${basePart[1]}/buildkite/api`;
+    }
+  }
+  
+  // Default fallback to the original behavior
   return `${cleanProxyPath}/buildkite/api`;
 }
 

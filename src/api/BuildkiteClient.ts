@@ -83,21 +83,41 @@ export class BuildkiteClient implements BuildkiteAPI {
         repository: pipeline.repository?.url,
       }),
 
-      toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams => ({
-        id: build.id,
-        number: parseInt(build.number, 10) || 0,
-        stage: build.meta_data?.environment || 'production',
-        status: this.transforms.mapBuildkiteStatus(build.state),
-        commit: formatCommitId(build.commit || ''),
-        branch: build.branch || '',
-        message: build.message || '',
-        createdAt: build.created_at || '',
-        author: {
-          name: build.creator?.name || 'Unknown',
-          avatar: build.creator?.avatar_url || '',
-        },
-        url: build.web_url,
-      }),
+      toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams => {
+        // Determine the environment/stage from metadata
+        let stage = 'production';
+        if (build.meta_data) {
+          // First check for traditional environment field
+          if (build.meta_data.environment) {
+            stage = build.meta_data.environment;
+          } else {
+            // Check for environment-specific deployment flags
+            for (const key in build.meta_data) {
+              if (key.endsWith('_deployment') && build.meta_data[key] === true) {
+                // Convert e.g. 'staging_deployment' to 'staging'
+                stage = key.replace('_deployment', '');
+                break;
+              }
+            }
+          }
+        }
+        
+        return {
+          id: build.id,
+          number: parseInt(build.number, 10) || 0,
+          stage,
+          status: this.transforms.mapBuildkiteStatus(build.state),
+          commit: formatCommitId(build.commit || ''),
+          branch: build.branch || '',
+          message: build.message || '',
+          createdAt: build.created_at || '',
+          author: {
+            name: build.creator?.name || 'Unknown',
+            avatar: build.creator?.avatar_url || '',
+          },
+          url: build.web_url,
+        };
+      },
     };
   }
 
@@ -280,9 +300,23 @@ export class BuildkiteClient implements BuildkiteAPI {
       );
 
       // Filter for builds that are deployments (have environment metadata)
-      const deployments = data.filter(
-        build => build.meta_data && build.meta_data.environment,
-      );
+      // Support both direct environment field and environment-specific boolean flags
+      const deployments = data.filter(build => {
+        if (!build.meta_data) return false;
+        
+        // Check for traditional environment field
+        if (build.meta_data.environment) return true;
+        
+        // Check for environment-specific flags like staging_deployment: true
+        for (const key in build.meta_data) {
+          if (key.endsWith('_deployment') && build.meta_data[key] === true) {
+            return true;
+          }
+        }
+        
+        return false;
+      });
+      
       console.log(
         `[Buildkite] Found ${deployments.length} builds with deployment metadata.`,
       );

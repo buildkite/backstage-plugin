@@ -11,6 +11,7 @@ export function mapBuildkiteStatus(status: string): Status {
     case 'passed':
       return 'PASSED';
     case 'failed':
+    case 'broken':
       return 'FAILED';
     case 'running':
       return 'RUNNING';

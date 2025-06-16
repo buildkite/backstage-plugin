@@ -100,6 +100,7 @@ describe('BuildkiteClient', () => {
         id: 'pipeline-id',
         name: 'Test Pipeline',
         repository: {
+          url: 'https://github.com/test-org/test-pipeline',
           provider: {
             icon: 'https://icon.url',
           },
@@ -130,6 +131,7 @@ describe('BuildkiteClient', () => {
               command: 'test command',
             },
           ],
+          web_url: 'https://buildkite.com/test-org/test-pipeline/builds/123',
         },
       ];
 
@@ -182,6 +184,7 @@ describe('BuildkiteClient', () => {
         ],
         orgSlug: 'test-org',
         slug: 'test-pipeline',
+        repository: 'https://github.com/test-org/test-pipeline',
       });
     });
 
@@ -206,6 +209,7 @@ describe('BuildkiteClient', () => {
         json: jest.fn().mockResolvedValue({
           id: 'pipeline-id',
           name: 'Test Pipeline',
+          repository: { url: 'https://github.com/test-org/test-pipeline' },
         }),
       } as any);
 
@@ -287,7 +291,7 @@ describe('BuildkiteClient', () => {
       // Call a public method that uses getBaseURL internally
       try {
         await client.getUser();
-      } catch (error) {
+      } catch (_error) {
         // Ignore any errors, we just need to trigger getBaseURL
       }
 

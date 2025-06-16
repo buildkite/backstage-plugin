@@ -1,11 +1,17 @@
 import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
-import { BuildParams, BuildStepParams, PipelineParams } from '../components';
+import {
+  BuildParams,
+  BuildStepParams,
+  PipelineParams,
+  DeploymentParams,
+} from '../components';
 import { BuildkiteAPI, User } from './buildkiteApiRef';
 import { BuildkitePluginConfig } from '../plugin';
 import {
   BuildkiteApiBuild,
   BuildkiteApiJob,
   BuildkiteApiPipeline,
+  BuildkiteBuildsOptions,
   BuildkiteTransforms,
   BuildTriggerOptions,
   JobLog,
@@ -74,6 +80,23 @@ export class BuildkiteClient implements BuildkiteAPI {
         builds: builds.map(this.transforms.toBuildParams),
         orgSlug,
         slug: pipelineSlug,
+        repository: pipeline.repository?.url,
+      }),
+
+      toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams => ({
+        id: build.id,
+        number: parseInt(build.number, 10) || 0,
+        stage: build.meta_data?.environment || 'production',
+        status: this.transforms.mapBuildkiteStatus(build.state),
+        commit: formatCommitId(build.commit || ''),
+        branch: build.branch || '',
+        message: build.message || '',
+        createdAt: build.created_at || '',
+        author: {
+          name: build.creator?.name || 'Unknown',
+          avatar: build.creator?.avatar_url || '',
+        },
+        url: build.web_url,
       }),
     };
   }
@@ -127,14 +150,11 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
       const baseUrl = getBuildkiteApiBaseUrl(proxyURL);
-      
+
       if (!baseUrl) {
         throw new Error('Failed to construct Buildkite API base URL');
       }
-      
-      // Log the constructed URL for debugging purposes
-      console.debug(`Buildkite API base URL: ${baseUrl}`);
-      
+
       return baseUrl;
     } catch (error) {
       console.error('Error constructing Buildkite API base URL:', error);
@@ -146,7 +166,6 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseURL = await this.getBaseURL();
       const url = `${baseURL}/user`;
-      console.log('Requesting URL:', url);
 
       const response = await this.fetchAPI.fetch(url, {
         method: 'GET',
@@ -218,10 +237,16 @@ export class BuildkiteClient implements BuildkiteAPI {
   async getBuilds(
     orgSlug: string,
     pipelineSlug: string,
+    options?: BuildkiteBuildsOptions,
   ): Promise<BuildParams[]> {
     try {
       const baseUrl = await this.getBaseURL();
-      const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
+      const url = getBuildkiteBuildsApiUrl(
+        baseUrl,
+        orgSlug,
+        pipelineSlug,
+        options,
+      );
 
       const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {
@@ -232,6 +257,39 @@ export class BuildkiteClient implements BuildkiteAPI {
       return data.map(this.transforms.toBuildParams);
     } catch (error) {
       console.error('Error in getBuilds:', error);
+      throw error;
+    }
+  }
+
+  async getDeployments(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<DeploymentParams[]> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      // Fetch all builds, not just from main
+      const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
+      const response = await this.fetchAPI.fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch deployments: ${response.statusText}`);
+      }
+
+      const data: BuildkiteApiBuild[] = await response.json();
+      console.log(
+        `[Buildkite] Fetched ${data.length} total builds for pipeline ${orgSlug}/${pipelineSlug}.`,
+      );
+
+      // Filter for builds that are deployments (have environment metadata)
+      const deployments = data.filter(
+        build => build.meta_data && build.meta_data.environment,
+      );
+      console.log(
+        `[Buildkite] Found ${deployments.length} builds with deployment metadata.`,
+      );
+
+      return deployments.map(this.transforms.toDeploymentParams);
+    } catch (error) {
+      console.error('Error in getDeployments:', error);
       throw error;
     }
   }
@@ -315,7 +373,9 @@ export class BuildkiteClient implements BuildkiteAPI {
           // If JSON parsing fails, get the text
           errorText = await response.text();
         }
-        throw new Error(`Failed to trigger build (${response.status}): ${errorText}`);
+        throw new Error(
+          `Failed to trigger build (${response.status}): ${errorText}`,
+        );
       }
 
       const data: BuildkiteApiBuild = await response.json();
@@ -333,12 +393,14 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseUrl = await this.getBaseURL();
       const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
-      
+
       const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch pipeline configuration: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch pipeline configuration: ${response.statusText}`,
+        );
       }
-      
+
       const data = await response.json();
       // Return the configuration field if it exists, otherwise format the entire response
       if (data.configuration) {
@@ -346,7 +408,7 @@ export class BuildkiteClient implements BuildkiteAPI {
       }
       return JSON.stringify(data, null, 2);
     } catch (error) {
-      console.error('Error fetching pipeline configuration:', error);
+      console.error('Error fetching pipeline config:', error);
       throw error;
     }
   }
@@ -359,25 +421,22 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseUrl = await this.getBaseURL();
       const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
-      
-      const payload = {
-        configuration: config
-      };
-      
+
       const response = await this.fetchAPI.fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ configuration: config }),
       });
-      
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update pipeline configuration: ${errorText}`);
+        throw new Error(
+          `Failed to update pipeline configuration: ${response.statusText}`,
+        );
       }
     } catch (error) {
-      console.error('Error updating pipeline configuration:', error);
+      console.error('Error updating pipeline config:', error);
       throw error;
     }
   }

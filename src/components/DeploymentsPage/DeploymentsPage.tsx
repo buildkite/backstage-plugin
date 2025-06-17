@@ -32,7 +32,6 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
         </Link>
       ),
     },
-    { title: 'App', field: 'app' },
     { title: 'Stage', field: 'stage' },
     {
       title: 'Status',
@@ -70,7 +69,7 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
   return (
     <Table
       title="Deployments"
-      options={{ search: false, paging: true, pageSize: 10 }}
+      options={{ search: true, paging: true, pageSize: 10 }}
       columns={columns}
       data={value?.deployments || []}
     />

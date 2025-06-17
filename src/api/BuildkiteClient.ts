@@ -83,60 +83,115 @@ export class BuildkiteClient implements BuildkiteAPI {
         repository: pipeline.repository?.url,
       }),
 
-      toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams => {
-        // Determine the environment/stage from metadata
-        let stage = 'production';
-        let app = '';
+      toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams[] => {
+        const deployments: DeploymentParams[] = [];
         
-        if (build.meta_data) {
-          // First check for traditional environment field
-          if (build.meta_data.environment) {
-            stage = build.meta_data.environment;
-          } else {
-            // Check for app:environment:deployed pattern
-            for (const key in build.meta_data) {
-              if (key.includes(':') && key.endsWith(':deployed')) {
-                // Check if the value is true or the property exists
-                if (build.meta_data[key] === true || build.meta_data[key] === 'true') {
-                  const parts = key.split(':');
-                  if (parts.length === 3) {
-                    app = parts[0];
-                    stage = parts[1];
-                    break;
-                  }
-                }
-              }
-            }
-            
-            // If no match found, check legacy format
-            if (!app && stage === 'production') {
-              for (const key in build.meta_data) {
-                if (key.endsWith('_deployment') && build.meta_data[key] === true) {
-                  // Convert e.g. 'staging_deployment' to 'staging'
-                  stage = key.replace('_deployment', '');
-                  break;
-                }
+        if (!build.meta_data) {
+          // No metadata, return empty array
+          return deployments;
+        }
+        
+        // Check for traditional environment field
+        if (build.meta_data.environment) {
+          deployments.push({
+            id: build.id,
+            number: parseInt(build.number, 10) || 0,
+            stage: build.meta_data.environment,
+            app: undefined,
+            status: this.transforms.mapBuildkiteStatus(build.state),
+            commit: formatCommitId(build.commit || ''),
+            branch: build.branch || '',
+            message: build.message || '',
+            createdAt: build.created_at || '',
+            author: {
+              name: build.creator?.name || 'Unknown',
+              avatar: build.creator?.avatar_url || '',
+            },
+            url: build.web_url,
+          });
+        }
+        
+        // Check for app:environment:deployed pattern
+        for (const key in build.meta_data) {
+          if (key.includes(':') && key.endsWith(':deployed')) {
+            // Check if the value is true, 'true', or any truthy value
+            if (build.meta_data[key] === true || 
+                build.meta_data[key] === 'true' ||
+                build.meta_data[key]) {
+              const parts = key.split(':');
+              if (parts.length === 3) {
+                const app = parts[0];
+                const stage = parts[1];
+                
+                deployments.push({
+                  id: build.id,
+                  number: parseInt(build.number, 10) || 0,
+                  stage,
+                  app,
+                  status: this.transforms.mapBuildkiteStatus(build.state),
+                  commit: formatCommitId(build.commit || ''),
+                  branch: build.branch || '',
+                  message: build.message || '',
+                  createdAt: build.created_at || '',
+                  author: {
+                    name: build.creator?.name || 'Unknown',
+                    avatar: build.creator?.avatar_url || '',
+                  },
+                  url: build.web_url,
+                });
               }
             }
           }
         }
         
-        return {
-          id: build.id,
-          number: parseInt(build.number, 10) || 0,
-          stage,
-          app: app || undefined,
-          status: this.transforms.mapBuildkiteStatus(build.state),
-          commit: formatCommitId(build.commit || ''),
-          branch: build.branch || '',
-          message: build.message || '',
-          createdAt: build.created_at || '',
-          author: {
-            name: build.creator?.name || 'Unknown',
-            avatar: build.creator?.avatar_url || '',
-          },
-          url: build.web_url,
-        };
+        // If no match found, check legacy format
+        if (deployments.length === 0) {
+          for (const key in build.meta_data) {
+            if (key.endsWith('_deployment') && build.meta_data[key] === true) {
+              // Convert e.g. 'staging_deployment' to 'staging'
+              const stage = key.replace('_deployment', '');
+              
+              deployments.push({
+                id: build.id,
+                number: parseInt(build.number, 10) || 0,
+                stage,
+                app: undefined,
+                status: this.transforms.mapBuildkiteStatus(build.state),
+                commit: formatCommitId(build.commit || ''),
+                branch: build.branch || '',
+                message: build.message || '',
+                createdAt: build.created_at || '',
+                author: {
+                  name: build.creator?.name || 'Unknown',
+                  avatar: build.creator?.avatar_url || '',
+                },
+                url: build.web_url,
+              });
+            }
+          }
+        }
+        
+        // If still no deployments found, use production as default (backward compatibility)
+        if (deployments.length === 0) {
+          deployments.push({
+            id: build.id,
+            number: parseInt(build.number, 10) || 0,
+            stage: 'production',
+            app: undefined,
+            status: this.transforms.mapBuildkiteStatus(build.state),
+            commit: formatCommitId(build.commit || ''),
+            branch: build.branch || '',
+            message: build.message || '',
+            createdAt: build.created_at || '',
+            author: {
+              name: build.creator?.name || 'Unknown',
+              avatar: build.creator?.avatar_url || '',
+            },
+            url: build.web_url,
+          });
+        }
+        
+        return deployments;
       },
     };
   }
@@ -329,7 +384,9 @@ export class BuildkiteClient implements BuildkiteAPI {
         // Check for app:$environment:deployed pattern (e.g., backend:production:deployed)
         for (const key in build.meta_data) {
           if (key.includes(':') && key.endsWith(':deployed')) {
-            if (build.meta_data[key] === true || build.meta_data[key] === 'true') {
+            if (build.meta_data[key] === true || 
+                build.meta_data[key] === 'true' ||
+                build.meta_data[key]) {
               return true;
             }
           }
@@ -348,8 +405,14 @@ export class BuildkiteClient implements BuildkiteAPI {
       console.log(
         `[Buildkite] Found ${deployments.length} builds with deployment metadata.`,
       );
+      
+      // Log all deployment metadata for debugging
+      deployments.forEach(build => {
+        console.log(`[Buildkite] Deployment: ${build.number}, metadata:`, build.meta_data);
+      });
 
-      return deployments.map(this.transforms.toDeploymentParams);
+      // Flatten the array of arrays into a single array of deployment params
+      return deployments.flatMap(this.transforms.toDeploymentParams);
     } catch (error) {
       console.error('Error in getDeployments:', error);
       throw error;

@@ -32,6 +32,7 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
         </Link>
       ),
     },
+    { title: 'App', field: 'app' },
     { title: 'Stage', field: 'stage' },
     {
       title: 'Status',

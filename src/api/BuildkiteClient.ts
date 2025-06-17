@@ -86,17 +86,36 @@ export class BuildkiteClient implements BuildkiteAPI {
       toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams => {
         // Determine the environment/stage from metadata
         let stage = 'production';
+        let app = '';
+        
         if (build.meta_data) {
           // First check for traditional environment field
           if (build.meta_data.environment) {
             stage = build.meta_data.environment;
           } else {
-            // Check for environment-specific deployment flags
+            // Check for app:environment:deployed pattern
             for (const key in build.meta_data) {
-              if (key.endsWith('_deployment') && build.meta_data[key] === true) {
-                // Convert e.g. 'staging_deployment' to 'staging'
-                stage = key.replace('_deployment', '');
-                break;
+              if (key.includes(':') && key.endsWith(':deployed')) {
+                // Check if the value is true or the property exists
+                if (build.meta_data[key] === true || build.meta_data[key] === 'true') {
+                  const parts = key.split(':');
+                  if (parts.length === 3) {
+                    app = parts[0];
+                    stage = parts[1];
+                    break;
+                  }
+                }
+              }
+            }
+            
+            // If no match found, check legacy format
+            if (!app && stage === 'production') {
+              for (const key in build.meta_data) {
+                if (key.endsWith('_deployment') && build.meta_data[key] === true) {
+                  // Convert e.g. 'staging_deployment' to 'staging'
+                  stage = key.replace('_deployment', '');
+                  break;
+                }
               }
             }
           }
@@ -106,6 +125,7 @@ export class BuildkiteClient implements BuildkiteAPI {
           id: build.id,
           number: parseInt(build.number, 10) || 0,
           stage,
+          app: app || undefined,
           status: this.transforms.mapBuildkiteStatus(build.state),
           commit: formatCommitId(build.commit || ''),
           branch: build.branch || '',
@@ -299,15 +319,23 @@ export class BuildkiteClient implements BuildkiteAPI {
         `[Buildkite] Fetched ${data.length} total builds for pipeline ${orgSlug}/${pipelineSlug}.`,
       );
 
-      // Filter for builds that are deployments (have environment metadata)
-      // Support both direct environment field and environment-specific boolean flags
+      // Filter for builds that are deployments
       const deployments = data.filter(build => {
         if (!build.meta_data) return false;
         
         // Check for traditional environment field
         if (build.meta_data.environment) return true;
         
-        // Check for environment-specific flags like staging_deployment: true
+        // Check for app:$environment:deployed pattern (e.g., backend:production:deployed)
+        for (const key in build.meta_data) {
+          if (key.includes(':') && key.endsWith(':deployed')) {
+            if (build.meta_data[key] === true || build.meta_data[key] === 'true') {
+              return true;
+            }
+          }
+        }
+        
+        // Legacy: Check for environment-specific flags like staging_deployment: true
         for (const key in build.meta_data) {
           if (key.endsWith('_deployment') && build.meta_data[key] === true) {
             return true;

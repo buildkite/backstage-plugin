@@ -71,6 +71,7 @@ export type DeploymentParams = {
   id: string;
   number: number;
   stage: string;
+  app?: string;
   status: Status;
   commit: string;
   branch: string;

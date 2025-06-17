@@ -66,12 +66,19 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
     return <ResponseErrorPanel error={error} />;
   }
 
+  // Sort deployments to show production above staging
+  const sortedDeployments = [...(value?.deployments || [])].sort((a, b) => {
+    if (a.stage === 'production' && b.stage === 'staging') return -1;
+    if (a.stage === 'staging' && b.stage === 'production') return 1;
+    return 0;
+  });
+
   return (
     <Table
       title="Deployments"
       options={{ search: true, paging: true, pageSize: 10 }}
       columns={columns}
-      data={value?.deployments || []}
+      data={sortedDeployments}
     />
   );
 };

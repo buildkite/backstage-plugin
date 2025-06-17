@@ -85,14 +85,18 @@ export class BuildkiteClient implements BuildkiteAPI {
 
       toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams[] => {
         const deployments: DeploymentParams[] = [];
-        
+
         if (!build.meta_data) {
           // No metadata, return empty array
           return deployments;
         }
-        
+
         // Check for traditional environment field
         if (build.meta_data.environment) {
+          // For environment-based deployments, check for environment-specific URL
+          const environmentUrlKey = `${build.meta_data.environment}:url`;
+          const environmentUrl = build.meta_data[environmentUrlKey] || build.meta_data.url || '';
+          
           deployments.push({
             id: build.id,
             number: parseInt(build.number, 10) || 0,
@@ -107,21 +111,28 @@ export class BuildkiteClient implements BuildkiteAPI {
               name: build.creator?.name || 'Unknown',
               avatar: build.creator?.avatar_url || '',
             },
-            url: build.web_url,
+            url: environmentUrl || build.web_url,
+            version: build.meta_data.version || '',
           });
         }
-        
+
         // Check for app:environment:deployed pattern
         for (const key in build.meta_data) {
           if (key.includes(':') && key.endsWith(':deployed')) {
             // Check if the value is true, 'true', or any truthy value
-            if (build.meta_data[key] === true || 
-                build.meta_data[key] === 'true' ||
-                build.meta_data[key]) {
+            if (
+              build.meta_data[key] === true ||
+              build.meta_data[key] === 'true' ||
+              build.meta_data[key]
+            ) {
               const parts = key.split(':');
               if (parts.length === 3) {
                 const app = parts[0];
                 const stage = parts[1];
+
+                // Check for app-specific URL in meta_data (e.g., backend:staging:url)
+                const appUrlKey = `${app}:${stage}:url`;
+                const customUrl = build.meta_data[appUrlKey] || build.meta_data.url || '';
                 
                 deployments.push({
                   id: build.id,
@@ -137,19 +148,24 @@ export class BuildkiteClient implements BuildkiteAPI {
                     name: build.creator?.name || 'Unknown',
                     avatar: build.creator?.avatar_url || '',
                   },
-                  url: build.web_url,
+                  url: customUrl || build.web_url,
+                  version: build.meta_data.version || '',
                 });
               }
             }
           }
         }
-        
+
         // If no match found, check legacy format
         if (deployments.length === 0) {
           for (const key in build.meta_data) {
             if (key.endsWith('_deployment') && build.meta_data[key] === true) {
               // Convert e.g. 'staging_deployment' to 'staging'
               const stage = key.replace('_deployment', '');
+
+              // Check for stage-specific URL
+              const stageUrlKey = `${stage}:url`;
+              const stageUrl = build.meta_data[stageUrlKey] || build.meta_data.url || '';
               
               deployments.push({
                 id: build.id,
@@ -165,14 +181,19 @@ export class BuildkiteClient implements BuildkiteAPI {
                   name: build.creator?.name || 'Unknown',
                   avatar: build.creator?.avatar_url || '',
                 },
-                url: build.web_url,
+                url: stageUrl || build.web_url,
+                version: build.meta_data.version || '',
               });
             }
           }
         }
-        
+
         // If still no deployments found, use production as default (backward compatibility)
         if (deployments.length === 0) {
+          // Check for production URL in meta_data
+          const prodUrlKey = 'production:url';
+          const prodUrl = build.meta_data[prodUrlKey] || build.meta_data.url || '';
+          
           deployments.push({
             id: build.id,
             number: parseInt(build.number, 10) || 0,
@@ -187,10 +208,11 @@ export class BuildkiteClient implements BuildkiteAPI {
               name: build.creator?.name || 'Unknown',
               avatar: build.creator?.avatar_url || '',
             },
-            url: build.web_url,
+            url: prodUrl || build.web_url,
+            version: build.meta_data.version || '',
           });
         }
-        
+
         return deployments;
       },
     };
@@ -377,38 +399,43 @@ export class BuildkiteClient implements BuildkiteAPI {
       // Filter for builds that are deployments
       const deployments = data.filter(build => {
         if (!build.meta_data) return false;
-        
+
         // Check for traditional environment field
         if (build.meta_data.environment) return true;
-        
+
         // Check for app:$environment:deployed pattern (e.g., backend:production:deployed)
         for (const key in build.meta_data) {
           if (key.includes(':') && key.endsWith(':deployed')) {
-            if (build.meta_data[key] === true || 
-                build.meta_data[key] === 'true' ||
-                build.meta_data[key]) {
+            if (
+              build.meta_data[key] === true ||
+              build.meta_data[key] === 'true' ||
+              build.meta_data[key]
+            ) {
               return true;
             }
           }
         }
-        
+
         // Legacy: Check for environment-specific flags like staging_deployment: true
         for (const key in build.meta_data) {
           if (key.endsWith('_deployment') && build.meta_data[key] === true) {
             return true;
           }
         }
-        
+
         return false;
       });
-      
+
       console.log(
         `[Buildkite] Found ${deployments.length} builds with deployment metadata.`,
       );
-      
+
       // Log all deployment metadata for debugging
       deployments.forEach(build => {
-        console.log(`[Buildkite] Deployment: ${build.number}, metadata:`, build.meta_data);
+        console.log(
+          `[Buildkite] Deployment: ${build.number}, metadata:`,
+          build.meta_data,
+        );
       });
 
       // Flatten the array of arrays into a single array of deployment params

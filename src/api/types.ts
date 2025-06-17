@@ -97,5 +97,5 @@ export interface BuildkiteTransforms {
     orgSlug: string,
     pipelineSlug: string,
   ) => PipelineParams;
-  toDeploymentParams: (build: BuildkiteApiBuild) => DeploymentParams;
+  toDeploymentParams: (build: BuildkiteApiBuild) => DeploymentParams[];
 }

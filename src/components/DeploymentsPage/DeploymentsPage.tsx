@@ -1,6 +1,6 @@
-import { Link, Progress, ResponseErrorPanel, Table, TableColumn } from '@backstage/core-components';
+import { Link, Progress, ResponseErrorPanel, Table, TableColumn, Button } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
-import React from 'react';
+import React, { useState } from 'react';
 import { useAsync } from 'react-use';
 import { buildkiteAPIRef, BuildkiteAPI } from '../../api';
 import { StatusIcon } from '../Icons';
@@ -14,6 +14,17 @@ interface Props {
 
 export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
   const buildkiteApi = useApi<BuildkiteAPI>(buildkiteAPIRef);
+  
+  // Define available columns and their initial visibility state
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
+    // Load saved preferences from localStorage if available
+    const savedColumns = localStorage.getItem(`buildkite-columns-${orgSlug}-${pipelineSlug}`);
+    return savedColumns ? JSON.parse(savedColumns) : [
+      'deployment', 'stage', 'status', 'commit', 'url', 'version'
+    ];
+  });
+
+
 
   const { value, loading, error } = useAsync(async () => {
     const [pipeline, deployments] = await Promise.all([
@@ -23,8 +34,12 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
     return { pipeline, deployments };
   }, [buildkiteApi, orgSlug, pipelineSlug]);
 
-  const columns: TableColumn<DeploymentParams>[] = [
+  // Use the deployments directly as they already have version from meta_data.version
+  const processedDeployments = value?.deployments || [];
+
+  const allColumns: TableColumn<DeploymentParams>[] = [
     {
+      id: 'deployment',
       title: 'Deployment',
       render: (row: DeploymentParams) => (
         <Link to={row.url} target="_blank" rel="noopener">
@@ -32,12 +47,14 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
         </Link>
       ),
     },
-    { title: 'Stage', field: 'stage' },
+    { id: 'stage', title: 'Stage', field: 'stage' },
     {
+      id: 'status',
       title: 'Status',
       render: (row: DeploymentParams) => <StatusIcon status={row.status} size="medium" />,
     },
     {
+      id: 'commit',
       title: 'Commit',
       render: (row: DeploymentParams) => {
         if (!value?.pipeline.repository) {
@@ -50,11 +67,26 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
         );
       },
     },
-    { title: 'Branch', field: 'branch' },
-    { title: 'Author', field: 'author.name' },
+    { id: 'branch', title: 'Branch', field: 'branch' },
+    { id: 'author', title: 'Author', field: 'author.name' },
     { 
+      id: 'createdAt',
       title: 'Created', 
       render: (row: DeploymentParams) => formatDate(row.createdAt, false)
+    },
+    {
+      id: 'url',
+      title: 'URL',
+      render: (row: DeploymentParams) => (
+        <Link to={row.url} target="_blank" rel="noopener">
+          {row.app ? `${row.app}-${row.stage}` : 'Open'}
+        </Link>
+      ),
+    },
+    {
+      id: 'version',
+      title: 'Version',
+      field: 'version',
     },
   ];
 
@@ -66,19 +98,60 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
     return <ResponseErrorPanel error={error} />;
   }
 
-  // Sort deployments to show production above staging
-  const sortedDeployments = [...(value?.deployments || [])].sort((a, b) => {
-    if (a.stage === 'production' && b.stage === 'staging') return -1;
-    if (a.stage === 'staging' && b.stage === 'production') return 1;
+  // Sort deployments by build number first, then environment type
+  const sortedDeployments = [...processedDeployments].sort((a, b) => {
+    // First compare build numbers (higher numbers first)
+    if (a.number !== b.number) {
+      return b.number - a.number;
+    }
+    // For same build number, sort by environment (production first)
+    if (a.stage === 'production' && b.stage !== 'production') return -1;
+    if (a.stage !== 'production' && b.stage === 'production') return 1;
     return 0;
   });
 
+  // Filter columns based on visibility settings
+  const visibleColumnsData = allColumns.filter(column => 
+    visibleColumns.includes(column.id as string)
+  );
+
   return (
-    <Table
-      title="Deployments"
-      options={{ search: true, paging: true, pageSize: 10 }}
-      columns={columns}
-      data={sortedDeployments}
-    />
+    <>
+      <div style={{ marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', marginBottom: '8px' }}>Select columns to display:</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {allColumns.map(column => {
+            const isActive = visibleColumns.includes(column.id as string);
+            return (
+              <Button
+                key={column.id as string}
+                color={isActive ? 'primary' : 'default'}
+                variant={isActive ? 'contained' : 'outlined'}
+                onClick={() => {
+                  const newColumns = isActive
+                    ? visibleColumns.filter(c => c !== column.id)
+                    : [...visibleColumns, column.id as string];
+                  
+                  if (newColumns.length > 0) {
+                    setVisibleColumns(newColumns);
+                    localStorage.setItem(`buildkite-columns-${orgSlug}-${pipelineSlug}`, JSON.stringify(newColumns));
+                  }
+                }}
+                size="small"
+              >
+                {column.title}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+      
+      <Table
+        title="Deployments"
+        options={{ search: true, paging: true, pageSize: 10 }}
+        columns={visibleColumnsData}
+        data={sortedDeployments}
+      />
+    </>
   );
 };

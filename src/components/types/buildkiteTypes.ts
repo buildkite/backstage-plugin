@@ -82,4 +82,5 @@ export type DeploymentParams = {
     avatar: string;
   };
   url: string;
+  version: string;
 };

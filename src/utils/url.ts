@@ -104,14 +104,30 @@ export function getBuildkitePipelineApiUrl(
  * @param baseUrl - The base API URL
  * @param organizationSlug - The Buildkite organization slug
  * @param pipelineSlug - The Buildkite pipeline slug
+ * @param options - Options for the builds API endpoint
  * @returns Full URL to the builds API endpoint
  */
 export function getBuildkiteBuildsApiUrl(
   baseUrl: string,
   organizationSlug: string,
   pipelineSlug: string,
+  options?: { page?: number; per_page?: number; branch?: string },
 ): string {
-  return `${baseUrl}/organizations/${organizationSlug}/pipelines/${pipelineSlug}/builds`;
+  const url = new URL(`${baseUrl}/organizations/${organizationSlug}/pipelines/${pipelineSlug}/builds`);
+
+  if (options?.page) {
+    url.searchParams.append('page', String(options.page));
+  }
+
+  if (options?.per_page) {
+    url.searchParams.append('per_page', String(options.per_page));
+  }
+
+  if (options?.branch) {
+    url.searchParams.append('branch', options.branch);
+  }
+
+  return url.href;
 }
 
 /**

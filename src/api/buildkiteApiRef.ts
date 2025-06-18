@@ -1,5 +1,5 @@
 import { createApiRef } from '@backstage/core-plugin-api';
-import { PipelineParams, BuildParams, BuildStepParams } from '../components/';
+import { PipelineParams, BuildParams, BuildStepParams, DeploymentParams } from '../components/';
 import { JobLog, BuildTriggerOptions } from './types';
 
 export interface User {
@@ -16,6 +16,7 @@ export interface BuildkiteAPI {
   getUser(): Promise<User>;
   getPipeline(orgSlug: string, pipelineSlug: string): Promise<PipelineParams>;
   getBuilds(orgSlug: string, pipelineSlug: string): Promise<BuildParams[]>;
+  getDeployments(orgSlug: string, pipelineSlug: string): Promise<DeploymentParams[]>;
   getBuildSteps(
     orgSlug: string,
     pipelineSlug: string,

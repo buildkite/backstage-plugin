@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from '@backstage/core-plugin-api';
 import { buildkiteAPIRef } from '../../api';
-import { Progress, ResponseErrorPanel } from '@backstage/core-components';
+import {
+  Progress,
+  ResponseErrorPanel,
+  Content,
+  Header,
+  Page,
+  TabbedLayout,
+} from '@backstage/core-components';
 import { PipelineParams } from '../types/buildkiteTypes';
 import { PipelineView } from '../PipelineView/PipelineView';
+import { DeploymentsPage } from '../DeploymentsPage';
 import { useParams } from 'react-router-dom';
 
 const POLL_INTERVAL = 1000; // Poll every second
@@ -17,24 +25,19 @@ export const PipelinePage = ({
   orgSlug: propOrgSlug,
   pipelineSlug: propPipelineSlug,
 }: PipelinePageProps): JSX.Element => {
-  // Get org and pipeline from route params if not passed as props
   const params = useParams<{ orgSlug?: string; pipelineSlug?: string }>();
-  
-  // Use props if provided, otherwise fall back to route params
-  const orgSlug = propOrgSlug || params.orgSlug || "default-org";
-  const pipelineSlug = propPipelineSlug || params.pipelineSlug || "default-pipeline";
+  const orgSlug = propOrgSlug || params.orgSlug || 'default-org';
+  const pipelineSlug = propPipelineSlug || params.pipelineSlug || 'default-pipeline';
 
   const buildkiteApi = useApi(buildkiteAPIRef);
   const [pipeline, setPipeline] = useState<PipelineParams | undefined>();
   const [error, setError] = useState<Error | undefined>();
   const [loading, setLoading] = useState(true);
 
-  // Use refs to keep track of the latest interval ID and mounted state
   const intervalRef = useRef<number>();
   const isMountedRef = useRef(true);
 
   const fetchPipelineData = useCallback(async () => {
-    // Don't fetch if component is unmounted
     if (!isMountedRef.current) return;
 
     try {
@@ -43,7 +46,6 @@ export const PipelinePage = ({
         pipelineSlug,
       );
 
-      // Only update state if component is still mounted
       if (isMountedRef.current) {
         setPipeline(pipelineData);
         setError(undefined);
@@ -61,27 +63,20 @@ export const PipelinePage = ({
   }, [buildkiteApi, orgSlug, pipelineSlug]);
 
   const startPolling = useCallback(() => {
-    // Clear any existing interval
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
     }
 
-    // Start new polling interval
     const id = window.setInterval(fetchPipelineData, POLL_INTERVAL);
     intervalRef.current = id;
   }, [fetchPipelineData]);
 
   useEffect(() => {
-    // Set mounted flag
     isMountedRef.current = true;
 
-    // Initial fetch
     fetchPipelineData();
-
-    // Start polling
     startPolling();
 
-    // Cleanup function
     return () => {
       isMountedRef.current = false;
       if (intervalRef.current) {
@@ -90,7 +85,6 @@ export const PipelinePage = ({
     };
   }, [fetchPipelineData, startPolling]);
 
-  // Handle tab visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -98,9 +92,7 @@ export const PipelinePage = ({
           window.clearInterval(intervalRef.current);
         }
       } else {
-        // Fetch immediately when becoming visible
         fetchPipelineData();
-        // Restart polling
         startPolling();
       }
     };
@@ -126,5 +118,19 @@ export const PipelinePage = ({
     );
   }
 
-  return <PipelineView pipeline={pipeline} onRefresh={fetchPipelineData} />;
+  return (
+    <Page themeId="tool">
+      <Header title="Buildkite" subtitle={pipeline.name} />
+      <Content>
+        <TabbedLayout>
+          <TabbedLayout.Route path="/builds" title="Builds">
+            <PipelineView pipeline={pipeline} onRefresh={fetchPipelineData} />
+          </TabbedLayout.Route>
+          <TabbedLayout.Route path="/deployments" title="Deployments">
+            <DeploymentsPage orgSlug={orgSlug} pipelineSlug={pipelineSlug} />
+          </TabbedLayout.Route>
+        </TabbedLayout>
+      </Content>
+    </Page>
+  );
 };

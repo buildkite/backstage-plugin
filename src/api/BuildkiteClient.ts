@@ -1,11 +1,17 @@
 import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
-import { BuildParams, BuildStepParams, PipelineParams } from '../components';
+import {
+  BuildParams,
+  BuildStepParams,
+  PipelineParams,
+  DeploymentParams,
+} from '../components';
 import { BuildkiteAPI, User } from './buildkiteApiRef';
 import { BuildkitePluginConfig } from '../plugin';
 import {
   BuildkiteApiBuild,
   BuildkiteApiJob,
   BuildkiteApiPipeline,
+  BuildkiteBuildsOptions,
   BuildkiteTransforms,
   BuildTriggerOptions,
   JobLog,
@@ -74,7 +80,175 @@ export class BuildkiteClient implements BuildkiteAPI {
         builds: builds.map(this.transforms.toBuildParams),
         orgSlug,
         slug: pipelineSlug,
+        repository: pipeline.repository?.url,
       }),
+
+      toDeploymentParams: (build: BuildkiteApiBuild): DeploymentParams[] => {
+        const deployments: DeploymentParams[] = [];
+
+        if (!build.meta_data) {
+          // No metadata, return empty array
+          return deployments;
+        }
+
+        // Check for traditional environment field
+        if (build.meta_data.environment) {
+          // For environment-based deployments, check for environment-specific URL
+          const environmentUrlKey = `${build.meta_data.environment}:url`;
+          const environmentUrl =
+            build.meta_data[environmentUrlKey] || build.meta_data.url || '';
+
+          // Check for environment-specific version
+          const environmentVersionKey = `${build.meta_data.environment}:version`;
+          const environmentVersion =
+            build.meta_data[environmentVersionKey] ||
+            build.meta_data.version ||
+            '';
+
+          deployments.push({
+            id: build.id,
+            number: parseInt(build.number, 10) || 0,
+            stage: build.meta_data.environment,
+            app: undefined,
+            status: this.transforms.mapBuildkiteStatus(build.state),
+            commit: formatCommitId(build.commit || ''),
+            branch: build.branch || '',
+            message: build.message || '',
+            createdAt: build.created_at || '',
+            author: {
+              name: build.creator?.name || 'Unknown',
+              avatar: build.creator?.avatar_url || '',
+            },
+            url: environmentUrl || build.web_url,
+            version: environmentVersion,
+            web_url: build.web_url,
+          });
+        }
+
+        // Check for app:environment:deployed pattern
+        for (const key in build.meta_data) {
+          if (key.includes(':') && key.endsWith(':deployed')) {
+            // Check if the value is true, 'true', or any truthy value
+            if (
+              build.meta_data[key] === true ||
+              build.meta_data[key] === 'true' ||
+              build.meta_data[key]
+            ) {
+              const parts = key.split(':');
+              if (parts.length === 3) {
+                const app = parts[0];
+                const stage = parts[1];
+
+                // Check for app-specific URL in meta_data (e.g., backend:staging:url)
+                const appUrlKey = `${app}:${stage}:url`;
+                const customUrl =
+                  build.meta_data[appUrlKey] || build.meta_data.url || '';
+
+                // Check for app-specific version in meta_data (e.g., api:production:version)
+                const appVersionKey = `${app}:${stage}:version`;
+                const appVersion =
+                  build.meta_data[appVersionKey] ||
+                  build.meta_data.version ||
+                  '';
+
+                deployments.push({
+                  id: build.id,
+                  number: parseInt(build.number, 10) || 0,
+                  stage,
+                  app,
+                  status: this.transforms.mapBuildkiteStatus(build.state),
+                  commit: formatCommitId(build.commit || ''),
+                  branch: build.branch || '',
+                  message: build.message || '',
+                  createdAt: build.created_at || '',
+                  author: {
+                    name: build.creator?.name || 'Unknown',
+                    avatar: build.creator?.avatar_url || '',
+                  },
+                  url: customUrl || build.web_url,
+                  version: appVersion,
+                  web_url: build.web_url,
+                });
+              }
+            }
+          }
+        }
+
+        // If no match found, check legacy format
+        if (deployments.length === 0) {
+          for (const key in build.meta_data) {
+            if (key.endsWith('_deployment') && build.meta_data[key] === true) {
+              // Convert e.g. 'staging_deployment' to 'staging'
+              const stage = key.replace('_deployment', '');
+
+              // Check for stage-specific URL
+              const stageUrlKey = `${stage}:url`;
+              const stageUrl =
+                build.meta_data[stageUrlKey] || build.meta_data.url || '';
+
+              // Check for stage-specific version
+              const stageVersionKey = `${stage}:version`;
+              const stageVersion =
+                build.meta_data[stageVersionKey] ||
+                build.meta_data.version ||
+                '';
+
+              deployments.push({
+                id: build.id,
+                number: parseInt(build.number, 10) || 0,
+                stage,
+                app: undefined,
+                status: this.transforms.mapBuildkiteStatus(build.state),
+                commit: formatCommitId(build.commit || ''),
+                branch: build.branch || '',
+                message: build.message || '',
+                createdAt: build.created_at || '',
+                author: {
+                  name: build.creator?.name || 'Unknown',
+                  avatar: build.creator?.avatar_url || '',
+                },
+                url: stageUrl || build.web_url,
+                version: stageVersion,
+                web_url: build.web_url,
+              });
+            }
+          }
+        }
+
+        // If still no deployments found, use production as default (backward compatibility)
+        if (deployments.length === 0) {
+          // Check for production URL in meta_data
+          const prodUrlKey = 'production:url';
+          const prodUrl =
+            build.meta_data[prodUrlKey] || build.meta_data.url || '';
+
+          // Check for production version in meta_data
+          const prodVersionKey = 'production:version';
+          const prodVersion =
+            build.meta_data[prodVersionKey] || build.meta_data.version || '';
+
+          deployments.push({
+            id: build.id,
+            number: parseInt(build.number, 10) || 0,
+            stage: 'production',
+            app: undefined,
+            status: this.transforms.mapBuildkiteStatus(build.state),
+            commit: formatCommitId(build.commit || ''),
+            branch: build.branch || '',
+            message: build.message || '',
+            createdAt: build.created_at || '',
+            author: {
+              name: build.creator?.name || 'Unknown',
+              avatar: build.creator?.avatar_url || '',
+            },
+            url: prodUrl || build.web_url,
+            version: prodVersion,
+            web_url: build.web_url,
+          });
+        }
+
+        return deployments;
+      },
     };
   }
 
@@ -127,14 +301,11 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const proxyURL = await this.discoveryAPI.getBaseUrl('proxy');
       const baseUrl = getBuildkiteApiBaseUrl(proxyURL);
-      
+
       if (!baseUrl) {
         throw new Error('Failed to construct Buildkite API base URL');
       }
-      
-      // Log the constructed URL for debugging purposes
-      console.debug(`Buildkite API base URL: ${baseUrl}`);
-      
+
       return baseUrl;
     } catch (error) {
       console.error('Error constructing Buildkite API base URL:', error);
@@ -146,7 +317,6 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseURL = await this.getBaseURL();
       const url = `${baseURL}/user`;
-      console.log('Requesting URL:', url);
 
       const response = await this.fetchAPI.fetch(url, {
         method: 'GET',
@@ -218,10 +388,16 @@ export class BuildkiteClient implements BuildkiteAPI {
   async getBuilds(
     orgSlug: string,
     pipelineSlug: string,
+    options?: BuildkiteBuildsOptions,
   ): Promise<BuildParams[]> {
     try {
       const baseUrl = await this.getBaseURL();
-      const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
+      const url = getBuildkiteBuildsApiUrl(
+        baseUrl,
+        orgSlug,
+        pipelineSlug,
+        options,
+      );
 
       const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {
@@ -232,6 +408,74 @@ export class BuildkiteClient implements BuildkiteAPI {
       return data.map(this.transforms.toBuildParams);
     } catch (error) {
       console.error('Error in getBuilds:', error);
+      throw error;
+    }
+  }
+
+  async getDeployments(
+    orgSlug: string,
+    pipelineSlug: string,
+  ): Promise<DeploymentParams[]> {
+    try {
+      const baseUrl = await this.getBaseURL();
+      // Fetch all builds, not just from main
+      const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
+      const response = await this.fetchAPI.fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch deployments: ${response.statusText}`);
+      }
+
+      const data: BuildkiteApiBuild[] = await response.json();
+      console.log(
+        `[Buildkite] Fetched ${data.length} total builds for pipeline ${orgSlug}/${pipelineSlug}.`,
+      );
+
+      // Filter for builds that are deployments
+      const deployments = data.filter(build => {
+        if (!build.meta_data) return false;
+
+        // Check for traditional environment field
+        if (build.meta_data.environment) return true;
+
+        // Check for app:$environment:deployed pattern (e.g., backend:production:deployed)
+        for (const key in build.meta_data) {
+          if (key.includes(':') && key.endsWith(':deployed')) {
+            if (
+              build.meta_data[key] === true ||
+              build.meta_data[key] === 'true' ||
+              build.meta_data[key]
+            ) {
+              return true;
+            }
+          }
+        }
+
+        // Legacy: Check for environment-specific flags like staging_deployment: true
+        for (const key in build.meta_data) {
+          if (key.endsWith('_deployment') && build.meta_data[key] === true) {
+            return true;
+          }
+        }
+
+        return false;
+      });
+
+      console.log(
+        `[Buildkite] Found ${deployments.length} builds with deployment metadata.`,
+      );
+
+      // Log all deployment metadata for debugging
+      deployments.forEach(build => {
+        console.log(
+          `[Buildkite] Deployment: ${build.number}, metadata:`,
+          build.meta_data,
+        );
+      });
+
+      // Flatten the array of arrays into a single array of deployment params
+      return deployments.flatMap(this.transforms.toDeploymentParams);
+    } catch (error) {
+      console.error('Error in getDeployments:', error);
       throw error;
     }
   }
@@ -315,7 +559,9 @@ export class BuildkiteClient implements BuildkiteAPI {
           // If JSON parsing fails, get the text
           errorText = await response.text();
         }
-        throw new Error(`Failed to trigger build (${response.status}): ${errorText}`);
+        throw new Error(
+          `Failed to trigger build (${response.status}): ${errorText}`,
+        );
       }
 
       const data: BuildkiteApiBuild = await response.json();
@@ -333,12 +579,14 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseUrl = await this.getBaseURL();
       const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
-      
+
       const response = await this.fetchAPI.fetch(url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch pipeline configuration: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch pipeline configuration: ${response.statusText}`,
+        );
       }
-      
+
       const data = await response.json();
       // Return the configuration field if it exists, otherwise format the entire response
       if (data.configuration) {
@@ -346,7 +594,7 @@ export class BuildkiteClient implements BuildkiteAPI {
       }
       return JSON.stringify(data, null, 2);
     } catch (error) {
-      console.error('Error fetching pipeline configuration:', error);
+      console.error('Error fetching pipeline config:', error);
       throw error;
     }
   }
@@ -359,25 +607,22 @@ export class BuildkiteClient implements BuildkiteAPI {
     try {
       const baseUrl = await this.getBaseURL();
       const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
-      
-      const payload = {
-        configuration: config
-      };
-      
+
       const response = await this.fetchAPI.fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ configuration: config }),
       });
-      
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update pipeline configuration: ${errorText}`);
+        throw new Error(
+          `Failed to update pipeline configuration: ${response.statusText}`,
+        );
       }
     } catch (error) {
-      console.error('Error updating pipeline configuration:', error);
+      console.error('Error updating pipeline config:', error);
       throw error;
     }
   }

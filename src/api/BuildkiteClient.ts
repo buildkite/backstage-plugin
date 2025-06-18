@@ -95,8 +95,16 @@ export class BuildkiteClient implements BuildkiteAPI {
         if (build.meta_data.environment) {
           // For environment-based deployments, check for environment-specific URL
           const environmentUrlKey = `${build.meta_data.environment}:url`;
-          const environmentUrl = build.meta_data[environmentUrlKey] || build.meta_data.url || '';
-          
+          const environmentUrl =
+            build.meta_data[environmentUrlKey] || build.meta_data.url || '';
+
+          // Check for environment-specific version
+          const environmentVersionKey = `${build.meta_data.environment}:version`;
+          const environmentVersion =
+            build.meta_data[environmentVersionKey] ||
+            build.meta_data.version ||
+            '';
+
           deployments.push({
             id: build.id,
             number: parseInt(build.number, 10) || 0,
@@ -112,7 +120,7 @@ export class BuildkiteClient implements BuildkiteAPI {
               avatar: build.creator?.avatar_url || '',
             },
             url: environmentUrl || build.web_url,
-            version: build.meta_data.version || '',
+            version: environmentVersion,
           });
         }
 
@@ -132,8 +140,16 @@ export class BuildkiteClient implements BuildkiteAPI {
 
                 // Check for app-specific URL in meta_data (e.g., backend:staging:url)
                 const appUrlKey = `${app}:${stage}:url`;
-                const customUrl = build.meta_data[appUrlKey] || build.meta_data.url || '';
-                
+                const customUrl =
+                  build.meta_data[appUrlKey] || build.meta_data.url || '';
+
+                // Check for app-specific version in meta_data (e.g., api:production:version)
+                const appVersionKey = `${app}:${stage}:version`;
+                const appVersion =
+                  build.meta_data[appVersionKey] ||
+                  build.meta_data.version ||
+                  '';
+
                 deployments.push({
                   id: build.id,
                   number: parseInt(build.number, 10) || 0,
@@ -149,7 +165,7 @@ export class BuildkiteClient implements BuildkiteAPI {
                     avatar: build.creator?.avatar_url || '',
                   },
                   url: customUrl || build.web_url,
-                  version: build.meta_data.version || '',
+                  version: appVersion,
                 });
               }
             }
@@ -165,8 +181,16 @@ export class BuildkiteClient implements BuildkiteAPI {
 
               // Check for stage-specific URL
               const stageUrlKey = `${stage}:url`;
-              const stageUrl = build.meta_data[stageUrlKey] || build.meta_data.url || '';
-              
+              const stageUrl =
+                build.meta_data[stageUrlKey] || build.meta_data.url || '';
+
+              // Check for stage-specific version
+              const stageVersionKey = `${stage}:version`;
+              const stageVersion =
+                build.meta_data[stageVersionKey] ||
+                build.meta_data.version ||
+                '';
+
               deployments.push({
                 id: build.id,
                 number: parseInt(build.number, 10) || 0,
@@ -182,7 +206,7 @@ export class BuildkiteClient implements BuildkiteAPI {
                   avatar: build.creator?.avatar_url || '',
                 },
                 url: stageUrl || build.web_url,
-                version: build.meta_data.version || '',
+                version: stageVersion,
               });
             }
           }
@@ -192,8 +216,14 @@ export class BuildkiteClient implements BuildkiteAPI {
         if (deployments.length === 0) {
           // Check for production URL in meta_data
           const prodUrlKey = 'production:url';
-          const prodUrl = build.meta_data[prodUrlKey] || build.meta_data.url || '';
-          
+          const prodUrl =
+            build.meta_data[prodUrlKey] || build.meta_data.url || '';
+
+          // Check for production version in meta_data
+          const prodVersionKey = 'production:version';
+          const prodVersion =
+            build.meta_data[prodVersionKey] || build.meta_data.version || '';
+
           deployments.push({
             id: build.id,
             number: parseInt(build.number, 10) || 0,
@@ -209,7 +239,7 @@ export class BuildkiteClient implements BuildkiteAPI {
               avatar: build.creator?.avatar_url || '',
             },
             url: prodUrl || build.web_url,
-            version: build.meta_data.version || '',
+            version: prodVersion,
           });
         }
 

@@ -49,7 +49,7 @@ export const DeploymentsPage = ({ orgSlug, pipelineSlug }: Props) => {
       id: 'deployment',
       title: 'Deployment',
       render: (row: DeploymentParams) => (
-        <Link to={row.url} target="_blank" rel="noopener">
+        <Link to={row.web_url || row.url} target="_blank" rel="noopener">
           #{row.number}
         </Link>
       ),

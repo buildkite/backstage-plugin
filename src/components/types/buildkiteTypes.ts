@@ -83,4 +83,5 @@ export type DeploymentParams = {
   };
   url: string;
   version?: string;
+  web_url?: string;
 };

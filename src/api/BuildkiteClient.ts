@@ -121,6 +121,7 @@ export class BuildkiteClient implements BuildkiteAPI {
             },
             url: environmentUrl || build.web_url,
             version: environmentVersion,
+            web_url: build.web_url,
           });
         }
 
@@ -166,6 +167,7 @@ export class BuildkiteClient implements BuildkiteAPI {
                   },
                   url: customUrl || build.web_url,
                   version: appVersion,
+                  web_url: build.web_url,
                 });
               }
             }
@@ -207,6 +209,7 @@ export class BuildkiteClient implements BuildkiteAPI {
                 },
                 url: stageUrl || build.web_url,
                 version: stageVersion,
+                web_url: build.web_url,
               });
             }
           }
@@ -240,6 +243,7 @@ export class BuildkiteClient implements BuildkiteAPI {
             },
             url: prodUrl || build.web_url,
             version: prodVersion,
+            web_url: build.web_url,
           });
         }
 

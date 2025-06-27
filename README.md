@@ -10,13 +10,13 @@ A Buildkite plugin for Backstage that provides deep integration with your Buildk
 - Detailed step-by-step build progress tracking
 - Comprehensive build logs with syntax highlighting
 
-⚡️ **Powerful Filtering & Search**
+⚡ **Powerful Filtering & Search**
 - Full-text search across builds, messages, authors, branches, and commit IDs
 - Smart date range filtering with preset options (Today, Yesterday, Last 7 days, Last 30 days)
 - Multi-criteria filtering by branch, creator, and build status
 - Automatic status-based grouping and organization
 
-📊 **Rich Build Information**
+📖 **Rich Build Information**
 - Detailed build status with step-by-step progress
 - Build timing and duration tracking
 - Commit and branch context
@@ -175,111 +175,8 @@ metadata:
     buildkite.com/pipeline-slug: organization-slug/pipeline-slug
 ```
 
-## Development
+## Documentation
 
-```bash
-# Install dependencies
-yarn install
-
-# Start plugin in development mode
-yarn start
-
-# Run tests
-yarn test
-
-# Build plugin
-yarn build
-```
-
-## Tracking Deployments
-
-The plugin can track deployments across your Buildkite pipelines. There are three ways to mark a build as a deployment:
-
-### 1. Using the `environment` metadata field
-
-Set the `environment` metadata field in your Buildkite build using the buildkite-agent command:
-
-```yaml
-# In your pipeline.yml
-steps:
-  - label: "Deploy to Production"
-    command: |
-      buildkite-agent meta-data set "environment" "production"
-      ./scripts/deploy.sh
-```
-
-### 2. Using the app:environment:deployed pattern
-
-For deployments where you want to track both the application name and environment:
-
-```yaml
-# In your pipeline.yml
-steps:
-  - label: "Deploy Frontend to Staging"
-    command: |
-      buildkite-agent meta-data set "frontend:staging:deployed" "true"
-      ./scripts/deploy-frontend-staging.sh
-    branches: "main"
-
-  - label: "Deploy Backend to Staging"
-    command: |
-      buildkite-agent meta-data set "backend:staging:deployed" "true"
-      ./scripts/deploy-backend-staging.sh
-    branches: "main"
-```
-
-This format allows you to track multiple applications deployed to different environments and will display both the application name and environment in the deployments view.
-
-### 3. Using environment-specific deployment flags
-
-For pipelines that deploy to multiple environments sequentially (e.g., staging then production), you can use environment-specific flags:
-
-```yaml
-# In your pipeline.yml
-steps:
-  - label: "Deploy to Staging"
-    command: |
-      buildkite-agent meta-data set "staging_deployment" "true"
-      ./scripts/deploy-staging.sh
-    branches: "main"
-
-  - block: "Promote to Production?"
-    branches: "main"
-
-  - label: "Deploy to Production"
-    command: |
-      buildkite-agent meta-data set "production_deployment" "true"
-      ./scripts/deploy-production.sh
-    branches: "main"
-```
-
-This allows tracking multiple deployments from a single build as they progress through your environments.
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**
-   - Verify `BUILDKITE_API_TOKEN` is set in your environment
-   - Check API token has required permissions
-   - Confirm proxy configuration in `app-config.yaml`
-
-2. **Missing Build Data**
-   - Verify pipeline slug format: `organization-slug/pipeline-slug`
-   - Check organization and pipeline names are correct
-   - Ensure builds exist within selected date range
-   - Confirm all filters are set correctly
-
-3. **Real-time Updates Not Working**
-   - Check browser tab is active (updates pause in background)
-   - Verify network connectivity
-   - Ensure API token hasn't expired
-
-4. **Build Logs Not Loading**
-   - Confirm API token has `read_builds` permission
-   - Check build exists and is accessible
-   - Verify proxy configuration can handle log requests
-
-## Contributing
-
-Please read our [Contributing Guide](docs/CONTRIBUTING.md) before submitting a Pull Request.
+- [Deployment Tracking](docs/DEPLOYMENT.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Contributing/Development Guide](docs/CONTRIBUTING.md)

@@ -56,6 +56,7 @@ export type PipelineParams = {
   navatarColor: string;
   navatarImage: string;
   builds: BuildParams[];
+  repository?: string;
 };
 
 export type ComponentParams = {
@@ -64,4 +65,23 @@ export type ComponentParams = {
   navatarColor: string;
   navatarImage: string;
   pipelines: PipelineParams[];
+};
+
+export type DeploymentParams = {
+  id: string;
+  number: number;
+  stage: string;
+  app?: string;
+  status: Status;
+  commit: string;
+  branch: string;
+  message: string;
+  createdAt: string;
+  author: {
+    name: string;
+    avatar: string;
+  };
+  url: string;
+  version?: string;
+  web_url?: string;
 };

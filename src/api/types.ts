@@ -47,12 +47,21 @@ export interface BuildkiteApiBuild {
   started_at?: string;
   finished_at?: string;
   jobs?: BuildkiteApiJob[];
+  meta_data?: Record<string, any>;
+  web_url: string;
+}
+
+export interface BuildkiteBuildsOptions {
+  page?: number;
+  per_page?: number;
+  branch?: string;
 }
 
 export interface BuildkiteApiPipeline {
   id: string;
   name: string;
   repository?: {
+    url?: string;
     provider?: {
       icon?: string;
     };
@@ -76,6 +85,8 @@ export interface BuildTriggerOptions {
 }
 
 // Type for transforming API data to our component types
+import { DeploymentParams } from '../components/types/buildkiteTypes';
+
 export interface BuildkiteTransforms {
   mapBuildkiteStatus: (status: string) => Status;
   toBuildParams: (build: BuildkiteApiBuild) => BuildParams;
@@ -86,4 +97,5 @@ export interface BuildkiteTransforms {
     orgSlug: string,
     pipelineSlug: string,
   ) => PipelineParams;
+  toDeploymentParams: (build: BuildkiteApiBuild) => DeploymentParams[];
 }

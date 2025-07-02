@@ -2,6 +2,7 @@ import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
 import { BuildkiteClient } from './BuildkiteClient';
 import { BuildkitePluginConfig } from '../plugin';
 import { BuildkiteApiBuild, BuildkiteApiPipeline } from './types';
+import { VERSION } from '../version';
 
 describe('BuildkiteClient', () => {
   // Mock console methods to prevent test output pollution
@@ -253,9 +254,13 @@ describe('BuildkiteClient', () => {
 
       expect(mockDiscoveryApi.getBaseUrl).toHaveBeenCalledWith('proxy');
       expect(mockFetchApi.fetch).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`,
-        ),
+        `http://backstage/api/proxy/buildkite/api/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'X-Buildkite-Plugin-Version': VERSION,
+            'X-Buildkite-Source': 'backstage-plugin',
+          }),
+        }),
       );
 
       expect(result).toEqual({
@@ -291,7 +296,7 @@ describe('BuildkiteClient', () => {
       // Call a public method that uses getBaseURL internally
       try {
         await client.getUser();
-      } catch (_error) {
+      } catch {
         // Ignore any errors, we just need to trigger getBaseURL
       }
 

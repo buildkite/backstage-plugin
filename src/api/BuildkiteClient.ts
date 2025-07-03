@@ -7,6 +7,7 @@ import {
 } from '../components';
 import { BuildkiteAPI, User } from './buildkiteApiRef';
 import { BuildkitePluginConfig } from '../plugin';
+import { VERSION } from '../version';
 import {
   BuildkiteApiBuild,
   BuildkiteApiJob,
@@ -252,6 +253,19 @@ export class BuildkiteClient implements BuildkiteAPI {
     };
   }
 
+  private getCommonHeaders(contentType?: boolean): Record<string, string> {
+    const headers: Record<string, string> = {
+      'X-Buildkite-Source': 'backstage-plugin',
+      'X-Buildkite-Plugin-Version': VERSION,
+    };
+
+    if (contentType) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    return headers;
+  }
+
   async getJobLogs(
     orgSlug: string,
     pipelineSlug: string,
@@ -268,7 +282,9 @@ export class BuildkiteClient implements BuildkiteAPI {
         jobId,
       );
 
-      const response = await this.fetchAPI.fetch(url);
+      const response = await this.fetchAPI.fetch(url, {
+        headers: this.getCommonHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch job logs: ${response.statusText}`);
       }
@@ -320,9 +336,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
       const response = await this.fetchAPI.fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getCommonHeaders(true),
       });
 
       if (!response.ok) {
@@ -352,7 +366,9 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
 
-      const pipelineResponse = await this.fetchAPI.fetch(url);
+      const pipelineResponse = await this.fetchAPI.fetch(url, {
+        headers: this.getCommonHeaders(),
+      });
       if (!pipelineResponse.ok) {
         throw new Error(
           `Failed to fetch pipeline: ${pipelineResponse.statusText}`,
@@ -366,7 +382,9 @@ export class BuildkiteClient implements BuildkiteAPI {
         orgSlug,
         pipelineSlug,
       );
-      const buildsResponse = await this.fetchAPI.fetch(buildsUrl);
+      const buildsResponse = await this.fetchAPI.fetch(buildsUrl, {
+        headers: this.getCommonHeaders(),
+      });
       if (!buildsResponse.ok) {
         throw new Error(`Failed to fetch builds: ${buildsResponse.statusText}`);
       }
@@ -399,7 +417,9 @@ export class BuildkiteClient implements BuildkiteAPI {
         options,
       );
 
-      const response = await this.fetchAPI.fetch(url);
+      const response = await this.fetchAPI.fetch(url, {
+        headers: this.getCommonHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch builds: ${response.statusText}`);
       }
@@ -420,7 +440,9 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       // Fetch all builds, not just from main
       const url = getBuildkiteBuildsApiUrl(baseUrl, orgSlug, pipelineSlug);
-      const response = await this.fetchAPI.fetch(url);
+      const response = await this.fetchAPI.fetch(url, {
+        headers: this.getCommonHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch deployments: ${response.statusText}`);
       }
@@ -489,7 +511,9 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       const url = `${baseUrl}/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}`;
 
-      const response = await this.fetchAPI.fetch(url);
+      const response = await this.fetchAPI.fetch(url, {
+        headers: this.getCommonHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch build steps: ${response.statusText}`);
       }
@@ -513,9 +537,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
       const response = await this.fetchAPI.fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getCommonHeaders(true),
       });
 
       if (!response.ok) {
@@ -543,9 +565,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
       const response = await this.fetchAPI.fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getCommonHeaders(true),
         body: JSON.stringify(options),
       });
 
@@ -580,7 +600,9 @@ export class BuildkiteClient implements BuildkiteAPI {
       const baseUrl = await this.getBaseURL();
       const url = getBuildkitePipelineApiUrl(baseUrl, orgSlug, pipelineSlug);
 
-      const response = await this.fetchAPI.fetch(url);
+      const response = await this.fetchAPI.fetch(url, {
+        headers: this.getCommonHeaders(),
+      });
       if (!response.ok) {
         throw new Error(
           `Failed to fetch pipeline configuration: ${response.statusText}`,
@@ -610,9 +632,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
       const response = await this.fetchAPI.fetch(url, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getCommonHeaders(true),
         body: JSON.stringify({ configuration: config }),
       });
 

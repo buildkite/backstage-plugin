@@ -7,7 +7,6 @@ import {
 } from '../components';
 import { BuildkiteAPI, User } from './buildkiteApiRef';
 import { BuildkitePluginConfig } from '../plugin';
-import { VERSION } from '../version';
 import {
   BuildkiteApiBuild,
   BuildkiteApiJob,
@@ -255,8 +254,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
   private getCommonHeaders(contentType?: boolean): Record<string, string> {
     const headers: Record<string, string> = {
-      'X-Buildkite-Source': 'backstage-plugin',
-      'X-Buildkite-Plugin-Version': VERSION,
+      'User-Agent': 'buildkite backstage plugin',
     };
 
     if (contentType) {

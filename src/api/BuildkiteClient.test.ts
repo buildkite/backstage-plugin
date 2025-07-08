@@ -2,7 +2,6 @@ import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
 import { BuildkiteClient } from './BuildkiteClient';
 import { BuildkitePluginConfig } from '../plugin';
 import { BuildkiteApiBuild, BuildkiteApiPipeline } from './types';
-import { VERSION } from '../version';
 
 describe('BuildkiteClient', () => {
   // Mock console methods to prevent test output pollution
@@ -66,6 +65,7 @@ describe('BuildkiteClient', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
+            'User-Agent': 'buildkite backstage plugin',
           }),
         }),
       );
@@ -257,8 +257,7 @@ describe('BuildkiteClient', () => {
         `http://backstage/api/proxy/buildkite/api/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`,
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-Buildkite-Plugin-Version': VERSION,
-            'X-Buildkite-Source': 'backstage-plugin',
+            'User-Agent': 'buildkite backstage plugin',
           }),
         }),
       );

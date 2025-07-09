@@ -66,6 +66,7 @@ describe('BuildkiteClient', () => {
           method: 'GET',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
+            'User-Agent': `buildkite-backstage-plugin/${VERSION}`,
           }),
         }),
       );
@@ -257,8 +258,7 @@ describe('BuildkiteClient', () => {
         `http://backstage/api/proxy/buildkite/api/organizations/${orgSlug}/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${jobId}/log`,
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-Buildkite-Plugin-Version': VERSION,
-            'X-Buildkite-Source': 'backstage-plugin',
+            'User-Agent': `buildkite-backstage-plugin/${VERSION}`,
           }),
         }),
       );

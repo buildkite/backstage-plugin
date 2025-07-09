@@ -255,7 +255,7 @@ export class BuildkiteClient implements BuildkiteAPI {
 
   private getCommonHeaders(contentType?: boolean): Record<string, string> {
     const headers: Record<string, string> = {
-      'User-Agent': `buildkite backstage plugin/${VERSION}`,
+      'User-Agent': `buildkite-backstage-plugin/${VERSION}`,
     };
 
     if (contentType) {

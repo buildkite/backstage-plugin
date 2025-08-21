@@ -52,6 +52,11 @@ describe('isSuccessStatus', () => {
     expect(isSuccessStatus('CANCELED')).toBe(false);
     expect(isSuccessStatus('WAITING')).toBe(false);
   });
+
+  it('handles undefined/null gracefully', () => {
+    expect(isSuccessStatus(undefined as unknown as Status)).toBe(false);
+    expect(isSuccessStatus(null as unknown as Status)).toBe(false);
+  });
 });
 
 describe('isFailureStatus', () => {
@@ -67,6 +72,11 @@ describe('isFailureStatus', () => {
     expect(isFailureStatus('PASSED')).toBe(false);
     expect(isFailureStatus('RUNNING')).toBe(false);
     expect(isFailureStatus('WAITING')).toBe(false);
+  });
+
+  it('handles undefined/null gracefully', () => {
+    expect(isFailureStatus(undefined as unknown as Status)).toBe(false);
+    expect(isFailureStatus(null as unknown as Status)).toBe(false);
   });
 });
 
@@ -84,6 +94,11 @@ describe('isInProgressStatus', () => {
     expect(isInProgressStatus('FAILED')).toBe(false);
     expect(isInProgressStatus('CANCELED')).toBe(false);
   });
+
+  it('handles undefined/null gracefully', () => {
+    expect(isInProgressStatus(undefined as unknown as Status)).toBe(false);
+    expect(isInProgressStatus(null as unknown as Status)).toBe(false);
+  });
 });
 
 describe('isClickableStatus', () => {
@@ -98,6 +113,11 @@ describe('isClickableStatus', () => {
     expect(isClickableStatus('SCHEDULED')).toBe(false);
     expect(isClickableStatus('WAITING')).toBe(false);
     expect(isClickableStatus('BLOCKED')).toBe(false);
+  });
+
+  it('handles undefined/null gracefully', () => {
+    expect(isClickableStatus(undefined as unknown as Status)).toBe(false);
+    expect(isClickableStatus(null as unknown as Status)).toBe(false);
   });
 });
 
@@ -130,5 +150,15 @@ describe('getStatusColors', () => {
     const colors = getStatusColors('BLOCKED');
     expect(colors.main).toBe('#888888');
     expect(colors.subtle).toBe('#FFFFFF');
+  });
+
+  it('handles undefined/null gracefully', () => {
+    const colorsUndefined = getStatusColors(undefined as unknown as Status);
+    expect(colorsUndefined.main).toBe('#888888');
+    expect(colorsUndefined.subtle).toBe('#FFFFFF');
+
+    const colorsNull = getStatusColors(null as unknown as Status);
+    expect(colorsNull.main).toBe('#888888');
+    expect(colorsNull.subtle).toBe('#FFFFFF');
   });
 });

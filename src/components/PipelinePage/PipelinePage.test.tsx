@@ -1,26 +1,26 @@
 import React from 'react';
 import { PipelinePage } from '..';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+// import { rest } from 'msw';
+// import { setupServer } from 'msw/node';
 import { screen } from '@testing-library/react';
 import {
-  setupRequestMockHandlers,
+  // setupRequestMockHandlers,
   renderInTestApp,
 } from '@backstage/test-utils';
 
 // We skip this because it needs a Backstage instance to run it
 // TODO: Add a mock Backstage instance
 describe.skip('PipelinePage', () => {
-  const server = setupServer();
+  // const server = setupServer();
   // Enable sane handlers for network requests
-  setupRequestMockHandlers(server);
+  // setupRequestMockHandlers(server);
 
   // setup mock response
-  beforeEach(() => {
-    server.use(
-      rest.get('/*', (_, res, ctx) => res(ctx.status(200), ctx.json({}))),
-    );
-  });
+  // beforeEach(() => {
+  //   server.use(
+  //     rest.get('/*', (_, res, ctx) => res(ctx.status(200), ctx.json({}))),
+  //   );
+  // });
 
   it('should render', async () => {
     await renderInTestApp(

@@ -55,6 +55,8 @@ export function mapBuildkiteStatus(status: string): Status {
       return 'WAIT';
     case 'waiter':
       return 'WAITER';
+    case null:
+      return 'Undetermined';
     default:
       console.warn(`Unhandled Buildkite status: ${status}`);
       return 'Undetermined';

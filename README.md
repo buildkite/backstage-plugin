@@ -1,39 +1,6 @@
 # Buildkite Backstage Plugin
 
-A Buildkite plugin for Backstage that provides deep integration with your Buildkite CI/CD pipelines.
-
-## ✨ Features
-
-🔍 **Enhanced Pipeline Visibility**
-- Real-time build status monitoring with automatic updates
-- Hierarchical branch-based organization of builds
-- Detailed step-by-step build progress tracking
-- Comprehensive build logs with syntax highlighting
-
-⚡ **Powerful Filtering & Search**
-- Full-text search across builds, messages, authors, branches, and commit IDs
-- Smart date range filtering with preset options (Today, Yesterday, Last 7 days, Last 30 days)
-- Multi-criteria filtering by branch, creator, and build status
-- Automatic status-based grouping and organization
-
-📖 **Rich Build Information**
-- Detailed build status with step-by-step progress
-- Build timing and duration tracking
-- Commit and branch context
-- Author information with avatars
-- Build trigger information
-
-🛠️ **Interactive Build Management**
-- One-click rebuild functionality
-- Expandable/collapsible build details
-- Interactive build step inspection
-- Direct links to Buildkite
-
-⚙️ **Advanced Customization**
-- UTC/Local time toggle with persistent preferences
-- Branch-level collapsing
-- Automatic expansion of running builds
-- Custom pipeline styling with avatars
+A Buildkite plugin for Backstage that provides deep integration with your Buildkite CI/CD pipelines. This plugin allows you to monitor the status of your pipelines and manage their builds from a single interface.
 
 ## Prerequisites
 
@@ -177,6 +144,10 @@ metadata:
 
 ## Documentation
 
-- [Deployment Tracking](docs/DEPLOYMENT.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Contributing/Development Guide](docs/CONTRIBUTING.md)
+Comprehensive documentation for the Buildkite plugin for Backstage can be found in the official Buildkite Documentation:
+- [Plugin overview](https://buildkite.com/docs/pipelines/integrations/other/backstage)
+- [Deployment visibility with Backstage](https://buildkite.com/docs/pipelines/deployments/deployment-visibility-with-backstage)
+
+## Development
+
+For guidelines and requirements regarding contributing to the Buildkite Agent Stack for Kubernetes controller, please see the [Contributing/Development Guide](docs/CONTRIBUTING.md).

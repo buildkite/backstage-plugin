@@ -6,6 +6,7 @@ import {
   isClickableStatus,
   getStatusColors,
 } from './status';
+import { Status } from '../components';
 
 describe('mapBuildkiteStatus', () => {
   it('maps common statuses correctly', () => {

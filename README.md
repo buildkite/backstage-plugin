@@ -144,8 +144,9 @@ metadata:
 
 ## Documentation
 
-Comprehensive documentation for the Buildkite plugin for Backstage can be found in the official Buildkite Documentation:
+For further usage tips for the Buildkite plugin for Backstage, as well as deployment visibility overview and troubleshooting, see the the official Buildkite Documentation:
 - [Plugin overview](https://buildkite.com/docs/pipelines/integrations/other/backstage)
+- [Deployment tracking](https://buildkite.com/docs/pipelines/integrations/other/backstage#deployment-tracking)
 - [Deployment visibility with Backstage](https://buildkite.com/docs/pipelines/deployments/deployment-visibility-with-backstage)
 
 ## Development

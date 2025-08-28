@@ -138,7 +138,7 @@ export const PipelineView: React.FC<PipelineViewProps> = ({ pipeline, onRefresh 
 
   // Keep track of the most recent filter operation
   const lastFilterOperationRef =
-    useRef<(builds: BuildParams[]) => BuildParams[]>();
+    useRef<((builds: BuildParams[]) => BuildParams[]) | undefined>(undefined);
 
   // Update filtered builds when pipeline changes while preserving filters
   useEffect(() => {

@@ -34,7 +34,7 @@ export const PipelinePage = ({
   const [error, setError] = useState<Error | undefined>();
   const [loading, setLoading] = useState(true);
 
-  const intervalRef = useRef<number>();
+  const intervalRef = useRef<number | undefined>(undefined);
   const isMountedRef = useRef(true);
 
   const fetchPipelineData = useCallback(async () => {

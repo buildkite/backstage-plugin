@@ -33,22 +33,22 @@
         "default": "./dist/index.esm.js"
       },
       "./alpha": {
-        "types": "./dist-types/src/alpha.d.ts",
-        "default": "./dist/esm/alpha.esm.js"
+        "types": "./dist/alpha.d.ts",
+        "default": "./dist/alpha.esm.js"
       },
       "./components": {
-        "types": "./dist-types/src/components/index.d.ts",
-        "default": "./dist/esm/components.esm.js"
+        "types": "./dist/components.d.ts",
+        "default": "./dist/components.esm.js"
       },
       "./package.json": "./package.json"
     },
     "typesVersions": {
       "*": {
         "alpha": [
-          "dist-types/src/alpha.d.ts"
+          "dist/alpha.d.ts"
         ],
         "components": [
-          "dist-types/src/components/index.d.ts"
+          "dist/components.d.ts"
         ],
         "package.json": [
           "package.json"
@@ -61,7 +61,10 @@
     "pluginId": "buildkite",
     "pluginPackages": [
       "@buildkite/backstage-plugin-buildkite"
-    ]
+    ],
+    "features": {
+      "./alpha": "@backstage/FrontendPlugin"
+    }
   },
   "sideEffects": false,
   "scripts": {
@@ -126,6 +129,8 @@
     "typescript-eslint": "^8.39.1"
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "dist-types"
+  ],
+  "module": "dist/index.esm.js"
 }

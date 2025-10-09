@@ -5,7 +5,10 @@
     "dev"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "src/setupTests.ts"
   ],
   "compilerOptions": {
     "outDir": "dist-types",

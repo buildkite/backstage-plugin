@@ -23,6 +23,7 @@ steps:
           config: compose.yaml
     artifact_paths:
       - dist/**/*
+      - dist-types/**/*
 
   - label: ':npm: Version Input'
     if: build.branch == 'main'

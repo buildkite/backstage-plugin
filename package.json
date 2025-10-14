@@ -28,7 +28,7 @@
   "homepage": "https://buildkite.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buildkite/backstage-plugin"
+    "url": "git+https://github.com/buildkite/backstage-plugin.git"
   },
   "license": "Apache-2.0",
   "sideEffects": false,

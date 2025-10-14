@@ -50,15 +50,21 @@ steps:
       # Extract the version type from the previous step
       VERSION_TYPE=$(buildkite-agent meta-data get version_type)
       echo "Performing $VERSION_TYPE version bump"
-      
+
       # Setup npm credentials
       npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
-      
+
       # Bump version according to input
       npm version $VERSION_TYPE --no-git-tag-version
-      
-      # Publish to npm registry
-      npm publish --access public
+
+      # Build and prepare for publishing
+      yarn tsc && yarn build && yarn prepack
+
+      # Publish to npm registry (skip scripts since prepack already ran)
+      npm publish --access public --ignore-scripts
+
+      # Restore package.json to original state
+      yarn postpack
     plugins:
       - docker-compose#v5.4.0:
           run: node

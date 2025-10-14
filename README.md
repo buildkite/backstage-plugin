@@ -46,21 +46,7 @@ buildkite:
   organization: ${BUILDKITE_ORGANIZATION}
 ```
 
-2. Create or update `packages/app/src/plugins.ts` to register the plugin:
-
-```typescript
-// Import plugins that you want to be included in your app
-export { buildkitePlugin } from '@buildkite/backstage-plugin-buildkite';
-```
-
-3. Make sure to import the plugins file in your `packages/app/src/App.tsx`:
-
-```typescript
-// Import plugins
-import './plugins';
-```
-
-4. Add the API factory in `packages/app/src/apis.ts`:
+2. Add the API factory in `packages/app/src/apis.ts`:
 
 ```typescript
 import { buildkiteAPIRef, BuildkiteClient } from '@buildkite/backstage-plugin-buildkite';
@@ -85,7 +71,7 @@ export const apis: AnyApiFactory[] = [
 ];
 ```
 
-5. Add routes in `packages/app/src/App.tsx`:
+3. Add routes in `packages/app/src/App.tsx`:
 
 ```typescript
 import { PipelinePage } from '@buildkite/backstage-plugin-buildkite';
@@ -101,7 +87,7 @@ const routes = (
 );
 ```
 
-6. Add to your Entity Page in `packages/app/src/components/catalog/EntityPage.tsx`:
+4. Add to your Entity Page in `packages/app/src/components/catalog/EntityPage.tsx`:
 
 ```typescript
 import { isBuildkiteAvailable, BuildkiteWrapper } from '@buildkite/backstage-plugin-buildkite';

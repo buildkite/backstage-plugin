@@ -42,13 +42,3 @@ services:
       - CI=true
     command: sh -c "yarn tsc && yarn build"
 
-  publish:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-    environment:
-      - NODE_ENV=production
-      - CI=true
-    command: sh -c "buildkite-agent artifact download dist/**/* dist && npm publish --dry-run"

@@ -27,13 +27,7 @@ steps:
   - label: ":npm: Publish Dry Run"
     branches: "!main"
     key: publish_dry_run
-    plugins:
-      - docker-compose#v5.4.0:
-          run: publish
-          config: compose.yaml
-          mount-buildkite-agent: true
-          volumes:
-            - dist:/dist
+    command: npm publish --dry-run
     artifact_paths:
       - dist/**/*
     depends_on: ["build", "unit_tests", "lint"]

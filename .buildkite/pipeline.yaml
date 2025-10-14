@@ -35,7 +35,6 @@ steps:
       - docker-compose#v5.4.0:
           run: app
           config: compose.yaml
-          volumes:
-            - "./dist:/app/dist:ro"
+          command: npm publish --dry-run --ignore-scripts
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

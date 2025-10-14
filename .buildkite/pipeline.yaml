@@ -1,12 +1,12 @@
 steps:
-  - label: ':typescript: Lint'
+  - label: ":typescript: Lint"
     key: lint
     plugins:
       - docker-compose#v5.4.0:
           run: lint
           config: compose.yaml
 
-  - label: ':jest: Unit Tests'
+  - label: ":jest: Unit Tests"
     key: unit_tests
     plugins:
       - docker-compose#v5.4.0:
@@ -14,8 +14,8 @@ steps:
           config: compose.yaml
     artifact_paths:
       - coverage/**/*
-  
-  - label: ':package: Build'
+
+  - label: ":package: Build"
     key: build
     plugins:
       - docker-compose#v5.4.0:
@@ -24,5 +24,14 @@ steps:
     artifact_paths:
       - dist/**/*
 
+  - label: ":npm: Publish Dry Run"
+    key: publish_dry_run
+    plugins:
+      - docker-compose#v5.4.0:
+          run: publish
+          config: compose.yaml
+    artifact_paths:
+      - dist/**/*
+    depends_on: ["build", "unit_tests", "lint"]
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

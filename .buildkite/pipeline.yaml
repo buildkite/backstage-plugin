@@ -32,6 +32,8 @@ steps:
           run: publish
           config: compose.yaml
           mount-buildkite-agent: true
+          volumes:
+            - dist:/dist
     artifact_paths:
       - dist/**/*
     depends_on: ["build", "unit_tests", "lint"]

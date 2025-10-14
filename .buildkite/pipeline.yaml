@@ -27,9 +27,15 @@ steps:
   - label: ":npm: Publish Dry Run"
     branches: "!main"
     key: publish_dry_run
-    command: npm publish --dry-run
-    artifact_paths:
-      - dist/**/*
     depends_on: ["build", "unit_tests", "lint"]
+    plugins:
+      - artifacts#v1.9.4:
+          download:
+            - "dist/**/*"
+      - docker-compose#v5.4.0:
+          run: app
+          config: compose.yaml
+          volumes:
+            - "./dist:/app/dist:ro"
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

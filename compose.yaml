@@ -30,7 +30,7 @@ services:
       - NODE_ENV=test
       - CI=true
     command: yarn lint
-    
+
   build:
     build:
       context: .
@@ -40,4 +40,5 @@ services:
     environment:
       - NODE_ENV=production
       - CI=true
-    command: yarn build
+    command: sh -c "yarn tsc && yarn build"
+

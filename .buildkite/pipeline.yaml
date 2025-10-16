@@ -1,12 +1,12 @@
 steps:
-  - label: ':typescript: Lint'
+  - label: ":typescript: Lint"
     key: lint
     plugins:
       - docker-compose#v5.4.0:
           run: lint
           config: compose.yaml
 
-  - label: ':jest: Unit Tests'
+  - label: ":jest: Unit Tests"
     key: unit_tests
     plugins:
       - docker-compose#v5.4.0:
@@ -14,8 +14,8 @@ steps:
           config: compose.yaml
     artifact_paths:
       - coverage/**/*
-  
-  - label: ':package: Build'
+
+  - label: ":package: Build"
     key: build
     plugins:
       - docker-compose#v5.4.0:
@@ -24,46 +24,17 @@ steps:
     artifact_paths:
       - dist/**/*
 
-  - label: ':npm: Version Input'
-    if: build.branch == 'main'
-    depends_on: [lint, unit_tests, build]
-    key: version_input
-    input: |
-      What kind of version bump would you like to make?
-    fields:
-      - select: "Version Bump"
-        key: "version-type"
-        options:
-          - label: "Major (Breaking Changes)"
-            value: "major"
-          - label: "Minor (New Features)"
-            value: "minor"
-          - label: "Patch (Bug Fixes)"
-            value: "patch"
-        required: true
-
-  - label: ':npm: Publish Package'
-    if: build.branch == 'main'
-    depends_on: version_input
-    command: |
-      # Extract the version type from the previous step
-      VERSION_TYPE=$(buildkite-agent meta-data get version_type)
-      echo "Performing $VERSION_TYPE version bump"
-      
-      # Setup npm credentials
-      npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
-      
-      # Bump version according to input
-      npm version $VERSION_TYPE --no-git-tag-version
-      
-      # Publish to npm registry
-      npm publish --access public
+  - label: ":npm: Publish Dry Run"
+    branches: "!main"
+    key: publish_dry_run
+    depends_on: ["build", "unit_tests", "lint"]
     plugins:
+      - artifacts#v1.9.4:
+          download:
+            - "dist/**/*"
       - docker-compose#v5.4.0:
-          run: node
+          run: app
           config: compose.yaml
-          environment:
-            - NPM_TOKEN
-
+          command: ["npm", "publish", "--dry-run", "--ignore-scripts"]
 # notify:
 #   - slack: "#project-backstage-spotify-plugin"

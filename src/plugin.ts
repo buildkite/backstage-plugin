@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   createApiFactory,
   createPlugin,
@@ -6,13 +5,13 @@ import {
   discoveryApiRef,
   fetchApiRef,
   configApiRef,
-} from '@backstage/core-plugin-api';
-import { BuildkiteClient, buildkiteAPIRef } from './api';
+} from "@backstage/core-plugin-api";
+import { BuildkiteClient, buildkiteAPIRef } from "./api";
 import {
   buildkiteRouteRef,
   buildkitePipelineRouteRef,
   buildkiteBuildRouteRef,
-} from './routes';
+} from "./routes";
 
 export interface BuildkitePluginConfig {
   organization: string;
@@ -21,7 +20,7 @@ export interface BuildkitePluginConfig {
 }
 
 export const buildkitePlugin = createPlugin({
-  id: 'buildkite',
+  id: "buildkite",
   apis: [
     createApiFactory({
       api: buildkiteAPIRef,
@@ -32,21 +31,21 @@ export const buildkitePlugin = createPlugin({
       },
       factory: ({ discoveryAPI, fetchAPI, config }) => {
         const buildkiteConfig = config.getOptionalConfig(
-          'integrations.buildkite.0',
+          "integrations.buildkite.0",
         );
 
         const pluginConfig: BuildkitePluginConfig = {
-          organization: buildkiteConfig?.getString('organization') ?? '',
+          organization: buildkiteConfig?.getString("organization") ?? "",
           defaultPageSize:
-            buildkiteConfig?.getOptionalNumber('defaultPageSize') ?? 25,
+            buildkiteConfig?.getOptionalNumber("defaultPageSize") ?? 25,
           apiBaseUrl:
-            buildkiteConfig?.getOptionalString('apiBaseUrl') ??
-            'https://api.buildkite.com/v2',
+            buildkiteConfig?.getOptionalString("apiBaseUrl") ??
+            "https://api.buildkite.com/v2",
         };
 
         if (!pluginConfig.organization) {
           throw new Error(
-            'Missing required config value for integrations.buildkite[0].organization',
+            "Missing required config value for integrations.buildkite[0].organization",
           );
         }
 
@@ -67,23 +66,12 @@ export const buildkitePlugin = createPlugin({
 
 export const PipelinePage = buildkitePlugin.provide(
   createRoutableExtension({
-    name: 'PipelinePage',
+    name: "PipelinePage",
     component: () =>
-      import('./components/PipelinePage').then(m => m.PipelinePage),
+      import("./components/PipelinePage").then((m) => m.PipelinePage),
     mountPoint: buildkiteRouteRef,
   }),
 );
 
-export const BuildPage = buildkitePlugin.provide(
-  createRoutableExtension({
-    name: 'BuildPage',
-    component: () => Promise.resolve(function BuildPageComponent(props: any): JSX.Element {
-      // This is a temporary implementation until we create a proper BuildPage component
-      return React.createElement('div', { id: 'build-page-placeholder' }, `Build Page Placeholder (Props: ${JSON.stringify(props)})`);
-    }),
-    mountPoint: buildkiteRouteRef,
-  }),
-);
-
-export { BuildkiteWrapper } from './components/BuildkiteWrapper';
-export { BuildRow } from './components/BuildRow';
+export { BuildkiteWrapper } from "./components/BuildkiteWrapper";
+export { BuildRow } from "./components/BuildRow";

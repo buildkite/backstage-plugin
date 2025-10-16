@@ -7,9 +7,6 @@ if [ ! -d "node_modules" ] && [ -f "package.json" ]; then
   yarn install --frozen-lockfile
 fi
 
-# Generate TypeScript declaration files
-/app/scripts/generate-types.sh
-
 # Make sure backstage CLI is available locally (not globally)
 if ! command -v "$(npm bin)/backstage-cli" &> /dev/null; then
   echo "Installing @backstage/cli locally if needed..."

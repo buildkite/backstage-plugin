@@ -12,6 +12,7 @@
       "./alpha": "@backstage/FrontendPlugin"
     }
   },
+  "configSchema": "config.d.ts",
   "exports": {
     ".": "./src/index.ts",
     "./alpha": "./src/alpha.tsx",
@@ -38,7 +39,8 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "files": [
-    "dist"
+    "dist",
+    "config.d.ts"
   ],
   "scripts": {
     "build": "backstage-cli package build",

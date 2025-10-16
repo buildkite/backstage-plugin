@@ -44,6 +44,7 @@ const buildkiteApiExtension = ApiBlueprint.make({
         );
 
         const pluginConfig: BuildkitePluginConfig = {
+          apiToken: buildkiteConfig?.getString('apiToken') ?? '',
           organization: buildkiteConfig?.getString('organization') ?? '',
           defaultPageSize:
             buildkiteConfig?.getOptionalNumber('defaultPageSize') ?? 25,

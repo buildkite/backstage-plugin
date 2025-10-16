@@ -1,6 +1,6 @@
 {
   "name": "@buildkite/backstage-plugin-buildkite",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Backstage plugin which integrates with Buildkite pipelines",
   "backstage": {
     "role": "frontend-plugin",

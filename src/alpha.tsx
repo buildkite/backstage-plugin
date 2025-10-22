@@ -3,6 +3,7 @@ import {
   createFrontendPlugin,
   ApiBlueprint,
   PageBlueprint,
+  NavItemBlueprint,
 } from '@backstage/frontend-plugin-api';
 import {
   compatWrapper,
@@ -16,13 +17,14 @@ import {
   FetchApi,
   ConfigApi,
 } from '@backstage/core-plugin-api';
+import BuildIcon from '@material-ui/icons/Build';
 import { buildkiteRouteRef } from './routes';
 import { BuildkiteClient, buildkiteAPIRef } from './api';
 import { BuildkitePluginConfig } from './plugin';
 
 // API Extension using ApiBlueprint
 const buildkiteApiExtension = ApiBlueprint.make({
-  params: defineParams =>
+  params: (defineParams) =>
     defineParams({
       api: buildkiteAPIRef,
       deps: {
@@ -74,13 +76,21 @@ const pipelinePageExtension = PageBlueprint.make({
     path: '/buildkite',
     routeRef: convertLegacyRouteRef(buildkiteRouteRef),
     loader: () =>
-      import('./components/PipelinePage').then(m =>
+      import('./components/PipelinePage').then((m) =>
         compatWrapper(<m.PipelinePage />),
       ),
   },
 });
 
+const buildkiteNavItem = NavItemBlueprint.make({
+  params: {
+    icon: BuildIcon,
+    routeRef: convertLegacyRouteRef(buildkiteRouteRef),
+    title: 'Buildkite',
+  },
+});
+
 export default createFrontendPlugin({
   pluginId: 'buildkite',
-  extensions: [buildkiteApiExtension, pipelinePageExtension],
+  extensions: [buildkiteNavItem, buildkiteApiExtension, pipelinePageExtension],
 });

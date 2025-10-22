@@ -3,6 +3,7 @@ import {
   createFrontendPlugin,
   ApiBlueprint,
   PageBlueprint,
+  NavItemBlueprint,
 } from '@backstage/frontend-plugin-api';
 import {
   compatWrapper,
@@ -19,6 +20,7 @@ import {
 import { buildkiteRouteRef } from './routes';
 import { BuildkiteClient, buildkiteAPIRef } from './api';
 import { BuildkitePluginConfig } from './plugin';
+import { ClusterIcon } from './components/Icons';
 
 // API Extension using ApiBlueprint
 const buildkiteApiExtension = ApiBlueprint.make({
@@ -80,7 +82,16 @@ const pipelinePageExtension = PageBlueprint.make({
   },
 });
 
+// Nav Item Extension using NavItemBlueprint
+const buildkiteNavItem = NavItemBlueprint.make({
+  params: {
+    routeRef: convertLegacyRouteRef(buildkiteRouteRef),
+    title: 'Buildkite',
+    icon: ClusterIcon,
+  },
+});
+
 export default createFrontendPlugin({
   pluginId: 'buildkite',
-  extensions: [buildkiteApiExtension, pipelinePageExtension],
+  extensions: [buildkiteApiExtension, pipelinePageExtension, buildkiteNavItem],
 });

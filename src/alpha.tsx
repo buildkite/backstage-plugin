@@ -41,9 +41,7 @@ const buildkiteApiExtension = ApiBlueprint.make({
         fetchApi: FetchApi;
         configApi: ConfigApi;
       }) => {
-        const buildkiteConfig = configApi.getOptionalConfig(
-          "integrations.buildkite.0",
-        );
+        const buildkiteConfig = configApi.getOptionalConfig("buildkite");
 
         const pluginConfig: BuildkitePluginConfig = {
           apiToken: buildkiteConfig?.getString("apiToken") ?? "",
@@ -57,7 +55,7 @@ const buildkiteApiExtension = ApiBlueprint.make({
 
         if (!pluginConfig.organization) {
           throw new Error(
-            "Missing required config value for integrations.buildkite[0].organization",
+            "Missing required config value for buildkite.organization",
           );
         }
 

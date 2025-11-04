@@ -10,6 +10,7 @@ export interface Config {
     apiToken: string;
     /**
      * The Buildkite organization slug
+     * @visibility frontend
      */
     organization: string;
   };

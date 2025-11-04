@@ -8,8 +8,11 @@ export interface Config {
      * @visibility secret
      */
     apiToken: string;
+
     /**
      * The Buildkite organization slug
+     *
+     * @visibility frontend
      */
     organization: string;
   };

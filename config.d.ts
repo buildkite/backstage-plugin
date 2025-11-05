@@ -1,17 +1,22 @@
 export interface Config {
   /**
-   * Required configuration for the Buildkite plugin
+   * Configuration for the Buildkite plugin
+   * 
+   * Note: The plugin uses the Backstage proxy for API authentication.
+   * Organizations and pipelines are configured per-entity via annotations.
    */
-  buildkite: {
+  buildkite?: {
     /**
-     * The API token which will be used to interact with the Buildkite API
-     * @visibility secret
-     */
-    apiToken: string;
-    /**
-     * The Buildkite organization slug
+     * Optional API base URL override
      * @visibility frontend
+     * @default https://api.buildkite.com/v2
      */
-    organization: string;
+    apiBaseUrl?: string;
+    /**
+     * Optional default page size for pagination
+     * @visibility frontend
+     * @default 25
+     */
+    defaultPageSize?: number;
   };
 }

@@ -40,38 +40,21 @@ proxy:
         Authorization: Bearer ${BUILDKITE_API_TOKEN}
         Accept: application/json
       allowedHeaders: ['Authorization']
+```
 
+**Note:** The plugin uses the Backstage proxy for authentication. The organization and pipeline are specified per-entity via annotations (see Component Configuration below).
+
+Optional configuration can be added to `app-config.yaml`:
+
+```yaml
 buildkite:
-  apiToken: ${BUILDKITE_API_TOKEN}
-  organization: ${BUILDKITE_ORGANIZATION}
+  # Optional: Override the API base URL (default: https://api.buildkite.com/v2)
+  apiBaseUrl: https://api.buildkite.com/v2
+  # Optional: Set default page size for pagination (default: 25)
+  defaultPageSize: 25
 ```
 
-2. Add the API factory in `packages/app/src/apis.ts`:
-
-```typescript
-import { buildkiteAPIRef, BuildkiteClient } from '@buildkite/backstage-plugin-buildkite';
-
-export const apis: AnyApiFactory[] = [
-  createApiFactory({
-    api: buildkiteAPIRef,
-    deps: { discoveryApi: discoveryApiRef, fetchApi: fetchApiRef, configApi: configApiRef },
-    factory: ({ discoveryApi, fetchApi, configApi }) => {
-      const buildkiteConfig = configApi.getOptionalConfig('buildkite');
-      return new BuildkiteClient({
-        discoveryAPI: discoveryApi,
-        fetchAPI: fetchApi,
-        config: {
-          organization: buildkiteConfig?.getOptionalString('organization') ?? 'default-org',
-          defaultPageSize: buildkiteConfig?.getOptionalNumber('defaultPageSize') ?? 25,
-          apiBaseUrl: buildkiteConfig?.getOptionalString('apiBaseUrl') ?? 'https://api.buildkite.com/v2',
-        },
-      });
-    },
-  }),
-];
-```
-
-3. Add routes in `packages/app/src/App.tsx`:
+2. Add routes in `packages/app/src/App.tsx`:
 
 ```typescript
 import { PipelinePage } from '@buildkite/backstage-plugin-buildkite';
@@ -87,7 +70,7 @@ const routes = (
 );
 ```
 
-4. Add to your Entity Page in `packages/app/src/components/catalog/EntityPage.tsx`:
+3. Add to your Entity Page in `packages/app/src/components/catalog/EntityPage.tsx`:
 
 ```typescript
 import { isBuildkiteAvailable, BuildkiteWrapper } from '@buildkite/backstage-plugin-buildkite';

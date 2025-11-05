@@ -14,8 +14,6 @@ import {
 } from "./routes";
 
 export interface BuildkitePluginConfig {
-  apiToken: string;
-  organization: string;
   defaultPageSize?: number;
   apiBaseUrl?: string;
 }
@@ -34,26 +32,12 @@ export const buildkitePlugin = createPlugin({
         const buildkiteConfig = config.getOptionalConfig("buildkite");
 
         const pluginConfig: BuildkitePluginConfig = {
-          apiToken: buildkiteConfig?.getString("apiToken") ?? "",
-          organization: buildkiteConfig?.getString("organization") ?? "",
           defaultPageSize:
             buildkiteConfig?.getOptionalNumber("defaultPageSize") ?? 25,
           apiBaseUrl:
             buildkiteConfig?.getOptionalString("apiBaseUrl") ??
             "https://api.buildkite.com/v2",
         };
-
-        if (!pluginConfig.apiToken) {
-          throw new Error(
-            "Missing required config value for buildkite.apiToken",
-          );
-        }
-
-        if (!pluginConfig.organization) {
-          throw new Error(
-            "Missing required config value for buildkite.organization",
-          );
-        }
 
         return new BuildkiteClient({
           discoveryAPI,

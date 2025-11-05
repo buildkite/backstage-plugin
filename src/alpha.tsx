@@ -3,8 +3,8 @@ import {
   createFrontendPlugin,
   ApiBlueprint,
   PageBlueprint,
-  NavItemBlueprint,
 } from "@backstage/frontend-plugin-api";
+import { EntityContentBlueprint } from "@backstage/plugin-catalog-react/alpha";
 import {
   compatWrapper,
   convertLegacyRouteRef,
@@ -17,10 +17,10 @@ import {
   FetchApi,
   ConfigApi,
 } from "@backstage/core-plugin-api";
+import { Entity } from "@backstage/catalog-model";
 import { buildkiteRouteRef } from "./routes";
 import { BuildkiteClient, buildkiteAPIRef } from "./api";
 import { BuildkitePluginConfig } from "./plugin";
-import { ClusterIcon } from "./components/Icons";
 
 // API Extension using ApiBlueprint
 const buildkiteApiExtension = ApiBlueprint.make({
@@ -44,20 +44,12 @@ const buildkiteApiExtension = ApiBlueprint.make({
         const buildkiteConfig = configApi.getOptionalConfig("buildkite");
 
         const pluginConfig: BuildkitePluginConfig = {
-          apiToken: buildkiteConfig?.getString("apiToken") ?? "",
-          organization: buildkiteConfig?.getString("organization") ?? "",
           defaultPageSize:
             buildkiteConfig?.getOptionalNumber("defaultPageSize") ?? 25,
           apiBaseUrl:
             buildkiteConfig?.getOptionalString("apiBaseUrl") ??
             "https://api.buildkite.com/v2",
         };
-
-        if (!pluginConfig.organization) {
-          throw new Error(
-            "Missing required config value for buildkite.organization",
-          );
-        }
 
         return new BuildkiteClient({
           discoveryAPI: discoveryApi,
@@ -81,15 +73,33 @@ const pipelinePageExtension = PageBlueprint.make({
 });
 
 // Nav Item Extension using NavItemBlueprint
-const buildkiteNavItem = NavItemBlueprint.make({
+// TODO: We might set this up in the future for a broad view of CI
+// const buildkiteNavItem = NavItemBlueprint.make({
+//   params: {
+//     routeRef: convertLegacyRouteRef(buildkiteRouteRef),
+//     title: "Buildkite",
+//     icon: ClusterIcon,
+//   },
+// });
+
+export const isBuildkiteAnnotationPresent = (entity: Entity) =>
+  !!entity.metadata.annotations?.["buildkite.com/pipeline"];
+
+export const entityContent = EntityContentBlueprint.make({
+  name: "buildkite",
   params: {
-    routeRef: convertLegacyRouteRef(buildkiteRouteRef),
+    path: "/buildkite",
     title: "Buildkite",
-    icon: ClusterIcon,
+    group: "deployment",
+    filter: isBuildkiteAnnotationPresent,
+    loader: () =>
+      import("./components/BuildkiteWrapper").then((m) =>
+        compatWrapper(<m.BuildkiteWrapper />),
+      ),
   },
 });
 
 export default createFrontendPlugin({
   pluginId: "buildkite",
-  extensions: [buildkiteApiExtension, pipelinePageExtension, buildkiteNavItem],
+  extensions: [buildkiteApiExtension, entityContent, pipelinePageExtension],
 });

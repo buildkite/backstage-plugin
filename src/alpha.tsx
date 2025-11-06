@@ -83,7 +83,7 @@ const pipelinePageExtension = PageBlueprint.make({
 // });
 
 export const isBuildkiteAnnotationPresent = (entity: Entity) =>
-  !!entity.metadata.annotations?.["buildkite.com/pipeline"];
+  !!entity.metadata.annotations?.["buildkite.com/pipeline-slug"];
 
 export const entityContent = EntityContentBlueprint.make({
   name: "buildkite",

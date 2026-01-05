@@ -84,7 +84,7 @@
     "prismjs": "^1.30.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.34.4",
+    "@backstage/cli": "^0.35.1",
     "@backstage/core-app-api": "^1.18.0",
     "@backstage/dev-utils": "^1.1.16",
     "@backstage/eslint-plugin": "^0.2.0",

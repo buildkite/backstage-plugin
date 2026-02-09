@@ -81,7 +81,13 @@
     "@octokit/request": "^9.2.3",
     "@octokit/request-error": "^6.1.8",
     "koa": "^2.16.2",
-    "prismjs": "^1.30.0"
+    "prismjs": "^1.30.0",
+    "linkifyjs": "^4.3.2",
+    "linkify-react": "^4.3.2"
+  },
+  "resolutions": {
+    "linkifyjs": "^4.3.2",
+    "linkify-react": "^4.3.2"
   },
   "devDependencies": {
     "@backstage/cli": "^0.35.1",

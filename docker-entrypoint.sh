@@ -1,16 +1,12 @@
 #!/bin/bash
 set -e
 
-# Install local dependencies if node_modules doesn't exist
-if [ ! -d "node_modules" ] && [ -f "package.json" ]; then
+# Install from the lockfile when the Backstage CLI is missing. --production=false
+# is required because the build service sets NODE_ENV=production, which makes
+# yarn skip devDependencies, and @backstage/cli is one of them.
+if [ -f "package.json" ] && [ ! -x "node_modules/.bin/backstage-cli" ]; then
   echo "Installing dependencies..."
-  yarn install --frozen-lockfile
-fi
-
-# Make sure backstage CLI is available locally (not globally)
-if ! command -v "$(npm bin)/backstage-cli" &> /dev/null; then
-  echo "Installing @backstage/cli locally if needed..."
-  yarn add --dev @backstage/cli
+  yarn install --frozen-lockfile --production=false
 fi
 
 # Execute the command passed to the script
